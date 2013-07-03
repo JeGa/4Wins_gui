@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(4Wins_gui)
 
-# Variables
+# Variables //!!
 set(BOOST_TEST_INCLUDE_DIR, "F:/ext/boost")
 
 # Build project
@@ -21,8 +21,8 @@ include_directories(${4Wins_gui_INCLUDE_DIRS})
 # Build Boost unit tests
 if (${CMAKE_BUILD_TYPE} STREQUAL "Test")
 
-	# Build library
-	add_library(4Wins_gui ${4Wins_gui_SOURCES})
+	# Remove main
+	list(REMOVE_ITEM 4Wins_gui_INCLUDE_DIRS "src/application/main.cpp")
 	
 	# Include Boost test includes path
 	include_directories("F:/ext/boost")
@@ -41,8 +41,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Test")
 	include_directories(${4Wins_gui_INCLUDE_DIRS})
 	
 	# Compile and link with 4Wins_gui
-	add_executable(4Wins_gui_tests ${4Wins_gui_SOURCES_TEST})
-	target_link_libraries (4Wins_gui_tests 4Wins_gui)
+	set(SOURCES_TEST ${4Wins_gui_SOURCES} ${4Wins_gui_SOURCES_TEST})
+	add_executable(4Wins_gui_tests ${SOURCES_TEST})
 	
 elseif (${CMAKE_BUILD_TYPE} STREQUAL "Test")
 

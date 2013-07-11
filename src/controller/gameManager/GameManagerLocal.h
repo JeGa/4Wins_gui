@@ -27,6 +27,7 @@ namespace controller
         virtual void newGame(data::IGame *game);
         virtual IGameController *getGameController();
         virtual bool input(int x, int y);
+        virtual data::IGame *getGame();
     };
 
 }

@@ -1,3 +1,8 @@
+/*
+* The implGUI package builds the gui. All events are handled in
+* this class. 
+*/
+
 #ifndef GRAPHICALUI_H
 #define GRAPHICALUI_H
 
@@ -9,27 +14,37 @@
 #include "IUserInterface.h"
 #include "GraphicalUIWindow.h"
 
+namespace view { namespace gui {
+    class GraphicalUIWindow;
+}}
+
 namespace view
 {
-    
-    using namespace controller;
-    using namespace data;
 
     class GraphicalUI : public IUserInterface
     {
     private:
-        GameFactory factory;
-        IGameManager *manager;
+        controller::GameFactory factory;
+        controller::IGameManager *manager;
         
         void startLocalGame();
-        //void startSettingsWindow();
+        //void startNetworkGame();
         
         // GUI
-        gui::GraphicalUIWindow window;
+        gui::GraphicalUIWindow *window;
+        
+        // Static callbacks
+        static void scb_btn_localGame(Fl_Widget *w, void *p);
+        static void scb_btn_loginGame(Fl_Widget *w, void *p);
+        static void scb_btn_register(Fl_Widget *w, void *p);
+        static void scb_field(Fl_Widget *w, void *p);
         
         // Callbacks
-        /*static void scb_window(Fl_Widget *w, void *p);
-        void cb_window(Fl_Widget *w);*/
+        void cb_btn_localGame();
+        void cb_btn_loginGame();
+        void cb_btn_register();
+        void cb_field();
+
     public:
         GraphicalUI();
         ~GraphicalUI();

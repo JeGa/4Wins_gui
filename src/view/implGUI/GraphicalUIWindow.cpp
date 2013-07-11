@@ -1,108 +1,72 @@
 #include "GraphicalUIWindow.h"
-
-//!!
 #include "GraphicalUIField.h"
 
 namespace view { namespace gui
 {
+    
+    // The main window
 
-    GraphicalUIWindow::GraphicalUIWindow() :
-        Fl_Window(800, 600, "4Wins_gui")
+    GraphicalUIWindow::GraphicalUIWindow() : Fl_Window(800, 600, "4Wins_gui")
     {
-        menubar = new Fl_Menu_Bar(0, 0, w(), 25);
-        menubar->add("&File/&Open", 0, 0, 0, FL_MENU_DIVIDER);
-        //menubar->add("&File/&Quit", 0, scb_menubar, (void *)this);
-        menubar->add("&Settings/&Test", 0, 0);
-        menubar->add("&Whatever/&Test", 0, 0);
+        menubar = new MenuBar(w(), 30);
         
-        wizard = new Fl_Wizard(0, menubar->h(),
-            w(), h() - menubar->h());
+        menu = new Menu(10, 40);
+        menu->end();
         
-        // Child 1 - Main window
-        Fl_Group *g1 = new Fl_Group(wizard->x(), wizard->y(),
-            wizard->w(), wizard->h());
-            
-            btn_localGame = new Fl_Button(50, 50, 100, 25, "Local");
-            btn_localGame->callback(scb_btn_localGame, this);
-            p1Name = new Fl_Input(200, 50, 100, 25);
-            p1Password = new Fl_Input(320, 50, 100, 25);
-            p2Name = new Fl_Input(500, 50, 100, 25);
-            p2Password = new Fl_Input(620, 50, 100, 25);
-            
-            btn_loginGame = new Fl_Button(50, 100, 100, 25, "Login");
-            loginName = new Fl_Input(200, 100, 100, 25);
-            loginPassword = new Fl_Input(320, 100, 100, 25);
-            
-            btn_register = new Fl_Button(50, 150, 100, 25, "Register");
-            registerName = new Fl_Input(200, 150, 100, 25);
-            registerPassword = new Fl_Input(320, 150, 100, 25);
-            
-            GraphicalUIField *a = new GraphicalUIField();
-            
-        g1->end();
-        
-        // Child 2 - Local
-        Fl_Group *g2 = new Fl_Group(wizard->x(), wizard->y(),
-            wizard->w(), wizard->h());
-        
-        localMain = new GraphicalUILocalMain();
-        
-        g2->end();
-        
-        // Child 3 - Network
-        Fl_Group *g3 = new Fl_Group(wizard->x(), wizard->y(),
-            wizard->w(), wizard->h());
-            
-            //!!
-        
-        g3->end();
-        
-        wizard->end(); 
+        field = new GraphicalUIField(10, 250);
         
         end();
-        
-        this->modal();
     }
 
     GraphicalUIWindow::~GraphicalUIWindow()
     {
     }
     
-    void GraphicalUIWindow::scb_btn_localGame(Fl_Widget *w, void *p)
-    {
-        ((GraphicalUIWindow *) p)->cb_btn_localGame();
-    }
+    // ===============================================================
     
-    void GraphicalUIWindow::cb_btn_localGame()
-    {
-        wizard->next();
-    }
+    // The additional classes
     
-    void GraphicalUIWindow::scb_btn_loginGame(Fl_Widget *w, void *p)
-    {
-        ((GraphicalUIWindow *) p)->cb_btn_localGame();
-    }
+    Menu::Menu(int x_, int y_) : Fl_Group(x_, y_, 0, 0)
+    { 
+        int sizeX = 100, sizeY = 25;
+        int offsetX = 10, offsetY = 10;
+        
+        int startX = x_ + offsetX;
+        int startY = y_ + offsetY;
+        
+        this->resize(x(), y(), startX + 720, startY + 80);
+        box(FL_UP_BOX);
+        
+        btn_localGame = new Fl_Button(startX, startY, sizeX, sizeY, "Local");
+        
+//        Fl_Label *l1 = new Fl_Label();
+
+        p1Name = new Fl_Input(startX + 180, startY, sizeX, sizeY);
+        p1Password = new Fl_Secret_Input(startX + 290, startY, sizeX, sizeY);
+        p2Name = new Fl_Input(startX + 500, startY, sizeX, sizeY);
+        p2Password = new Fl_Secret_Input(startX + 610, startY, sizeX, sizeY);
+        
+        btn_loginGame = new Fl_Button(startX, startY + 40, sizeX, sizeY, "Login");
+        loginName = new Fl_Input(startX + 180, startY + 40, sizeX, sizeY);
+        loginPassword = new Fl_Secret_Input(startX + 290, startY + 40, sizeX, sizeY);
+        
+        btn_register = new Fl_Button(startX, startY + 80, sizeX, sizeY, "Register");
+        registerName = new Fl_Input(startX + 180, startY + 80, sizeX, sizeY);
+        registerPassword = new Fl_Secret_Input(startX + 290, startY + 80, sizeX, sizeY);
+    };
     
-    void GraphicalUIWindow::cb_btn_loginGame()
+    MenuBar::MenuBar(int w, int h) : Fl_Menu_Bar(0, 0, w, h)
     {
-        wizard->next();
-    }
-    
-    void GraphicalUIWindow::scb_btn_register(Fl_Widget *w, void *p)
-    {
-        ((GraphicalUIWindow *) p)->cb_btn_localGame();
-    }
-    
-    void GraphicalUIWindow::cb_btn_register()
-    {
-        wizard->next();
-    }
-    
-/*    int GraphicalUIWindow::handle(int event)
-    {
-        return Fl_Window::handle(event);
-    }*/
+        add("&File/&Open", 0, 0, 0, FL_MENU_DIVIDER);
+        add("&File/&Quit", 0, 0);
+        //add("&File/&Quit", 0, scb_menubar, (void *)this);
+        
+        add("&View/&My Profile", 0, 0);
+        
+        add("&Settings/&Settings", 0, 0);
+        
+        add("&Help/&About", 0, 0);
+    };
 
 }
 }
-

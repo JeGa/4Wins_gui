@@ -60,4 +60,9 @@ namespace controller
         return false;
     }
 
+    data::IGame *GameManagerLocal::getGame()
+    {
+        return gc->getGame();
+    }
+
 }

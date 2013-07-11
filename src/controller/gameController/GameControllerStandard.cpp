@@ -52,8 +52,8 @@ namespace controller
     {
         int sum = 0;
 
-        countCells(x, y, p, +1, +1); // First to right down
-        countCells(x-1, y-1, p, -1, -1); // Than to left up
+        sum = countCells(x, y, p, +1, +1); // First to right down
+        sum += countCells(x-1, y-1, p, -1, -1); // Than to left up
         // (dont count double)
 
         return sum;

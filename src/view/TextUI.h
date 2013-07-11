@@ -5,37 +5,43 @@
 #include "GameFactory.h"
 #include "IGame.h"
 #include "GameControllerStrategy.h"
+#include "GameControllerStandard.h"
+#include "IGameManager.h"
 #include "LoginManager.h"
+#include "IUserInterface.h"
 #include <string>
+
+#include "implTUI/TextUIElement.h"
 
 namespace view
 {
+    
     using namespace controller;
     using namespace data;
     using namespace std;
 
-    class TextUI
+    class TextUI : public IUserInterface
     {
         private:
             GameFactory factory;
-            LoginManager login;
-
-            // Local players
-            IPlayer *p1;
-            IPlayer *p2;
-
-            GameControllerStrategy *gc;
-            IGame *game;
+            IGameManager *manager;
 
             void startLocalGame();
             //startNetworkGame();
+            void gameLoop();
+            
+            // TUI elements
+            tui::TuiElem mainTui;
+            tui::TuiElem localGameTui;
+            tui::TuiElem networkGameMainTui;
+            tui::TuiElem settingsTui;
+            tui::TuiElem networkGamePlayTui;
+            tui::TuiElem networkGameProfileTui;
         public:
             TextUI();
             ~TextUI();
-
-            void menu();
-            bool setInput(int x, int y); // Call from game loop
-            string toString();
+            
+            virtual void run();
     };
 
 }

@@ -13,36 +13,36 @@ namespace view
     using namespace data;
     using namespace std;
 
-    TextUI::TextUI() : gc(factory.getGameController())
-    {
-        cout << "####################################" << endl;
-        cout << "#### 4Wins: Text User Interface ####" << endl;
-        cout << "####################################" << endl;
+    TextUI::TextUI() : mainTui(40, 6)
+    {        
+        // Set TUI elements
+        mainTui.setLabel("4Wins_gui");
+        mainTui.setText("4Wins: Text User Interface");
+        
+        localGameTui.setLabel("1) Local Game");
+        localGameTui.setText("Local Game Text");
+        
+        settingsTui.setLabel("3) Settings");
+        
+        networkGameMainTui.setLabel("2) Network Game");
+        networkGameMainTui.setText("Login sucessfull.");
+        
+        networkGamePlayTui.setLabel("1) Play network game");
+        networkGameProfileTui.setLabel("2) View player profiles");
+        
+        mainTui.addChild(&localGameTui);
+        mainTui.addChild(&networkGameMainTui);
+        mainTui.addChild(&settingsTui);
+        
+        networkGameMainTui.addChild(&networkGamePlayTui);
+        networkGameMainTui.addChild(&networkGameProfileTui);
+        
+        manager = factory.getGameManagerLocal(factory.getGameController());
     }
 
     TextUI::~TextUI()
     {
-        if (gc->isRunning())
-            delete game;
-
-        delete gc;
-
-        delete p1;
-        delete p2;
-    }
-
-    void TextUI::menu()
-    {
-        int choose;
-        cout << "---- 4Wins Menu ----" << endl;
-        cout << "1) Local 2 player game" << endl;
-        cout << "2) Network game" << endl << endl;
-
-        cin >> choose;
-        if (choose == 1)
-            startLocalGame();
-        else if (choose == 2)
-            throw "Not implemented";
+        delete manager;
     }
 
     void TextUI::startLocalGame()
@@ -50,7 +50,6 @@ namespace view
         string p1_name, p2_name;
         int w, h;
 
-        cout << endl << "#### Local 2 player game ####" << endl;
         cout << "Set up:" << endl;
 
         cout << "Width and height: ";
@@ -60,39 +59,49 @@ namespace view
         cin >> p1_name;
         cout << "Player2 name: ";
         cin >> p2_name;
+        
+        IPlayer *p1 = factory.getPlayer(p1_name, "local");
+        IPlayer *p2 = factory.getPlayer(p2_name, "local");
+        IGame *game = factory.getGame(w, h, p1, p2, p1);
 
-        p1 = factory.getPlayer(p1_name, "local");
-        p2 = factory.getPlayer(p2_name, "local");
+        manager->newGame(game);
+        
+        gameLoop();
 
-        game = factory.getGame(w, h, p1, p2, p1);
-
-        gc->playGame(game);
-        cout << endl << toString() << endl;
+        // GameManager is responsible for freeing the memory!
     }
-
-    bool TextUI::setInput(int x, int y)
+    
+    // Menu input
+    void TextUI::run()
     {
-        if (!gc->isRunning()) {
-            throw "First start a game.";
+        while (true) {
+            // Display TUI
+            std::cout << std::endl;
+            mainTui.display();
+            tui::TuiElem *choice = mainTui.ask();
+            std::cout << std::endl;
+            
+            if (choice == &this->localGameTui) {
+                startLocalGame();
+            }
         }
-
-        if (!gc->toggleTurn(x, y))
-            cout << "Not valid cell, try again!";
-
-        if (!gc->isRunning()) {
-            cout << "#### Game ends ####" << endl;
-            cout << "WINNER IS:" << endl;
-            cout << gc->getLastWinner()->toString() << endl;
-            return false;
-        }
-
-        cout << toString();
-        return true;
     }
-
-    std::string TextUI::toString()
+    
+    // Game input
+    void TextUI::gameLoop()
     {
-        return game->toString();
+        while (manager->getGameController()->isRunning()) {
+            cout << endl << manager->getGameController()->getGame()->toString() << endl;
+            cout << manager->getGameController()->onTurn()->getName() << " -> X and Y coordinates: ";
+            
+            int x, y;
+            cin >> x;
+            cin >> y;
+            
+            manager->getGameController()->toggleTurn(x, y);
+        }
+        cout << endl << "== WINNER IS: " <<
+            manager->getGameController()->getLastWinner()->getName() << "! ==" << endl;
     }
 
 }

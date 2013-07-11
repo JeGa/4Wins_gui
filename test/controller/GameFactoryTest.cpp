@@ -5,11 +5,11 @@
 namespace controller
 {
 
-	BOOST_FIXTURE_TEST_SUITE(GameFactoryTestSuite, GameFactoryTest)
+	BOOST_AUTO_TEST_SUITE(GameFactoryTestSuite)
 	
-    BOOST_AUTO_TEST_CASE(testInit)
+    BOOST_FIXTURE_TEST_CASE(testInit, GameFactoryTest)
     {
-/*        std::string strraw("");
+        std::string strraw("");
         std::string strfunc("");
 
         for (int j = 0; j < field->getHeight(); j++) {
@@ -21,8 +21,8 @@ namespace controller
 
         strfunc = field->toString();
 
-        std::cout << strraw << std::endl << strfunc;
-        EXPECT_STREQ(strraw.c_str(), strfunc.c_str());*/
+        std::cout << std::endl << strraw << std::endl << strfunc;
+        BOOST_CHECK(!strraw.compare(strfunc));
     }
 	
 	BOOST_AUTO_TEST_SUITE_END()

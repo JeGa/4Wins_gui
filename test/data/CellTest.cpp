@@ -3,18 +3,18 @@
 namespace data
 {
 	
-	BOOST_FIXTURE_TEST_SUITE(CellTestSuite, CellTest)
+	BOOST_AUTO_TEST_SUITE(CellTestSuite)
 	
-    BOOST_AUTO_TEST_CASE(testInit)
+    BOOST_FIXTURE_TEST_CASE(testInit, CellTest)
     {
-//		EXPECT_EQ(PLAYER1, cell.getColor());
-//		EXPECT_EQ(NOTSET, cell_default.getColor());
+        BOOST_CHECK_EQUAL(PLAYER1, cell.getColor());
+        BOOST_CHECK_EQUAL(NOTSET, cell_default.getColor());
     }
 
-    BOOST_AUTO_TEST_CASE(testSetGet)
+    BOOST_FIXTURE_TEST_CASE(testSetGet, CellTest)
     {
-//		cell.setColor(PLAYER2);
-//		EXPECT_EQ(PLAYER2, cell.getColor());
+        cell.setColor(PLAYER2);
+		BOOST_CHECK_EQUAL(PLAYER2, cell.getColor());
     }
 
 	BOOST_AUTO_TEST_SUITE_END()

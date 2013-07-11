@@ -6,26 +6,25 @@
 namespace data
 {
 	
-	BOOST_FIXTURE_TEST_SUITE(PlayerTestSuite, PlayerTest)
+	BOOST_AUTO_TEST_SUITE(PlayerTestSuite)
 
-    BOOST_AUTO_TEST_CASE(testGet)
+    BOOST_FIXTURE_TEST_CASE(testGet, PlayerTest)
     {
-/*        EXPECT_STREQ("Han Solo", p1.getName().c_str());
-
+        BOOST_CHECK(!p1.getName().compare("Han Solo"));
 
         p1.addGameStatistic(Player::WIN);
-        EXPECT_EQ(1, p1.getWins());
-        EXPECT_EQ(1, p1.getPlayedGames());
+        BOOST_CHECK_EQUAL(1, p1.getWins());
+        BOOST_CHECK_EQUAL(1, p1.getPlayedGames());
         p1.addGameStatistic(Player::LOOSE);
-        EXPECT_EQ(1, p1.getLooses());
-        EXPECT_EQ(2, p1.getPlayedGames());
+        BOOST_CHECK_EQUAL(1, p1.getLooses());
+        BOOST_CHECK_EQUAL(2, p1.getPlayedGames());
 
-        EXPECT_EQ(0.5, p1.getWinRatio());*/
+        BOOST_CHECK_EQUAL(0.5, p1.getWinRatio());
     }
 
-    BOOST_AUTO_TEST_CASE(testWriteToDisk)
+    BOOST_FIXTURE_TEST_CASE(testWriteToDisk, PlayerTest)
     {
-/*        p1.addGameStatistic(Player::WIN);
+        p1.addGameStatistic(Player::WIN);
         p1.addGameStatistic(Player::LOOSE);
         p1.writeToDisk();
 
@@ -40,7 +39,7 @@ namespace data
         }
 
         in.close();
-        EXPECT_STREQ(p1.toString().c_str(), str.c_str());*/
+        BOOST_CHECK(!p1.toString().compare(str));
     }
 	
 	BOOST_AUTO_TEST_SUITE_END()

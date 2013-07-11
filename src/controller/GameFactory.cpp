@@ -9,6 +9,7 @@
 #include "impl/Game.h"
 #include "IPlayer.h"
 #include "impl/Player.h"
+#include "GameManagerLocal.h"
 #include <string>
 
 namespace controller
@@ -84,5 +85,11 @@ namespace controller
         return game;
     }
 */
+
+    IGameManager *GameFactory::getGameManagerLocal(IGameController *gc)
+    {
+        GameManagerLocal *manager = new GameManagerLocal(gc);
+        return manager;
+    }
 
 }

@@ -5,6 +5,6 @@ cmake_install.cmake
 install_manifest.txt
 
 4Wins_gui.project
-build
-debug
-release
+build/
+debug/
+release/

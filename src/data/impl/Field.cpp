@@ -2,6 +2,7 @@
 #include "ICell.h"
 
 #include <string>
+#include <stdexcept>
 
 namespace data
 {
@@ -34,7 +35,7 @@ namespace data
     void Field::setCellStatus(int x, int y, Colors c)
     {
         if (!checkInField(x, y))
-            throw "Index not valid.";
+            throw std::out_of_range("Index not valid.");
 
         cell_field[x][y]->setColor(c);
     }
@@ -42,7 +43,7 @@ namespace data
     Colors Field::getCellStatus(int x, int y)
     {
         if (!checkInField(x, y))
-            throw "Index not valid.";
+            throw std::out_of_range("Index not valid.");
 
         return cell_field[x][y]->getColor();
     }
@@ -50,7 +51,7 @@ namespace data
     ICell *Field::getCell(int x, int y)
     {
         if (!checkInField(x, y))
-            throw "Index not valid.";
+            throw std::out_of_range("Index not valid.");
 
         return cell_field[x][y];
     }

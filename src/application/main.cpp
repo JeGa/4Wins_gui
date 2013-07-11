@@ -1,69 +1,55 @@
-#define RELEASE
-#ifdef RELEASE
-
 #include <string>
 #include <iostream>
+#include "IUserInterface.h"
 #include "TextUI.h"
-//#include "GraphicalUI.h"
+#include "GraphicalUI.h"
 
 using namespace std;
 using namespace controller;
 using namespace data;
 
 void print_help();
-void guiLoop();
-void tuiLoop();
+void loop(view::IUserInterface *ui);
+
+enum class GameMode {GUI, TUI, NOT_SELECTED};
 
 int main(int argc, char **argv)
 {
-    // 0 = gui, 1 = tui, 2 = both
-    int status = 0;
+    // 0 = gui, 1 = tui (, 2 = both -> not implmented - Observer pattern)
+    GameMode status = GameMode::GUI;
+    view::IUserInterface *ui = nullptr;
 
     // Parse command line args
-    if (argc == 1)
-        status = 0;
-    else {
+    if (argc > 1) {
         // Copy only first string so its easier
         string str(argv[1]);
-        if (str.compare("-h") == 0) {
+        
+        if (!str.compare("-h"))
             print_help();
-            return 0;
-        } else if (str.compare("-gui") == 0)
-            status = 0;
-        else if (str.compare("-tui") == 0)
-            status = 1;
-        else {
+        else if (!str.compare("-gui"))
+            status = GameMode::GUI;
+        else if (!str.compare("-tui"))
+            status = GameMode::TUI;
+        else
             print_help();
-            return 0;
-        }
     }
 
-    //if (status == 0)
-        //guiLoop();
-    //else if (status == 1)
-        tuiLoop();
+    if (status == GameMode::TUI) {
+        ui = new view::TextUI();
+    } else if (status == GameMode::GUI)
+        ui = new view::GraphicalUI;
 
-    return 0;
+    if (ui) {
+        loop(ui);
+        delete ui;
+    }
+
+    return EXIT_SUCCESS;
 }
 
-void guiLoop()
+void loop(view::IUserInterface *ui)
 {
-    //view::GraphicalUI gui;
-    //gui.start();
-}
-
-void tuiLoop()
-{
-    view::TextUI tui;
-    int x, y;
-
-    tui.menu();
-    do {
-        cout << "Give x and y coordinates to set cell:" << endl;
-        cin >> x;
-        cin >> y;
-
-    } while(tui.setInput(x, y));
+    ui->run();
 }
 
 void print_help()
@@ -74,8 +60,6 @@ void print_help()
     cout << "-gui\t\t\t" << "Start gui mode" << endl;
     cout << "-tui\t\t\t" << "Start tui mode" << endl;
     /*cout << "-log\t\t\ŧ" << "Start logging mode (tui to file + gui)" << endl;
-    cout << "-guitui\t\t\t" << "Start gui and tui mode" << endl;*/
+    cout << "-guitui\t\t\t" << "Start gui and tui mode" << endl;*/ // Not impl.
     cout << "No parameter: Gui mode" << endl;
 }
-
-#endif

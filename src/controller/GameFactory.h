@@ -11,6 +11,7 @@
 #include "IGame.h"
 #include "IPlayer.h"
 #include "GameControllerStrategy.h"
+#include "IGameManager.h"
 
 #include <string>
 
@@ -39,6 +40,7 @@ namespace controller
             virtual IGame *getGameDefault(IPlayer *p1, IPlayer *p2, IPlayer *turn);
             // Creates new game with new players
             //virtual IGame *getGameAllNew(int x, int y, string name1, string pw1, string name2, string pw2);
+            virtual IGameManager *getGameManagerLocal(IGameController *gc);
     };
 
 }

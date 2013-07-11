@@ -6,42 +6,35 @@
 #include "IGame.h"
 #include "GameControllerStrategy.h"
 #include "LoginManager.h"
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Menu_Bar.H>
-#include <FL/Fl_Wizard.H>
+#include "IUserInterface.h"
+#include "GraphicalUIWindow.h"
 
 namespace view
 {
+    
     using namespace controller;
     using namespace data;
 
-    class GraphicalUI : public Fl_Window
+    class GraphicalUI : public IUserInterface
     {
-        private:
-            GameFactory factory;
-            LoginManager login;
-
-            // Local players
-            IPlayer *p1;
-            IPlayer *p2;
-
-            GameControllerStrategy *gc;
-            IGame *game;
-
-
-            Fl_Button *btn_localGame;
-            Fl_Menu_Bar *menubar;
-            Fl_Wizard *wizard;
-
-            void startLocalGame();
-            void startSettingsWindow();
-        public:
-            GraphicalUI();
-            ~GraphicalUI();
-            void start();
-            //void cb_menubar(Fl_Widget *w);
+    private:
+        GameFactory factory;
+        IGameManager *manager;
+        
+        void startLocalGame();
+        //void startSettingsWindow();
+        
+        // GUI
+        gui::GraphicalUIWindow window;
+        
+        // Callbacks
+        /*static void scb_window(Fl_Widget *w, void *p);
+        void cb_window(Fl_Widget *w);*/
+    public:
+        GraphicalUI();
+        ~GraphicalUI();
+        
+        virtual void run();
     };
 
 }

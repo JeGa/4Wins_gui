@@ -11,7 +11,7 @@ namespace data
     int Game::gameCounter = 0;
     
     Game::Game(IField *field, IPlayer *player1, IPlayer *player2, IPlayer *turn)
-        : field(field), player1(player1), player2(player2), turn(turn), running(true)
+        : running(true), field(field), player1(player1), player2(player2), turn(turn)
     {
         std::stringstream stream;
         stream << this->getPlayer1()->getName() << this->getPlayer2()->getName()

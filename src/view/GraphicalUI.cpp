@@ -109,8 +109,8 @@ namespace view
         
         //startNetworkgame();
         
-        controller::ServerNetworkController server;
-        server.startServer();
+//        controller::ServerNetworkController server;
+//        server.startServer();
     }
     
     void GraphicalUI::scb_btn_register(Fl_Widget *w, void *p)
@@ -121,9 +121,9 @@ namespace view
     void GraphicalUI::cb_btn_register()
     {
         //registerPlayer();
-        controller::ClientNetworkController client;
+//        controller::ClientNetworkController client;
         
-        client.connect();
+//        client.connect();
     }
     
     void GraphicalUI::scb_game(Fl_Widget *w, void *p)

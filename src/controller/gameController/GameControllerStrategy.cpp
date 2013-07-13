@@ -8,7 +8,7 @@ namespace controller
 {
 
     GameControllerStrategy::GameControllerStrategy() :
-        lastWinner(NULL), game(nullptr) {}
+        game(nullptr), lastWinner(NULL) {}
 
     GameControllerStrategy::~GameControllerStrategy() {}
 

@@ -28,8 +28,8 @@ namespace controller
         virtual ~GameManagerNetwork();
         
         virtual void newGame(data::IGame *game) {};
-        virtual IGameController *getGameController() {};
-        virtual bool input(int x, int y) {};
+        virtual IGameController *getGameController() {return nullptr;};
+        virtual bool input(int x, int y) {return false;};
         // set input() -> send to server, copy in games
     };
 

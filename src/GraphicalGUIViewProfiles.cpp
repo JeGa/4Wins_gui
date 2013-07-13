@@ -1,20 +1,20 @@
-#include "GraphicalGUIPlayGame.h"
+#include "GraphicalGUIViewProfiles.h"
 
 namespace view { namespace gui
 {
 
-    GraphicalGUIPlayGame::GraphicalGUIPlayGame() :
+    GraphicalGUIViewProfiles::GraphicalGUIViewProfiles() :
         Fl_Group(10, 10, 10, 10)
     {
         this->resize(this->parent()->x(), this->parent()->y() + 20,
             this->parent()->w(), this->parent()->h() - 40);
             
-        this->label("My Profile");
+        this->label("View Profiles");
         
         end();
     }
 
-    GraphicalGUIPlayGame::~GraphicalGUIPlayGame()
+    GraphicalGUIViewProfiles::~GraphicalGUIViewProfiles()
     {
     }
 

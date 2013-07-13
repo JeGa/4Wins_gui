@@ -10,11 +10,10 @@
 #include <Fl/fl_menu_bar.h>
 #include <Fl/Fl_input.h>
 #include <Fl/fl_Secret_Input.h>
-#include "GraphicalUILocalMain.h"
+#include <Fl/Fl_Help_View.h>
+#include <Fl/Fl_Value_Slider.h>
 #include "GraphicalUI.h"
-
-//!!
-#include "GraphicalUIField.h"
+#include "GraphicalUITab.h"
 
 namespace view {class GraphicalUI;}
 
@@ -23,15 +22,16 @@ namespace view { namespace gui
     
     class Menu;
     class MenuBar;
+    class StatusBar;
 
     class GraphicalUIWindow : public Fl_Window
     {
     private:
-        GraphicalUILocalMain *localMain;
-        //GraphicalUINetworkMain *networkMain;
         Menu *menu;
         MenuBar *menubar;
-        GraphicalUIField *field;
+        StatusBar *status;
+        GraphicalUITab *tabs;
+        Fl_Help_View *html;
 
     public:
         GraphicalUIWindow();
@@ -49,9 +49,7 @@ namespace view { namespace gui
         private:
             Fl_Button *btn_localGame;
             Fl_Input *p1Name;
-            Fl_Secret_Input *p1Password;
             Fl_Input *p2Name;
-            Fl_Secret_Input *p2Password;
 
             Fl_Button *btn_loginGame;
             Fl_Input *loginName;
@@ -60,6 +58,9 @@ namespace view { namespace gui
             Fl_Button *btn_register;
             Fl_Input *registerName;
             Fl_Secret_Input *registerPassword;
+            
+            Fl_Value_Slider *hor;
+            Fl_Value_Slider *vert;
             
         public:
             Menu(int x, int y);
@@ -77,6 +78,25 @@ namespace view { namespace gui
         public:
             MenuBar(int w, int h);
             virtual ~MenuBar() {};
+        
+        friend class view::GraphicalUI;
+    };
+    
+    // ===============================================================
+
+    class StatusBar : public Fl_Group
+    {
+        private:
+            Fl_Button *btn_logout;
+            
+            Fl_Box *statusText;
+            Fl_Image *statusImage;
+            
+            Fl_Box *connectionStatusText;
+            Fl_Image *connectionStatusImage;
+        public:
+            StatusBar(int x, int y);
+            virtual ~StatusBar() {};
         
         friend class view::GraphicalUI;
     };

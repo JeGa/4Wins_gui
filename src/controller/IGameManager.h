@@ -1,3 +1,8 @@
+/*
+* The GameManager is resonsible for the memory management.
+* One GameController is used for all games.
+*/
+
 #ifndef IGAMEMANAGER_H
 #define IGAMEMANAGER_H
 
@@ -13,9 +18,11 @@ namespace controller
         virtual ~IGameManager() {};
         
         virtual void newGame(data::IGame *game) = 0;
-        virtual IGameController *getGameController() = 0;
+        virtual bool deleteGame(data::IGame *game) = 0;
         virtual bool input(int x, int y) = 0;
-        virtual data::IGame *getGame() = 0; // From GameController
+        virtual bool setActiveGame(data::IGame *game) = 0;
+        virtual data::IGame *getActiveGame() = 0; // From GameController
+        virtual IGameController *getGameController() = 0;
     };
     
 }

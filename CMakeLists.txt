@@ -21,7 +21,7 @@ set(FLTK_FLUID_EXECUTABLE
 set(CMAKE_INCLUDE_PATH ${BOOST_TEST_SEARCH_INCLUDE_DIR} ${FLTK_SEARCH_INCLUDE_DIR})
 set(CMAKE_LIBRARY_PATH ${BOOST_TEST_SEARCH_LIB_DIR} ${FLTK_SEARCH_LIB_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -D_WIN32_WINNT=0x0501")
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # ==============================================================================
@@ -65,14 +65,22 @@ if (CMAKE_BUILD_TYPE STREQUAL "Test") # Build boost unit tests
 	set(SOURCES_TEST ${4Wins_gui_SOURCES} ${4Wins_gui_SOURCES_TEST})
 	add_executable(4Wins_gui_tests ${SOURCES_TEST})
     
-    # Link with boost test
+    # Link with boost system
+    target_link_libraries(4Wins_gui_tests ${Boost_LIBRARIES})
+    
+    # Link with boost test and boost system
     set(Boost_USE_STATIC_LIBS ON) # Static library
-    find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+    find_package(Boost COMPONENTS thread regex system unit_test_framework REQUIRED)
     include_directories(${Boost_INCLUDE_DIR})
     target_link_libraries(4Wins_gui_tests ${Boost_LIBRARIES})
     
     # Link with FLTK
     target_link_libraries(4Wins_gui_tests ${FLTK_LIBRARIES})
+    
+    # Link with winsock
+    if (WIN32)
+        target_link_libraries(4Wins_gui ws2_32)
+    endif (WIN32)
 	
 else (CMAKE_BUILD_TYPE STREQUAL "Test")
     
@@ -81,5 +89,16 @@ else (CMAKE_BUILD_TYPE STREQUAL "Test")
 	
     # Link with FLTK
     target_link_libraries(4Wins_gui debug ${FLTK_LIBRARIES})
+    
+    # Link with boost system
+    set(Boost_USE_STATIC_LIBS ON) # Static library
+    find_package(Boost COMPONENTS thread regex system REQUIRED)
+    include_directories(${Boost_INCLUDE_DIR})
+    target_link_libraries(4Wins_gui ${Boost_LIBRARIES})
+    
+    # Link with winsock
+    if (WIN32)
+        target_link_libraries(4Wins_gui ws2_32)
+    endif (WIN32)
     
 endif (CMAKE_BUILD_TYPE STREQUAL "Test")

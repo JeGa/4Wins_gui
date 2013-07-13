@@ -1,5 +1,5 @@
 /*
-* Needs the GameManager to draw the field.
+* Needs the game to draw the field.
 */
 
 #ifndef GRAPHICALUIFIELD_H
@@ -17,9 +17,13 @@ namespace view { namespace gui
     class GraphicalUIField : public Fl_Widget
     {
     private:
-        controller::IGameManager *manager = nullptr;
+        data::IGame *game;
         CellDrawing *clickedCell;
         
+        bool cellIsClicked(int x, int y);
+        virtual void draw() override;
+        virtual int handle(int event) override;  
+      
     public:
         static const int sizeX = 40;
         static const int sizeY = 40;
@@ -27,22 +31,17 @@ namespace view { namespace gui
         GraphicalUIField(int x, int y);
         virtual ~GraphicalUIField();
         
-        void setGameManager(controller::IGameManager *manager);
-        void displayGame();
-        bool cellIsClicked(int x, int y);
+        void displayGame(data::IGame *game);
         CellDrawing *getClickedCell();
-        
-        virtual void draw() override;
-        virtual int handle(int event) override;
     };
     
-    // Used for easier drawing and click recognition.
+    // Used for easier drawing and click recognition
     typedef struct CellDrawing
     {
         int x = 0;
-        int xNr = 0;
+        int xNr = 0; // Cell Nr.
         int y = 0;
-        int yNr = 0;
+        int yNr = 0; // Cell Nr.
         int w = GraphicalUIField::sizeX;
         int h = GraphicalUIField::sizeY;
         

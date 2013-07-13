@@ -15,7 +15,13 @@ namespace data
 
     class Game : public IGame
     {
-        private:
+    private:
+            bool running;
+    
+            // For key generation
+            static int gameCounter;
+            size_t key;
+            
             IField *field;
             IPlayer *player1;
             IPlayer *player2;
@@ -28,11 +34,15 @@ namespace data
 
             virtual void setCellStatus(int x, int y, IPlayer *player);
             virtual IPlayer *getCellStatus(int x, int y);
+            
+            virtual bool isRunning();
+            virtual void setRunning(bool running);
 
             virtual IPlayer *getPlayer1();
             virtual IPlayer *getPlayer2();
             virtual int getWidth();
             virtual int getHeight();
+            virtual int getKey();
             virtual std::string toString();
     };
 

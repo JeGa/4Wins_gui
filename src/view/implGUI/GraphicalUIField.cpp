@@ -8,7 +8,7 @@ namespace view { namespace gui
 {
 
     GraphicalUIField::GraphicalUIField(int x, int y) :
-        Fl_Widget(x, y, 10, 10)
+        Fl_Widget(x, y, 10, 10), game(nullptr)
     {
         clickedCell = new CellDrawing(0, 0);
     }
@@ -18,19 +18,14 @@ namespace view { namespace gui
         delete clickedCell;
     }
     
-    void GraphicalUIField::setGameManager(controller::IGameManager *manager)
+    // Sets the game to display and get inputs for and
+    // resizes the widget
+    void GraphicalUIField::displayGame(data::IGame *game)
     {
-        this->manager = manager;
-    }
-    
-    void GraphicalUIField::displayGame()
-    {
-        if (this->manager == nullptr ||
-            this->manager->getGameController()->getGame() == nullptr)
+        if (game == nullptr)
             return;
-        
-        // Resize
-        data::IGame *game = this->manager->getGame();
+            
+        this->game = game;
             
         int width = game->getWidth();
         int height = game->getHeight();
@@ -41,7 +36,8 @@ namespace view { namespace gui
     
     bool GraphicalUIField::cellIsClicked(int xClicked, int yClicked)
     {
-        data::IGame *game = this->manager->getGame();
+        if (game == nullptr)
+            return false;
             
         int width = game->getWidth();
         int height = game->getHeight();
@@ -73,16 +69,11 @@ namespace view { namespace gui
     
     void GraphicalUIField::draw()
     {
-        if (this->manager == nullptr ||
-            this->manager->getGameController()->getGame() == nullptr)
+        if (game == nullptr)
             return;
-        
-        data::IGame *game = this->manager->getGame();
             
         int width = game->getWidth();
         int height = game->getHeight();
-
-        //game->getCellStatus();
         
         draw_box(FL_DOWN_BOX, x(), y(),
             width * sizeX + 20, height * sizeY + 20, FL_WHITE);

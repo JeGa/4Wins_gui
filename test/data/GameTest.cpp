@@ -22,6 +22,22 @@ namespace data
         BOOST_CHECK_EQUAL(p1, game->onTurn());
     }
 	
+    BOOST_FIXTURE_TEST_CASE(testKey, GameTest)
+    {
+        // Key has to be unique
+        Game *tmp = new Game(f.getDefaultField(), p1, p2, p1);
+        
+        BOOST_CHECK_NE(game->getKey(), tmp->getKey());
+        
+        delete tmp;
+    }
+    
+    BOOST_FIXTURE_TEST_CASE(testRunning, GameTest)
+    {
+        game->setRunning(false);
+        BOOST_CHECK(!game->isRunning());
+    }
+
 	BOOST_AUTO_TEST_SUITE_END()
 
 }

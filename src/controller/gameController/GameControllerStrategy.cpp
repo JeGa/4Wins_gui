@@ -8,19 +8,18 @@ namespace controller
 {
 
     GameControllerStrategy::GameControllerStrategy() :
-        running(false), lastWinner(NULL), game(nullptr) {}
+        lastWinner(NULL), game(nullptr) {}
 
     GameControllerStrategy::~GameControllerStrategy() {}
 
     void GameControllerStrategy::playGame(data::IGame *game)
     {
         this->game = game;
-        running = true;
     }
 
     bool GameControllerStrategy::toggleTurn(int x, int y)
     {
-        if (!running)
+        if (!game->isRunning())
             return false;
             
         convertCoords(&y);
@@ -56,7 +55,7 @@ namespace controller
                 lastWinner = game->getPlayer2();
             }
 
-            running = false;
+            game->setRunning(false);
         }
 
         return true;
@@ -69,7 +68,9 @@ namespace controller
 
     bool GameControllerStrategy::isRunning()
     {
-        return running;
+        if (game != nullptr)
+            return game->isRunning();
+        return false;
     }
 
     data::IPlayer *GameControllerStrategy::getLastWinner()

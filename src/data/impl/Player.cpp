@@ -3,16 +3,25 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <functional>
 
 namespace data
 {
     const int IPlayer::LOOSE;
     const int IPlayer::WIN;
+    
+    int Player::playerCounter = 0;
 
     Player::Player(std::string name, std::string pw)
         : name(name), password(pw), wins(0), looses(0), playedGames(0), winRatio(0.0)
     {
-
+        std::stringstream stream;
+        stream << this->name << Player::playerCounter;
+        
+        std::hash<std::string> str_hash;
+        key = str_hash(stream.str());
+        
+        playerCounter++;
     }
 
     Player::~Player()
@@ -86,6 +95,11 @@ namespace data
         str += sstr.str();
 
         return str;
+    }
+    
+    int Player::getKey()
+    {    
+        return key;
     }
 
 }

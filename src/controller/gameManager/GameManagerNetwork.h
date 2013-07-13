@@ -1,3 +1,8 @@
+/*
+* Holds multiple game instances, the game controller holds one game
+* that is played.
+*/
+
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
 

@@ -41,6 +41,13 @@ namespace data
         in.close();
         BOOST_CHECK(!p1.toString().compare(str));
     }
+    
+    BOOST_FIXTURE_TEST_CASE(testKey, PlayerTest)
+    {
+        // Key has to be unique
+        Player tmp("Tmp", "");
+        BOOST_CHECK_NE(p1.getKey(), tmp.getKey());
+    }
 	
 	BOOST_AUTO_TEST_SUITE_END()
 

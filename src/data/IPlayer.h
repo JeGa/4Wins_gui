@@ -21,6 +21,8 @@ namespace data
             //virtual bool verifypassword(std::string pw) = 0;
             virtual std::string toString() = 0;
 
+            virtual int getKey() = 0;
+            
             virtual void addGameStatistic(int result) = 0;
             virtual int getWins() = 0;
             virtual int getLooses() = 0;

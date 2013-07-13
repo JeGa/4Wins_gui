@@ -19,7 +19,10 @@ namespace data
             virtual IPlayer *getPlayer2() = 0;
             virtual int getWidth() = 0;
             virtual int getHeight() = 0;
+            virtual int getKey() = 0;
             virtual std::string toString() = 0;
+            virtual bool isRunning() = 0;
+            virtual void setRunning(bool running) = 0;
     };
 
 }

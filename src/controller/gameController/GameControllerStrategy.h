@@ -28,8 +28,8 @@ namespace controller
     {
         private:
             data::IGame *game;
-            bool running; // Actual game is running?
             data::IPlayer *lastWinner;
+//            data::ICell winnerRow[4]; //!!
 
             void convertCoords(int *y);
             // Strategy method to override

@@ -67,9 +67,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Test") # Build boost unit tests
 	set(SOURCES_TEST ${4Wins_gui_SOURCES} ${4Wins_gui_SOURCES_TEST})
 	add_executable(4Wins_gui_tests ${SOURCES_TEST})
     
-    # Link with boost system
-    target_link_libraries(4Wins_gui_tests ${Boost_LIBRARIES})
-    
     # Link with boost test and boost system
     set(Boost_USE_STATIC_LIBS ON) # Static library
     find_package(Boost COMPONENTS thread regex system unit_test_framework chrono REQUIRED)

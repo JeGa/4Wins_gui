@@ -11,7 +11,9 @@
 * Make turn:
 * -> toggleInput()
 * [optional: After game, get winner]:
-* -> getLastWinner()
+* -> getWinner()
+* 
+* Access to the game infos with the function getGame().
 */
 
 #ifndef GAMECONTROLLERSTRATEGY_H
@@ -28,8 +30,6 @@ namespace controller
     {
         private:
             data::IGame *game;
-            data::IPlayer *lastWinner;
-//            data::ICell winnerRow[4]; //!!
 
             void convertCoords(int *y);
             // Strategy method to override
@@ -39,11 +39,8 @@ namespace controller
             virtual ~GameControllerStrategy();
 
             virtual void playGame(data::IGame *game);
-            virtual bool isRunning();
             virtual data::IPlayer *onTurn(); // From field
             virtual bool toggleTurn(int x, int y); // Switches between the 2 players
-
-            virtual data::IPlayer *getLastWinner();
             virtual data::IGame *getGame();
     };
 

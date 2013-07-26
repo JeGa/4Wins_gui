@@ -1,9 +1,9 @@
 #ifndef GRAPHICALUITAB_H
 #define GRAPHICALUITAB_H
 
-#include "GraphicalGUIPlayGame.h"
-#include "GraphicalGUIMyProfile.h"
-#include "GraphicalGUIViewProfiles.h"
+#include "GraphicalUIPlayGame.h"
+#include "GraphicalUIMyProfile.h"
+#include "GraphicalUIViewProfiles.h"
 #include <Fl/Fl_Tabs.h>
 
 namespace view { namespace gui
@@ -13,9 +13,9 @@ namespace view { namespace gui
     {
     private:
         // Tabs to display
-        GraphicalGUIPlayGame *playGame;
-        GraphicalGUIMyProfile *myProfile;
-        GraphicalGUIViewProfiles *viewProfiles;
+        GraphicalUIPlayGame *playGame;
+        GraphicalUIMyProfile *myProfile;
+        GraphicalUIViewProfiles *viewProfiles;
         
     public:
         GraphicalUITab(int x, int y, int w, int h);

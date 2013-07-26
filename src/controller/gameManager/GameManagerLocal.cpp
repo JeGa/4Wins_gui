@@ -1,3 +1,5 @@
+//!! TODO: Delete player
+
 #include "GameManagerLocal.h"
 
 namespace controller
@@ -18,7 +20,7 @@ namespace controller
     {
         if (gc == nullptr)
             return;
-            
+        
         if (game->getPlayer1() == nullptr || game->getPlayer2() == nullptr)
             return;
         
@@ -30,15 +32,6 @@ namespace controller
         // If player is not in the map add it
         addPlayer(game->getPlayer1());
         addPlayer(game->getPlayer2());
-        
-/*        if (gc->getGame() != nullptr) {
-            if (game->getPlayer1()->getKey() != gc->getGame()->getPlayer1()->getKey())
-                delete gc->getGame()->getPlayer1();
-            if (game->getPlayer2()->getKey() != gc->getGame()->getPlayer2()->getKey())
-                delete gc->getGame()->getPlayer2();
-            
-            delete gc->getGame();
-        }*/
         
         // Set active
         gc->playGame(game);
@@ -72,8 +65,6 @@ namespace controller
         
         if (games.count(key) != 1)
             return false;
-            
-        
             
         data::IGame *g = games.at(key);
         // If the to be deleted game is the active game, remove it as active
@@ -113,11 +104,6 @@ namespace controller
         if (players.find(player->getKey()) == players.end()) {
             players.insert(std::pair<int, data::IPlayer *>(player->getKey(), player));
         }
-    }
- 
-    IGameController *GameManagerLocal::getGameController()
-    {
-        return gc;
     }
 
     data::IGame *GameManagerLocal::getActiveGame()

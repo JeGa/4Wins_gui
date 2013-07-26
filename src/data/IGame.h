@@ -23,6 +23,8 @@ namespace data
             virtual std::string toString() = 0;
             virtual bool isRunning() = 0;
             virtual void setRunning(bool running) = 0;
+            virtual IPlayer *getWinner() = 0;
+            virtual void setWinner(IPlayer *winner) = 0;
     };
 
 }

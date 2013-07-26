@@ -33,6 +33,11 @@ namespace data
     {
         return name;
     }
+    
+    std::string Player::getPassword()
+    {
+        return password;
+    }
 
     void Player::writeToDisk()
     {

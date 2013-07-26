@@ -25,6 +25,7 @@ namespace data
             IField *field;
             IPlayer *player1;
             IPlayer *player2;
+            IPlayer *winner;
             IPlayer *turn;
         public:
             Game(IField *field, IPlayer *player1, IPlayer *player2, IPlayer *onTurn);
@@ -37,6 +38,8 @@ namespace data
             
             virtual bool isRunning();
             virtual void setRunning(bool running);
+            virtual IPlayer *getWinner();
+            virtual void setWinner(IPlayer *winner);
 
             virtual IPlayer *getPlayer1();
             virtual IPlayer *getPlayer2();

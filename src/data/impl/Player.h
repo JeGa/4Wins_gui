@@ -28,6 +28,7 @@ namespace data
             Player(std::string name, std::string pw);
             virtual ~Player();
             virtual std::string getName();
+            virtual std::string getPassword();
             virtual void writeToDisk();
             //virtual bool verifypassword(std::string pw);
             virtual std::string toString();

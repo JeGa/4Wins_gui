@@ -1,0 +1,229 @@
+#include "TCPConnection.h"
+#include <iostream>
+#include <boost/chrono.hpp>
+
+namespace controller
+{
+
+    TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s)
+        : socket(std::move(s))
+    {
+        socket->non_blocking(true);
+        
+        tcp::endpoint localEndp = socket->local_endpoint();
+        localAddress = localEndp.address().to_string();
+        localPort = localEndp.port();
+        
+        tcp::endpoint remoteEndp = socket->remote_endpoint();
+        remoteAddress = remoteEndp.address().to_string();
+        remotePort = remoteEndp.port();
+    }
+
+    TCPConnection::~TCPConnection()
+    {
+        this->disconnect();
+    }
+    
+    void TCPConnection::disconnect()
+    {
+        // Stop the connection threads
+        //sendThreadHandle.interrupt(); // Maybe already from receiveThread closed
+        //sendThreadHandle.join();
+        receiveThreadHandle.interrupt(); // Closes socket and both threads
+        receiveThreadHandle.join();
+    }
+
+    void TCPConnection::startConnectionThreads()
+    {
+        sendThreadHandle =
+            boost::thread(&TCPConnection::sendThread, this);
+            
+        receiveThreadHandle = 
+            boost::thread(&TCPConnection::receiveThread, this);
+    }
+    
+    void TCPConnection::send(std::string str)
+    {
+//		str += "4WIN SERVER " + localIpAddr.to_string() + ": HELLO OK\n";
+        
+        str += "\n";
+        try {
+            socketMutex.lock();
+            boost::asio::write(*socket, boost::asio::buffer(str));
+            socketMutex.unlock();
+        } catch (std::exception& e) {
+            socketMutex.unlock();
+            std::cerr << e.what() << std::endl;
+        }
+    }
+    
+    void sendMessage(TCPMessage& msg)
+    {
+        //!! TODO
+    }
+    
+    // Returns string "" if no message received
+    std::string TCPConnection::receive()
+    {
+        std::string line = "";
+        boost::asio::streambuf rcv;
+        
+        try {
+            socketMutex.lock();
+            
+            // Throws exception if theres no client connection
+            boost::asio::read_until(*socket, rcv, '\n');
+        
+            std::istream is(&rcv);
+            std::getline(is, line);
+        
+            socketMutex.unlock();
+        } catch (std::exception& e) {
+            socketMutex.unlock();
+            
+            if (!boost::asio::error::would_block)
+                std::cerr << e.what() << std::endl;
+        }
+        
+        return line;
+    }
+    
+    bool TCPConnection::isActive()
+    {
+        activeMutex.lock();
+        bool tmp = active;
+        activeMutex.unlock();
+        return tmp;
+    }
+    
+    // =========================================================================
+    
+    void TCPConnection::receiveThread()
+    {
+        std::cout<< "#> Receive thread started" << std::endl;
+        
+        // Print remote endpoint infos
+        std::cout << "#> " << remoteAddress << " "
+            << remotePort << std::endl;
+        
+        // Initialize the keep alive value
+        lastKeepAlive = boost::chrono::steady_clock::now();
+        
+        while (true) {
+            // Check if thread interrupted -> Closed from other thread
+            // Check if keep alive is expired -> Closed from client (or error)
+            if (sleepAndCheckInterrupt() | !checkKeepAlive()) {
+                
+                // Close send thread
+                sendThreadHandle.interrupt();
+                sendThreadHandle.join();
+                
+                // Close socket
+                closeSocket();
+                
+                // Close thread
+                break;
+            }
+            
+            //std::cout << boost::this_thread::get_id() << " #> Reading ...\n";
+
+            // Read message
+            std::string line = receive();
+            
+            if (line != "") {
+                // CONTINUE HERE: Message received
+                std::cout << line << std::endl;
+                
+                //boost::this_thread::sleep_for(boost::chrono::milliseconds(5000));
+                parseMessageInternal(line);
+            }
+        }
+        
+        activeMutex.lock();
+        active = false;
+        activeMutex.unlock();
+        
+        // Socket is closed from client or from server
+        // Notify observers:
+        // - On server side, this connection is removed from the vector
+        notifyObservers();
+        
+        std::cout<< "#> Receive thread closing" << std::endl;
+    }
+    
+    // Sends keep alive message
+    void TCPConnection::sendThread()
+    {
+        std::cout<< "#> Send thread started" << std::endl;
+
+        while (true) {
+            // Check if thread interrupted -> Closed from other thread
+            if (sleepAndCheckInterrupt()) {
+                // Close socket
+                //closeSocket();
+                // Close thread
+                break;
+            }
+            
+            send(localAddress + ": alive");
+        }
+        
+        std::cout<< "#> Send thread closing" << std::endl;
+
+    }
+    
+    // =========================================================================
+    
+    bool TCPConnection::checkKeepAlive()
+    {
+        boost::chrono::steady_clock::time_point now = 
+            boost::chrono::steady_clock::now();
+            
+        auto d = now - lastKeepAlive;
+        
+        if (d >= boost::chrono::seconds(TCPConnection::KEEP_ALIVE)) {
+            // No keep alive after x seconds: Client closed the socket     
+            return false;
+        }
+        
+        return true;
+    }
+    
+    void TCPConnection::parseMessageInternal(std::string str)
+    {
+        tcp::endpoint remoteEndpoint = socket->remote_endpoint();
+        
+        // Check keep alive
+        if (str == remoteEndpoint.address().to_string() + ": alive") {
+            lastKeepAlive = boost::chrono::steady_clock::now();
+        }
+    }
+    
+    void TCPConnection::closeSocket()
+    {
+        try {
+            if (socket->is_open()) {
+                socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+                socket->close();
+                
+                std::cout << "#> Socket closed: " <<
+                    boost::this_thread::get_id() << std::endl;
+            }
+        } catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+        }
+    }
+    
+    bool TCPConnection::sleepAndCheckInterrupt()
+    {
+        try {
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        } catch (boost::thread_interrupted& e) {
+            // Interrupted:
+            return true;
+        }
+        return false;
+    }
+    
+}
+

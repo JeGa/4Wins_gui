@@ -90,18 +90,18 @@ namespace view
     // Game input
     void TextUI::gameLoop()
     {
-        while (manager->getGameController()->isRunning()) {
-            cout << endl << manager->getGameController()->getGame()->toString() << endl;
-            cout << manager->getGameController()->onTurn()->getName() << " -> X and Y coordinates: ";
+        while (manager->getActiveGame()->isRunning()) {
+            cout << endl << manager->getActiveGame()->toString() << endl;
+            cout << manager->getActiveGame()->onTurn()->getName() << " -> X and Y coordinates: ";
             
             int x, y;
             cin >> x;
             cin >> y;
             
-            manager->getGameController()->toggleTurn(x, y);
+            manager->input(x, y);
         }
         cout << endl << "== WINNER IS: " <<
-            manager->getGameController()->getLastWinner()->getName() << "! ==" << endl;
+            manager->getActiveGame()->getWinner()->getName() << "! ==" << endl;
     }
 
 }

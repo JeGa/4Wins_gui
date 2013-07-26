@@ -9,9 +9,9 @@
 #include "GameFactory.h"
 #include "IGame.h"
 #include "GameControllerStrategy.h"
-#include "LoginManager.h"
 #include "IUserInterface.h"
 #include "GraphicalUIWindow.h"
+#include "GraphicalUIServer.h"
 
 namespace view { namespace gui {
     class GraphicalUIWindow;
@@ -24,18 +24,14 @@ namespace view
     {
     private:
         controller::GameFactory factory;
-        controller::IGameManager *manager;
+        controller::IGameManager *manager = nullptr;
+        controller::IGameManager *managerServer = nullptr;
         
         void startLocalGame();
-        //void startNetworkGame();
-        //bool register();
-        //bool logout();
+        void startNetworkGame();
         
         // GUI
         gui::GraphicalUIWindow *window;
-        
-//        gui::GraphicalUIGame *localGame;
-//        std::vector<gui::GraphicalUIGame *> networkGames;
         
         // Static callbacks
         static void scb_btn_localGame(Fl_Widget *w, void *p);

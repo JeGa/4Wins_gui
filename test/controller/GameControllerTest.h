@@ -37,7 +37,7 @@ namespace controller
 
             ~GameControllerTest()
             {
-                if (gc->isRunning())
+                if (gc->getGame()->isRunning())
                     delete game;
 
                 delete gc;

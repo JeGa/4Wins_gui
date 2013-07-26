@@ -1,25 +1,23 @@
 /*
 * The other GUI classes are only responsible for displaying. The game
-* logic is controlled in this class. Only the following classes have
+* is controlled in this class. Only the following classes have
 * access to the game (only read data):
 * 
-* - GUI:Game/Field needs game object to display the game field.
+* - GUI: Game/Field needs game object to display the game field.
 */
 
 #include "GraphicalUI.h"
 #include "IPlayer.h"
 #include "GraphicalUIGame.h"
 
-#include "ClientNetworkController.h"
-#include "ServerNetworkController.h"
+#include "NetworkControllerClient.h"
+#include "NetworkControllerServer.h"
 
 namespace view
 {
     
     GraphicalUI::GraphicalUI()
     {
-        manager = factory.getGameManagerLocal(factory.getGameController());
-
         // The main window
         window = new gui::GraphicalUIWindow();
         
@@ -31,24 +29,44 @@ namespace view
         // Status callbacks
         window->status->btn_logout->callback(scb_btn_logout, this); //!! Put in status class
         
-        //window->field->callback(scb_field, this);
-        //this->window->field->setGameManager(manager);
+        //!! TODO: Check server status
+//        if (client.ping()) {
+//            window->status->connectionStatusText->color(FL_GREEN);
+//            window->status->redraw();
+//        }
     }
 
     GraphicalUI::~GraphicalUI()
     {
         delete window;
-        delete manager;
+        if (manager != nullptr)
+            delete manager;
+        if (managerServer != nullptr)
+            delete managerServer;
     }
     
+    // Main loop for window
     void GraphicalUI::run()
     {
         window->show();
         while(Fl::wait());
     }
     
+    void GraphicalUI::startNetworkGame()
+    {
+        if (manager != nullptr)
+            delete manager;
+            
+        manager = factory.getGameManagerNetwork();
+    }
+    
     void GraphicalUI::startLocalGame()
     {
+        if (manager != nullptr)
+            delete manager;
+            
+        manager = factory.getGameManagerLocal(factory.getGameController());
+            
         const char *p1Name = window->menu->p1Name->value();
         const char *p2Name = window->menu->p2Name->value();
         
@@ -63,6 +81,7 @@ namespace view
             p2 = manager->getActiveGame()->getPlayer2();
         
             // If the name is the same, use the old player
+            // else create new player.
             if (p1->getName().compare(p1Name))
                 p1 = factory.getPlayer(p1Name, "");
             if (p2->getName().compare(p2Name))
@@ -90,7 +109,7 @@ namespace view
     
     void GraphicalUI::cb_btn_localGame()
     {
-        // Validate input
+        // TODO: Validate input
         
         startLocalGame();
     }
@@ -106,11 +125,6 @@ namespace view
         window->menu->hide();
         window->html->hide();
         window->tabs->show();
-        
-//        startNetworkgame();
-        
-		controller::ServerNetworkController server;
-        server.startServer();
     }
     
     void GraphicalUI::scb_btn_register(Fl_Widget *w, void *p)
@@ -121,15 +135,14 @@ namespace view
     void GraphicalUI::cb_btn_register()
     {
         //registerPlayer();
-        controller::ClientNetworkController client;
-        
-        client.connect();
     }
     
     void GraphicalUI::scb_game(Fl_Widget *w, void *p)
     {
         (static_cast<GraphicalUI *>(p))->cb_game(w);
     }
+    
+    //!! TODO: Put this in the manager class
     
     // Field is clicked
     void GraphicalUI::cb_game(Fl_Widget *w)
@@ -150,13 +163,14 @@ namespace view
         if (!manager->setActiveGame(game->game))
             return;
         
-        if (manager->getGameController()->isRunning()) {
+        // Only make turn if the game is running
+        if (manager->getActiveGame()->isRunning()) {
             manager->input(cell->xNr, cell->yNr);
             game->setInfoOutput();
         }
         
-        if (!manager->getGameController()->isRunning()) {
-            data::IPlayer *winner = manager->getGameController()->getLastWinner();
+        if (!manager->getActiveGame()->isRunning()) {
+            data::IPlayer *winner = manager->getActiveGame()->getWinner();
             
             game->setWinnerOutput(winner);
         }
@@ -171,7 +185,7 @@ namespace view
     
     void GraphicalUI::cb_btn_logout()
     {
-        // Logout first
+        // TODO: Logout first
         
         // Switch to start screen
         window->tabs->hide();

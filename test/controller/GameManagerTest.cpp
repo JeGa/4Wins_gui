@@ -5,10 +5,6 @@ namespace controller
     
     BOOST_AUTO_TEST_SUITE(GameManagerTestSuite)
 
-    BOOST_FIXTURE_TEST_CASE(testGameController, GameManagerTest)
-    {
-        BOOST_CHECK_EQUAL(manager->getGameController(), gc);
-    }
     
     BOOST_FIXTURE_TEST_CASE(testPlay, GameManagerTest)
     {
@@ -19,6 +15,7 @@ namespace controller
         // New game set active
         IGame *tmp = f.getGameDefault(p1, p2, p1);
         manager->newGame(tmp);
+        BOOST_CHECK(manager->getActiveGame() == tmp);
 
         // 2 Player 2 Games
         

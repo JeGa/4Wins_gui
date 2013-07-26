@@ -19,6 +19,8 @@ namespace controller
     {
     private:
         // The gc holds the active game and the 2 players
+        // With the local version, there is only one GameManager,
+        // so it needs a GameController to play a game.
         IGameController *gc = nullptr;
         
         std::map<int, data::IGame *> games;
@@ -37,7 +39,6 @@ namespace controller
         virtual bool input(int x, int y); // For active game
         virtual bool setActiveGame(data::IGame *game);
         virtual data::IGame *getActiveGame();
-        virtual IGameController *getGameController();
     };
 
 }

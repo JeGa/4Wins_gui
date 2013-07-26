@@ -7,7 +7,6 @@
 #include "GameControllerStrategy.h"
 #include "GameControllerStandard.h"
 #include "IGameManager.h"
-#include "LoginManager.h"
 #include "IUserInterface.h"
 #include <string>
 

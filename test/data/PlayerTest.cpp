@@ -11,6 +11,7 @@ namespace data
     BOOST_FIXTURE_TEST_CASE(testGet, PlayerTest)
     {
         BOOST_CHECK(!p1.getName().compare("Han Solo"));
+        BOOST_CHECK(!p1.getPassword().compare("Falcon"));
 
         p1.addGameStatistic(Player::WIN);
         BOOST_CHECK_EQUAL(1, p1.getWins());

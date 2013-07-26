@@ -22,7 +22,8 @@ namespace controller
         virtual bool input(int x, int y) = 0;
         virtual bool setActiveGame(data::IGame *game) = 0;
         virtual data::IGame *getActiveGame() = 0; // From GameController
-        virtual IGameController *getGameController() = 0;
+//        virtual std::map<data::IGame *> getGames() = 0;
+//        virtual std::map<data::IPlayer *> getPlayers() = 0;
     };
     
 }

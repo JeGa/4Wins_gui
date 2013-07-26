@@ -11,7 +11,8 @@ namespace data
     int Game::gameCounter = 0;
     
     Game::Game(IField *field, IPlayer *player1, IPlayer *player2, IPlayer *turn)
-        : running(true), field(field), player1(player1), player2(player2), turn(turn)
+        : running(true), field(field), player1(player1), player2(player2), turn(turn),
+        winner(nullptr)
     {
         std::stringstream stream;
         stream << this->getPlayer1()->getName() << this->getPlayer2()->getName()
@@ -70,6 +71,17 @@ namespace data
     void Game::setRunning(bool running)
     {
         this->running = running;
+    }
+    
+    IPlayer *Game::getWinner()
+    {
+        return winner;
+    }
+    
+    void Game::setWinner(IPlayer *winner)
+    {
+        if (winner != nullptr && (winner == player1 || winner == player2))
+            this->winner = winner;
     }
 
     IPlayer *Game::getPlayer1()

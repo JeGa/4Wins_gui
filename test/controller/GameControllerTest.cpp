@@ -31,8 +31,8 @@ namespace controller
         BOOST_CHECK(gc->toggleTurn(3, 0));
         BOOST_CHECK(gc->toggleTurn(0, 3)); // 4 p1
 
-        BOOST_CHECK(!gc->isRunning());
-        BOOST_CHECK_EQUAL(p1, gc->getLastWinner());
+        BOOST_CHECK(!gc->getGame()->isRunning());
+        BOOST_CHECK_EQUAL(p1, gc->getGame()->getWinner());
     }
 
 

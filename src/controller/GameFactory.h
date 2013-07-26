@@ -41,6 +41,7 @@ namespace controller
             // Creates new game with new players
             //virtual IGame *getGameAllNew(int x, int y, string name1, string pw1, string name2, string pw2);
             virtual IGameManager *getGameManagerLocal(IGameController *gc);
+            virtual IGameManager *getGameManagerNetwork();
     };
 
 }

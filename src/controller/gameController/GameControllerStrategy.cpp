@@ -8,7 +8,7 @@ namespace controller
 {
 
     GameControllerStrategy::GameControllerStrategy() :
-        game(nullptr), lastWinner(NULL) {}
+        game(nullptr) {}
 
     GameControllerStrategy::~GameControllerStrategy() {}
 
@@ -47,12 +47,12 @@ namespace controller
                 // P1 Wins
                 game->getPlayer1()->addGameStatistic(data::IPlayer::WIN);
                 game->getPlayer2()->addGameStatistic(data::IPlayer::LOOSE);
-                lastWinner = game->getPlayer1();
+                game->setWinner(game->getPlayer1());
             } else {
                 // P2 Wins
                 game->getPlayer2()->addGameStatistic(data::IPlayer::WIN);
                 game->getPlayer1()->addGameStatistic(data::IPlayer::LOOSE);
-                lastWinner = game->getPlayer2();
+                game->setWinner(game->getPlayer2());
             }
 
             game->setRunning(false);
@@ -64,18 +64,6 @@ namespace controller
     data::IPlayer *GameControllerStrategy::onTurn()
     {
         return game->onTurn();
-    }
-
-    bool GameControllerStrategy::isRunning()
-    {
-        if (game != nullptr)
-            return game->isRunning();
-        return false;
-    }
-
-    data::IPlayer *GameControllerStrategy::getLastWinner()
-    {
-        return lastWinner;
     }
 
     data::IGame *GameControllerStrategy::getGame()

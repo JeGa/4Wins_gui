@@ -140,9 +140,9 @@ namespace controller
 //            std::string line = receive();
 			TCPMessage msg = receiveMessage();
             
-            if (line != "") {
+            if (msg.isValid()) {
                 // CONTINUE HERE: Message received
-                std::cout << line << std::endl;
+                std::cout << msg.getFrameData() << std::endl;
                 
                 //boost::this_thread::sleep_for(boost::chrono::milliseconds(5000));
                 parseMessageInternal(msg);
@@ -206,7 +206,8 @@ namespace controller
         tcp::endpoint remoteEndpoint = socket->remote_endpoint();
         
         // Check keep alive
-        if (str == remoteEndpoint.address().to_string() + msg.getQueryUserData()) {
+        if (msg.getQueryUserData() ==
+			remoteEndpoint.address().to_string() + TCPMessage::KEEP_ALIVE_MESSAGE) {
             lastKeepAlive = boost::chrono::steady_clock::now();
         }
     }

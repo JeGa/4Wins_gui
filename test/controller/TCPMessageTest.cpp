@@ -7,46 +7,46 @@ namespace controller
     
     BOOST_FIXTURE_TEST_CASE(testMessageSend, TCPMessageTest)
     {
-        BOOST_CHECK(!msg.isValid());
+        BOOST_CHECK(!msgQuery.isValid());
         
-        std::string queryRegister = "These are not the droids you are looking for";
+        std::string queryData = "These are not the droids you are looking for";
         
-        msg.setQueryData(MSG_TYPE::REGISTER_QUERY, queryRegister);
-        BOOST_CHECK(msg.isValid());
+       BOOST_CHECK(msgQuery.createQueryMessage(queryData));
+        BOOST_CHECK(msgQuery.isValid());
         
         // I only look here from the console ...
-        std::string frame = msg.getFrameData();
-        std::cout << std::endl << frame << std::endl;
+        std::string setQueryData = msgQuery.getQueryUserData();
+		BOOST_CHECK(queryData.compare(setQueryData) == 0);
+		
+        std::cout << std::endl << msgQuery.getFrameData() << std::endl;
+		
+		// Is not allowed:
+		BOOST_CHECK(!msgQuery.createQueryMessage(queryData));
     }
     
     BOOST_FIXTURE_TEST_CASE(testMessageReceive, TCPMessageTest)
     {
         // Client side =========================================================
         // Same as send
-        std::string queryRegister = "These are not the droids you are looking for";
+        std::string queryData = "These are not the droids you are looking for";
         
-        msg.setQueryData(MSG_TYPE::REGISTER_QUERY, queryRegister);
-        BOOST_CHECK(msg.isValid());
+        BOOST_CHECK(msgQuery2.createQueryMessage(queryData));
+        BOOST_CHECK(msgQuery2.isValid());
         
-        std::string frame = msg.getFrameData();
+        std::string frame = msgQuery2.getFrameData();
         
         // Server side =========================================================
         // Now in "frame" there is the received string
-        TCPMessage msgRec(frame);
-        BOOST_CHECK(msg.isValid());
+		msgAck.createAckMessage(frame, "I dont look for droids");
+        BOOST_CHECK(msgAck.isValid());
         
-        // Now both msg should be the same
-        BOOST_CHECK(!msgRec.getClientUserData().compare(queryRegister));
-       // BOOST_CHECK(!msgRec.getFrameData().compare(frame));
-        
-        std::cout << std::endl << msgRec.getClientUserData() << std::endl;
-        std::cout << std::endl << msgRec.getFrameData() << std::endl;
-        
-        // To resend the message to the client:
-        //msgRec.setQueryData(MSG_TYPE::REGISTER_ACK, )
-    }
+		std::cout << "Query msg: " << std::endl << frame << std::endl;
+		std::cout << "Ack msg: " << std::endl << msgAck.getFrameData() << std::endl;
+    
+		// Is not allowed:
+		BOOST_CHECK(!msgAck.createAckMessage(frame, "I dont look for droids"));
+	}
     
     BOOST_AUTO_TEST_SUITE_END()
 
 }
-

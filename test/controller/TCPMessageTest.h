@@ -9,17 +9,12 @@ namespace controller
 
     struct TCPMessageTest
     {
-        TCPMessage msg;
+        TCPMessage msgQuery;
+		TCPMessage msgQuery2;
+		TCPMessage msgAck;
         
-        TCPMessageTest()
-        {
-            
-        };
-        
-        ~TCPMessageTest()
-        {
-            
-        };
+        TCPMessageTest() {};
+        ~TCPMessageTest() {};
     };
 
 }

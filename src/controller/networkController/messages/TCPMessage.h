@@ -35,10 +35,9 @@ namespace controller
 		NOT_SET = 0, UNDEF = 1, KEEP_ALIVE = 2, QUERY = 3, ACK = 4
 	};
 	
-	/*
 	enum class QUERY_MSG_TYPE
 	{
-		NOT_SET,
+		NOT_SET = 0,
         NEW_GAME_QUERY,
         LOGIN_QUERY,
         LOGOUT_QUERY,
@@ -48,14 +47,13 @@ namespace controller
     
     enum class ACK_MSG_TYPE
 	{
-		NOT_SET,
+		NOT_SET = 0,
 		NEW_GAME_ACK,
         LOGIN_ACK,
         LOGOUT_ACK,
         REGISTER_ACK,
         INPUT_ACK
 	};
-	*/
     
     class TCPMessage
     {
@@ -90,7 +88,8 @@ namespace controller
 		
 		// Create a ACK message as answer for a QUERY message. The data string
 		// received has a TCPMessage frame.
-		bool createAckMessage(std::string frameData, std::string data);
+		bool createAckMessage(std::string frameData);
+		bool setAckMessage(std::string data);
 		
 		// Create a keep-alive message
 		bool createKeepAliveMessage();

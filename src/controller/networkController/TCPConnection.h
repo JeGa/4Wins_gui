@@ -45,7 +45,7 @@ namespace controller
         void sendThread();
         void receiveThread();
         
-        void parseMessageInternal(std::string str);
+        void parseMessageInternal(TCPMessage& msg);
         bool checkKeepAlive();
         void closeSocket();
         bool sleepAndCheckInterrupt();
@@ -59,7 +59,7 @@ namespace controller
         std::string receive();
         
         void sendMessage(TCPMessage& msg);
-        //TCPMessage receiveMessage(); //!! TODO
+        TCPMessage receiveMessage();
         
         // If threads are running, closes the threads and the socket
         void disconnect();

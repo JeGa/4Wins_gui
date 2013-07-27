@@ -127,21 +127,30 @@ namespace controller
 		return valid;
 	}
 	
-	bool TCPMessage::createAckMessage(std::string frameData, std::string data)
+	bool TCPMessage::createAckMessage(std::string frameData)
 	{
 		valid = false;
 		
 		if (type != MSG_TYPE::NOT_SET)
 			return false;
 			
-		if (data.length() == 0)
-			return false;
-			
 		if (!parseFrameData(frameData))
 			return false;
 		
-		ackUserData = data;
 		type = MSG_TYPE::ACK;
+		
+		valid = true;
+		return valid;
+	}
+	
+	bool TCPMessage::setAckMessage(std::string data)
+	{
+		valid = false;
+		
+		if (data.length() == 0)
+			return false;
+			
+		ackUserData = data;	
 		valid = buildFrameData();
 		
 		return valid;

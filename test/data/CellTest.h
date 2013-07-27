@@ -13,8 +13,8 @@ namespace data
             data::Cell cell;
             data::Cell cell_default;
 
-            CellTest() : cell(PLAYER1) {};
-			~CellTest() {};
+            CellTest() : cell(PLAYER1) {}
+			~CellTest() {}
     };
 
 }

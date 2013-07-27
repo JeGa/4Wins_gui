@@ -11,7 +11,7 @@ namespace controller
         
         std::string queryData = "These are not the droids you are looking for";
         
-       BOOST_CHECK(msgQuery.createQueryMessage(queryData));
+		BOOST_CHECK(msgQuery.createQueryMessage(queryData));
         BOOST_CHECK(msgQuery.isValid());
         
         // I only look here from the console ...
@@ -37,14 +37,15 @@ namespace controller
         
         // Server side =========================================================
         // Now in "frame" there is the received string
-		msgAck.createAckMessage(frame, "I dont look for droids");
+		BOOST_CHECK(msgAck.createAckMessage(frame));
+		BOOST_CHECK(msgAck.setAckMessage("I dont look for droids"));
         BOOST_CHECK(msgAck.isValid());
         
 		std::cout << "Query msg: " << std::endl << frame << std::endl;
 		std::cout << "Ack msg: " << std::endl << msgAck.getFrameData() << std::endl;
     
 		// Is not allowed:
-		BOOST_CHECK(!msgAck.createAckMessage(frame, "I dont look for droids"));
+		BOOST_CHECK(!msgAck.createAckMessage(frame));
 	}
     
     BOOST_AUTO_TEST_SUITE_END()

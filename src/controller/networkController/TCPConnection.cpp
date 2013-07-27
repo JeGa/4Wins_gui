@@ -59,9 +59,9 @@ namespace controller
         }
     }
     
-    void sendMessage(TCPMessage& msg)
+    void TCPConnection::sendMessage(TCPMessage& msg)
     {
-        //!! TODO
+        send(msg.getFrameData());
     }
     
     // Returns string "" if no message received
@@ -89,6 +89,13 @@ namespace controller
         
         return line;
     }
+	
+	TCPMessage TCPConnection::receiveMessage()
+	{
+		TCPMessage msg;
+		msg.createAckMessage(receive());
+		return msg;
+	}
     
     bool TCPConnection::isActive()
     {
@@ -130,14 +137,15 @@ namespace controller
             //std::cout << boost::this_thread::get_id() << " #> Reading ...\n";
 
             // Read message
-            std::string line = receive();
+//            std::string line = receive();
+			TCPMessage msg = receiveMessage();
             
             if (line != "") {
                 // CONTINUE HERE: Message received
                 std::cout << line << std::endl;
                 
                 //boost::this_thread::sleep_for(boost::chrono::milliseconds(5000));
-                parseMessageInternal(line);
+                parseMessageInternal(msg);
             }
         }
         
@@ -167,7 +175,9 @@ namespace controller
                 break;
             }
             
-            send(localAddress + ": alive");
+			TCPMessage msg;
+			msg.createKeepAliveMessage();
+            send(localAddress + msg.getFrameData());
         }
         
         std::cout<< "#> Send thread closing" << std::endl;
@@ -191,12 +201,12 @@ namespace controller
         return true;
     }
     
-    void TCPConnection::parseMessageInternal(std::string str)
+    void TCPConnection::parseMessageInternal(TCPMessage& msg)
     {
         tcp::endpoint remoteEndpoint = socket->remote_endpoint();
         
         // Check keep alive
-        if (str == remoteEndpoint.address().to_string() + ": alive") {
+        if (str == remoteEndpoint.address().to_string() + msg.getQueryUserData()) {
             lastKeepAlive = boost::chrono::steady_clock::now();
         }
     }

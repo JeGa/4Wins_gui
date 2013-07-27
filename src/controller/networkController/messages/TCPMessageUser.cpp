@@ -1,44 +1,60 @@
-//#include "TCPMessageUser.h"
-//
-//namespace controller
-//{
-//
-//    TCPMessageUser::TCPMessageUser(MSG_TYPE type, data::IPlayer& p)
-//    {
-//        // Set the user data
-//        std::string tmp;
-//        
-//        if (type == MSG_TYPE::REGISTER_QUERY) {
-//            
-//            tmp = p.getKey() + ": " + p.getName() + " " + p.getPassword();
-//        
-//        } else if (type == MSG_TYPE::REGISTER_ACK) {
-//            
-//            mp = p.getKey() + ": " + p.getName();
-//            
-//        }
-//
-////            type == MSG_TYPE::REGISTER_ACK ||
-////            type == MSG_TYPE::LOGIN_ACK ||
-////            type == MSG_TYPE::LOGIN_QUERY ||
-////            type == MSG_TYPE::LOGOUT_ACK ||
-////            type == MSG_TYPE::LOGOUT_QUERY) {
-//                
-//            //tmp = p.getKey() + p.;
-//                
-//        this->setUserData(type, tmp);
-//    }
-//    
-//    TCPMessageUser::TCPMessageUser(std::string data)
-//    {
-//        this->setFrameData(data);
-//        
-//        // Extract the user data
-//    }
-//
-//    TCPMessageUser::~TCPMessageUser()
-//    {
-//    }
-//
-//}
-//
+#include "TCPMessageUser.h"
+
+#include <boost/lexical_cast.hpp>
+#include <sstream>
+#include <cstdlib>
+
+namespace controller
+{
+
+    TCPMessageUser::TCPMessageUser()
+	{
+	}
+	
+	TCPMessageUser::~TCPMessageUser()
+    {
+    }
+	
+	bool TCPMessageUser::createQuery(QUERY_MSG_TYPE type, data::IPlayer& p)
+    {
+        // Set the user data
+        std::string tmp;
+		std::stringstream sstr;
+		
+        sstr << static_cast<int>(type);
+        
+        if (type == QUERY_MSG_TYPE::REGISTER_QUERY) {
+            
+            tmp = sstr.str() + ": " + boost::lexical_cast<std::string>(p.getKey())
+				+ " " + p.getName() + " " + p.getPassword();
+        
+        } else if (type == QUERY_MSG_TYPE::LOGIN_QUERY) {
+            
+            tmp = sstr.str() + ": " + boost::lexical_cast<std::string>(p.getKey())
+				+ " " + p.getName() + " " + p.getPassword();
+            
+        } else if (type == QUERY_MSG_TYPE::LOGOUT_QUERY) {
+            
+            tmp = sstr.str() + ": " + boost::lexical_cast<std::string>(p.getKey())
+				+ " " + p.getName();
+        }
+                
+        return this->createQueryMessage(tmp);
+    }
+	
+	bool TCPMessageUser::createAck(std::string frame, bool status)
+	{
+		std::string tmp;
+		if (status)
+			tmp = "SUCCESS";
+		else
+			tmp = "FAILURE";
+		
+		if (!createAckMessage(frame))
+			return false;
+			
+		return setAckMessage(tmp);
+	}
+
+}
+

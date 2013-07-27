@@ -67,7 +67,12 @@ if (CMAKE_BUILD_TYPE STREQUAL "Test") # Build boost unit tests
 	set(SOURCES_TEST ${4Wins_gui_SOURCES} ${4Wins_gui_SOURCES_TEST})
 	add_executable(4Wins_gui_tests ${SOURCES_TEST})
     
-    # Link with boost test and boost system
+    # Link with boost
+	if (WIN32 AND __COMPILER_GNU)
+        # mingw-gcc fails to link boost::thread
+        add_definitions(-DBOOST_THREAD_USE_LIB)
+    endif (WIN32 AND __COMPILER_GNU)
+	
     set(Boost_USE_STATIC_LIBS ON) # Static library
     find_package(Boost COMPONENTS thread regex system unit_test_framework chrono REQUIRED)
     include_directories(${Boost_INCLUDE_DIR})
@@ -89,7 +94,12 @@ else (CMAKE_BUILD_TYPE STREQUAL "Test")
     # Link with FLTK
     target_link_libraries(4Wins_gui debug ${FLTK_LIBRARIES})
     
-    # Link with boost system
+    # Link with boost
+	if (WIN32 AND __COMPILER_GNU)
+        # mingw-gcc fails to link boost::thread
+        add_definitions(-DBOOST_THREAD_USE_LIB)
+    endif (WIN32 AND __COMPILER_GNU)
+	
     set(Boost_USE_STATIC_LIBS ON) # Static library
     find_package(Boost COMPONENTS thread regex system chrono REQUIRED)
     include_directories(${Boost_INCLUDE_DIR})

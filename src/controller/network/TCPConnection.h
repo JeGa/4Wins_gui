@@ -26,7 +26,7 @@ namespace controller
     class TCPConnection : public util::Subject
     {
     private:
-        static const int KEEP_ALIVE = 10;
+        static const int KEEP_ALIVE;
     
         boost::thread receiveThreadHandle;
         boost::thread sendThreadHandle;

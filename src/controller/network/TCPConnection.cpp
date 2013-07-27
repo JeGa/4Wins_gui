@@ -4,6 +4,8 @@
 
 namespace controller
 {
+	
+	const int TCPConnection::KEEP_ALIVE = 10;
 
     TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s)
         : socket(std::move(s))
@@ -181,7 +183,7 @@ namespace controller
             
         auto d = now - lastKeepAlive;
         
-        if (d >= boost::chrono::seconds(TCPConnection::KEEP_ALIVE)) {
+        if (d >= boost::chrono::seconds(KEEP_ALIVE)) {
             // No keep alive after x seconds: Client closed the socket     
             return false;
         }

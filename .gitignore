@@ -9,3 +9,4 @@ build/
 debug/
 release/
 4Wins_gui.bat
+*.player

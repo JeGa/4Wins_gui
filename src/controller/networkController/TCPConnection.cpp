@@ -46,8 +46,6 @@ namespace controller
     
     void TCPConnection::send(std::string str)
     {
-//		str += "4WIN SERVER " + localIpAddr.to_string() + ": HELLO OK\n";
-        
         str += "\n";
         try {
             socketMutex.lock();
@@ -181,7 +179,6 @@ namespace controller
         }
         
         std::cout<< "#> Send thread closing" << std::endl;
-
     }
     
     // =========================================================================

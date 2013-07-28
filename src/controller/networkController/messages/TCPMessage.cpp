@@ -11,7 +11,6 @@ namespace controller
 	const std::string TCPMessage::KEEP_ALIVE_MESSAGE = "4WINS ALIVE";
     int TCPMessage::msgKey = 0;
 
-    // A new message is created, to send it over the network.
     TCPMessage::TCPMessage()
     {
     }
@@ -21,19 +20,12 @@ namespace controller
     }
     
     // Create and format the string to send over the network.
-    bool TCPMessage::buildFrameData()
+	void TCPMessage::buildFrameData()
     {
         std::string frameData = "";
         
-        if (queryUserData == "")
-            return false;
-			
-		// AckUserData can be empty (for QUERY)
-            
-        if (type == MSG_TYPE::UNDEF || type == MSG_TYPE::NOT_SET)
-            return false;
-        
         std::stringstream sstr;
+		
         sstr << static_cast<int>(msgKey);
         frameData = HEADER + ";" + sstr.str() + ";";
         sstr.str("");
@@ -43,8 +35,6 @@ namespace controller
 			ackUserData + ";" + FOOTER + "\n";
         
 		internalData = frameData;
-		
-        return true;
     }
     
     // Creates this message object based on a message received from the other
@@ -118,8 +108,7 @@ namespace controller
 		queryUserData = data;
 		type = MSG_TYPE::QUERY;
 		
-		if (!buildFrameData()) // Encapsulate in frame
-			return false;
+		buildFrameData(); // Encapsulate in frame
 		
 		msgKey++;
 		
@@ -129,6 +118,10 @@ namespace controller
 	
 	bool TCPMessage::createAckMessage(std::string frameData)
 	{
+		// TODO
+		
+		// REMOVE DUPLICATION FROM CREATEMSSAGE
+		
 		valid = false;
 		
 		if (type != MSG_TYPE::NOT_SET)
@@ -147,12 +140,17 @@ namespace controller
 	{
 		valid = false;
 		
+		if (type != MSG_TYPE::ACK)
+			return false;
+		
 		if (data.length() == 0)
 			return false;
 			
 		ackUserData = data;	
-		valid = buildFrameData();
 		
+		buildFrameData();
+		
+		valid = true;
 		return valid;
 	}
 	
@@ -166,7 +164,22 @@ namespace controller
 		type = MSG_TYPE::KEEP_ALIVE;
 		queryUserData = KEEP_ALIVE_MESSAGE;
 		
-		valid = buildFrameData();
+		buildFrameData();
+		valid = true;
+		return valid;
+	}
+	
+	bool TCPMessage::createMessage(std::string frameData)
+	{
+		valid = false;
+		
+		if (type != MSG_TYPE::NOT_SET)
+			return false;
+			
+		if (!parseFrameData(frameData))
+			return false;
+		
+		valid = true;
 		return valid;
 	}
 	
@@ -189,6 +202,15 @@ namespace controller
     {
         return valid;
     }
+	
+	void TCPMessage::reset()
+	{
+		type = MSG_TYPE::NOT_SET;
+		queryUserData = "";
+		ackUserData = "";
+		internalData = "";
+		valid = false;
+	}
 
 }
 

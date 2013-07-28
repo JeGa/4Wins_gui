@@ -75,7 +75,7 @@ namespace controller
         // The send string with the frame (client and server data)
         std::string internalData = "";
         
-        bool buildFrameData();
+        void buildFrameData();
         bool parseFrameData(std::string data);
     public:
 		static const std::string KEEP_ALIVE_MESSAGE;
@@ -94,12 +94,19 @@ namespace controller
 		
 		// Create a keep-alive message
 		bool createKeepAliveMessage();
+		
+		// Only creates a messag based on a frame data string
+		bool createMessage(std::string frameData);
         
         std::string getFrameData(); // Return the data with the frame (to send)
         std::string getQueryUserData();
         std::string getAckUserData();
         
         bool isValid();
+		// This resets the message to create a new message. Normally the user
+		// is prevented from creating a new message if the object is already
+		// a valid message (to prevent loss of message information).
+		void reset();
     };
 
 }

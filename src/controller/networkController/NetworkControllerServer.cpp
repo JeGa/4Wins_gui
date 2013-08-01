@@ -21,6 +21,9 @@ namespace controller
     {
         this->acceptorThreadHandle =
             boost::thread(&NetworkControllerServer::acceptorThread, this);
+        this->cleanerThreadHandle =
+            boost::thread(&NetworkControllerServer::connectionCleanerThread,
+            this);
     }
     
     void NetworkControllerServer::stopServer()
@@ -28,6 +31,10 @@ namespace controller
         // Stop waiting for incoming connections
         acceptorThreadHandle.interrupt();
         acceptorThreadHandle.join();
+        
+        // Stop cleaner thread
+        cleanerThreadHandle.interrupt();
+        cleanerThreadHandle.join();
         
         // Remove saved client connections
         this->connections.clear();
@@ -37,6 +44,11 @@ namespace controller
         NetworkControllerServer::getConnections()
     {
         return connections;
+    }
+    
+    void NetworkControllerServer::setExternalTCPConnectionObserver(util::Observer *o)
+    {
+        obs.push_back(o);
     }
     
     // =========================================================================
@@ -56,6 +68,8 @@ namespace controller
             }
             
 //            std::cout << "=> Wait for connection ..." << std::endl;
+//            std::cout << "=> There are " << connections.size() <<
+//                " connections." << std::endl;
             
             try {
                 // Wait for connection
@@ -70,7 +84,11 @@ namespace controller
                 // Create connection
                 std::unique_ptr<TCPConnection> con(
                     new TCPConnection(std::move(incomingCon)));
+                
                 con->addObserver(this);
+                for (auto i : obs)
+                    con->addObserver(i);
+                
                 con->startConnectionThreads();
                 this->connections.push_back(std::move(con));
                 
@@ -83,15 +101,65 @@ namespace controller
         std::cout << "=> Acceptor thread closing" << std::endl;
     }
     
+    void NetworkControllerServer::connectionCleanerThread()
+    {
+        std::cout << "=> Cleaner thread started" << std::endl;
+        
+        while (true) {
+            try {
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+            } catch (boost::thread_interrupted& e) {
+                // Close thread
+                break;
+            }
+            
+            // Check if a connection is closed from a client
+            
+            boost::unique_lock<boost::mutex> l(cleanerMutex);
+
+            if (!clean)
+                cleanerCond.wait_for(l, boost::chrono::milliseconds(100));
+            
+            if (clean) { // Check again because of timed wait
+                // The cond. is true
+            
+                // Clean connection
+                std::cout << "=> Cleaning closed connection" << std::endl;
+            
+                std::vector<std::unique_ptr<TCPConnection>>::iterator rem;
+                for (rem = connections.begin(); rem < connections.end();
+                    rem++) {
+                    
+                    if ((*rem).get() == clean) {
+                        connections.erase(rem);
+                    }
+                }
+                
+                clean = nullptr;
+                
+                // Then ext threads can notify this thread
+                waitForCleanedMutex.unlock();
+            }
+        }
+        
+        std::cout << "=> Cleaner thread closing" << std::endl;
+    }
+    
     // Notified from the TCPConnection receive thread
-    void NetworkControllerServer::notify(util::Subject * sub)
+    void NetworkControllerServer::notify(util::Subject *sub)
     {
         TCPConnection *con = static_cast<TCPConnection *>(sub);
         
         // Connection is closed:
         if (!con->isActive()) {
-            // Remove from list
-            //this->connections.
+            // Remove from list: Notify cleaner thread
+            
+            waitForCleanedMutex.lock();
+            
+            cleanerMutex.lock();
+            clean = con;
+            cleanerCond.notify_one();
+            cleanerMutex.unlock();
         }
     }
     

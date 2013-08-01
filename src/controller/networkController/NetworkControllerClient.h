@@ -8,6 +8,8 @@
 #include <iostream>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
+#include "Observer.h"
+#include "TCPMessage.h"
 
 namespace controller
 {
@@ -24,19 +26,25 @@ namespace controller
         std::string port;
         std::string address;
         
+        // Observers to set for each TCPConnection
+        std::vector<util::Observer*> obs;
+        //!! Be careful here!
+        
     public:
         NetworkControllerClient(std::string addr = "127.0.0.1",
             std::string port = "9999");
         virtual ~NetworkControllerClient();
         
+        void setExternalTCPConnectionObserver(util::Observer *o);
+        
         bool ping(); // Only try if the server is online
         void connect();
         void disconnect();
         
-        void send(std::string str);
-        std::string receive();
+        void send(TCPMessage& msg);
+        std::unique_ptr<TCPMessage> receive();
         
-//        std::string getData();
+        bool isConnected();
     };
 
 }

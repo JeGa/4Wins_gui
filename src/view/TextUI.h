@@ -6,7 +6,7 @@
 #include "IGame.h"
 #include "GameControllerStrategy.h"
 #include "GameControllerStandard.h"
-#include "IGameManager.h"
+#include "IGameManagerLocal.h"
 #include "IUserInterface.h"
 #include <string>
 
@@ -23,7 +23,7 @@ namespace view
     {
         private:
             GameFactory factory;
-            IGameManager *manager;
+            IGameManagerLocal *manager;
 
             void startLocalGame();
             //startNetworkGame();

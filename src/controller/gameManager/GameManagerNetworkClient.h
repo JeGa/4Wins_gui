@@ -9,43 +9,46 @@
 #ifndef GAMEMANAGERNETWORKCLIENT_H
 #define GAMEMANAGERNETWORKCLIENT_H
 
-#include "IGameManager.h"
+#include "IGameManagerClient.h"
 #include <map>
 #include "NetworkControllerClient.h"
 #include "TCPMessage.h"
+#include "Observer.h"
+#include "GameFactory.h"
+#include <boost/thread.hpp>
 
 namespace controller
 {
 
-    class GameManagerNetworkClient : public IGameManager
+    class GameManagerNetworkClient :
+        public IGameManagerClient,
+        public util::Observer
     {
     private:
-        data::IPlayer *localPlayer = nullptr; // The own player
-    
-        // This are copies from the server.
-        std::map<int, data::IGame *> games;
-        std::map<int, data::IPlayer *> players;
+        std::unique_ptr<data::IPlayer> localPlayer; // The own player
         
         NetworkControllerClient networkController;
+        GameFactory factory;
+        
         // If the game manager is waiting for a message from the server
-        MSG_TYPE waitingFor = MSG_TYPE::UNDEF;
+        QUERY_MSG_TYPE waitingFor = QUERY_MSG_TYPE::NOT_SET;
+        
+        boost::mutex handshake;
     
     public:
         GameManagerNetworkClient();
         virtual ~GameManagerNetworkClient();
         
-        bool login(std::string name, std::string pw);
-        bool logout(std::string name, std::string pw);
-        bool registerUser(std::string name, std::string pw);
+        virtual bool login();
+        virtual bool logout();
+        virtual bool registerUser(std::string name, std::string pw);
+        virtual bool ping();
+        
         virtual void newGame(data::IGame *game) {};
         virtual bool deleteGame(data::IGame *game) {return false;};
         virtual bool input(int x, int y) {return false;};
         
-        // Do not need that: ??
-        virtual bool setActiveGame(data::IGame *game) {return false;};
-        virtual data::IGame *getActiveGame() {return nullptr;};
-        
-
+        virtual void notify(util::Subject * sub);
     };
 
 }

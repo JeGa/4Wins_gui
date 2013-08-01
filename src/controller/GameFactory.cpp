@@ -11,6 +11,7 @@
 #include "impl/Player.h"
 #include "GameManagerLocal.h"
 #include "GameManagerNetworkClient.h"
+#include "GameManagerNetworkServer.h"
 #include <string>
 
 namespace controller
@@ -75,27 +76,21 @@ namespace controller
         return new Player(name, pw);
     }
 
-/*
-    IGame *GameFactory::getGameAllNew(int x, int y, string name1, string pw1, string name2, string pw2)
-    {
-        IPlayer *p1 = new Player(name1, pw1);
-        IPlayer *p2 = new Player(name2, pw2);
-
-        IGame *game = new Game(getField(x, y), p1, p2, p1);
-
-        return game;
-    }
-*/
-
-    IGameManager *GameFactory::getGameManagerLocal(IGameController *gc)
+    IGameManagerLocal *GameFactory::getGameManagerLocal(IGameController *gc)
     {
         GameManagerLocal *manager = new GameManagerLocal(gc);
         return manager;
     }
 
-    IGameManager *GameFactory::getGameManagerNetwork()
+    IGameManagerClient *GameFactory::getGameManagerClient()
     {
         GameManagerNetworkClient *manager = new GameManagerNetworkClient();
+        return manager;
+    }
+    
+    IGameManagerServer *GameFactory::getGameManagerServer(IGameController *gc)
+    {
+        GameManagerNetworkServer *manager = new GameManagerNetworkServer(gc);
         return manager;
     }
 

@@ -46,6 +46,21 @@ namespace controller
     
 		// Is not allowed:
 		BOOST_CHECK(!msgAck.createAckMessage(frame));
+        
+        // Test for static msg counter
+        TCPMessage m1;
+        TCPMessage m2;
+        
+        m1.createQueryMessage("The force");
+        m2.createQueryMessage("Yoda");
+        
+        std::cout << "======================================" << std::endl;
+        
+        std::cout << m1.getMsgKey() << std::endl;
+        std::cout << m1.getFrameData() << std::endl;
+        std::cout << m2.getMsgKey() << std::endl;
+        std::cout << m2.getFrameData() << std::endl;
+
 	}
     
     BOOST_AUTO_TEST_SUITE_END()

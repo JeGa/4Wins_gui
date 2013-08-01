@@ -58,16 +58,15 @@ namespace controller
     class TCPMessage
     {
     private:
-        static int msgKey; // Unique identifier
+        static int msgKeyCounter; // Unique identifier counter
+        
         static const std::string HEADER;
         static const std::string FOOTER;
 		
+        int msgKey = -1;
         MSG_TYPE type = MSG_TYPE::NOT_SET;
-//		QUERY_MSG_TYPE queryType = QUERY_MSG_TYPE::NOT_SET;
-//		ACK_MSG_TYPE ackType = ACK_MSG_TYPE::NOT_SET;
-
         std::string queryUserData = ""; // What the client sends
-        std::string ackUserData = ""; // What the server sends
+        std::string ackUserData = ""; // What the server sends back
         
 		// If this message has valid data
         bool valid = false;
@@ -98,15 +97,19 @@ namespace controller
 		// Only creates a messag based on a frame data string
 		bool createMessage(std::string frameData);
         
+        MSG_TYPE getType();
         std::string getFrameData(); // Return the data with the frame (to send)
         std::string getQueryUserData();
         std::string getAckUserData();
+        int getMsgKey();
         
         bool isValid();
 		// This resets the message to create a new message. Normally the user
 		// is prevented from creating a new message if the object is already
 		// a valid message (to prevent loss of message information).
 		void reset();
+        
+        std::string toString();
     };
 
 }

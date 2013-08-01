@@ -88,10 +88,12 @@ namespace controller
         return line;
     }
 	
-	TCPMessage TCPConnection::receiveMessage()
+    std::unique_ptr<TCPMessage>	TCPConnection::receiveMessage()
 	{
-		TCPMessage msg;
-		msg.createAckMessage(receive());
+		std::unique_ptr<TCPMessage> msg(new TCPMessage);
+        std::string str = receive();
+        if (str != "")
+            msg->createMessage(str);
 		return msg;
 	}
     
@@ -101,6 +103,22 @@ namespace controller
         bool tmp = active;
         activeMutex.unlock();
         return tmp;
+    }
+    
+    // Resets the last message (
+    std::unique_ptr<TCPMessage> TCPConnection::getLastMessage()
+    {
+        return std::move(lastMessage);
+    }
+    
+    int TCPConnection::getRemotePort()
+    {
+        return remotePort;
+    }
+    
+    std::string TCPConnection::getRemoteAddress()
+    {
+        return remoteAddress;
     }
     
     // =========================================================================
@@ -119,7 +137,7 @@ namespace controller
         while (true) {
             // Check if thread interrupted -> Closed from other thread
             // Check if keep alive is expired -> Closed from client (or error)
-            if (sleepAndCheckInterrupt() | !checkKeepAlive()) {
+            if (checkInterrupt() | !checkKeepAlive()) {
                 
                 // Close send thread
                 sendThreadHandle.interrupt();
@@ -131,19 +149,23 @@ namespace controller
                 // Close thread
                 break;
             }
-            
-            //std::cout << boost::this_thread::get_id() << " #> Reading ...\n";
 
-            // Read message
-//            std::string line = receive();
-			TCPMessage msg = receiveMessage();
+            // Read message            
+			std::unique_ptr<TCPMessage> msg = receiveMessage();
             
-            if (msg.isValid()) {
+            if (msg->isValid()) {
                 // CONTINUE HERE: Message received
-                std::cout << msg.getFrameData() << std::endl;
                 
-                //boost::this_thread::sleep_for(boost::chrono::milliseconds(5000));
-                parseMessageInternal(msg);
+//                std::cout << msg.getFrameData() << std::endl;
+                
+                if (msg->getType() == MSG_TYPE::KEEP_ALIVE)
+                    parseMessageInternal(*msg);
+                else {
+                    lastMessage = std::move(msg);
+                    notifyObservers();
+                    // Reset the last message (no observer wanted it)
+                    lastMessage.release();
+                }
             }
         }
         
@@ -165,8 +187,11 @@ namespace controller
         std::cout<< "#> Send thread started" << std::endl;
 
         while (true) {
+            
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+            
             // Check if thread interrupted -> Closed from other thread
-            if (sleepAndCheckInterrupt()) {
+            if (checkInterrupt()) {
                 // Close socket
                 //closeSocket();
                 // Close thread
@@ -175,7 +200,7 @@ namespace controller
             
 			TCPMessage msg;
 			msg.createKeepAliveMessage();
-            send(localAddress + msg.getFrameData());
+            send(msg.getFrameData());
         }
         
         std::cout<< "#> Send thread closing" << std::endl;
@@ -204,7 +229,7 @@ namespace controller
         
         // Check keep alive
         if (msg.getQueryUserData() ==
-			remoteEndpoint.address().to_string() + TCPMessage::KEEP_ALIVE_MESSAGE) {
+			TCPMessage::KEEP_ALIVE_MESSAGE) {
             lastKeepAlive = boost::chrono::steady_clock::now();
         }
     }
@@ -224,10 +249,10 @@ namespace controller
         }
     }
     
-    bool TCPConnection::sleepAndCheckInterrupt()
+    bool TCPConnection::checkInterrupt()
     {
         try {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+            boost::this_thread::interruption_point();
         } catch (boost::thread_interrupted& e) {
             // Interrupted:
             return true;

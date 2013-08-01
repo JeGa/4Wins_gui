@@ -7,7 +7,7 @@
 
 #include <Fl/Fl_Widget.H> // Base class: Fl_Widget
 #include "IField.h"
-#include "IGameManager.h"
+#include "IGameManagerLocal.h"
 
 namespace view { namespace gui
 {

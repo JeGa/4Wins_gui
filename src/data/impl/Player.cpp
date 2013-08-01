@@ -106,5 +106,15 @@ namespace data
     {    
         return key;
     }
+    
+    bool Player::isLoggedIn()
+    {
+        return loggedIn;
+    }
+    
+    void Player::setLoggedIn(bool l)
+    {
+        loggedIn = l;
+    }
 
 }

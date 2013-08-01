@@ -15,6 +15,7 @@
 
 #include "TCPMessage.h" // Base class: controller::TCPMessage
 #include "IPlayer.h"
+#include <vector>
 
 namespace controller
 {
@@ -30,6 +31,10 @@ namespace controller
 		std::string userKey = "";
 		
 		bool ackStatus = false;
+
+        bool tokenizeUserMessage(std::string msg, std::vector<std::string>& tokens);
+        bool parseQueryUserData();
+        bool parseAckUserData();
 	public:
         TCPMessageUser();
         virtual ~TCPMessageUser();

@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
+#include <boost/lexical_cast.hpp>
 
 namespace controller
 {
@@ -9,7 +10,7 @@ namespace controller
     const std::string TCPMessage::HEADER = "4WINS HEADER";
     const std::string TCPMessage::FOOTER = "4WINS FOOTER";
 	const std::string TCPMessage::KEEP_ALIVE_MESSAGE = "4WINS ALIVE";
-    int TCPMessage::msgKey = 0;
+    int TCPMessage::msgKeyCounter = 0;
 
     TCPMessage::TCPMessage()
     {
@@ -32,7 +33,7 @@ namespace controller
 		
         sstr << static_cast<int>(type);
         frameData += sstr.str() + ";" + queryUserData + ";" +
-			ackUserData + ";" + FOOTER + "\n";
+			ackUserData + ";" + FOOTER;
         
 		internalData = frameData;
     }
@@ -64,12 +65,10 @@ namespace controller
         int tmpKey = atoi(tmp.c_str());
         msgKey = tmpKey;
 		
-        // Set and check type
+        // Set type
 		tmp = tokens[2];
         int tmpInt = atoi(tmp.c_str());
         MSG_TYPE tmpType = static_cast<MSG_TYPE>(tmpInt);
-		if (tmpType != MSG_TYPE::QUERY)
-			return false;
 		type = tmpType;
 		
         // Set query data
@@ -86,7 +85,7 @@ namespace controller
         // Check Footer
 		tmp = tokens[5];
 		// Remove '\n'
-		tmp.erase(tmp.length()-1);
+//		tmp.erase(tmp.length()-1);
         if (tmp != FOOTER)
             return false;
 			
@@ -107,10 +106,11 @@ namespace controller
 		
 		queryUserData = data;
 		type = MSG_TYPE::QUERY;
+        
+		msgKey = msgKeyCounter;
+        msgKeyCounter++;
 		
-		buildFrameData(); // Encapsulate in frame
-		
-		msgKey++;
+        buildFrameData(); // Encapsulate in frame
 		
 		valid = true;
 		return valid;
@@ -118,18 +118,15 @@ namespace controller
 	
 	bool TCPMessage::createAckMessage(std::string frameData)
 	{
-		// TODO
+        valid = false;
+        
+        if (!createMessage(frameData))
+            return false;
+            
+        if (type != MSG_TYPE::QUERY)
+            return false;
 		
-		// REMOVE DUPLICATION FROM CREATEMSSAGE
-		
-		valid = false;
-		
-		if (type != MSG_TYPE::NOT_SET)
-			return false;
-			
-		if (!parseFrameData(frameData))
-			return false;
-		
+        // Override the type (was QUERY)
 		type = MSG_TYPE::ACK;
 		
 		valid = true;
@@ -178,10 +175,19 @@ namespace controller
 			
 		if (!parseFrameData(frameData))
 			return false;
+            
+        buildFrameData();
 		
 		valid = true;
 		return valid;
 	}
+
+    // =========================================================================
+    
+    MSG_TYPE TCPMessage::getType()
+    {
+        return type;
+    }
 	
     std::string TCPMessage::getFrameData()
     {
@@ -198,6 +204,11 @@ namespace controller
         return this->ackUserData;
     }
     
+    int TCPMessage::getMsgKey()
+    {
+        return msgKey;
+    }
+    
     bool TCPMessage::isValid()
     {
         return valid;
@@ -209,8 +220,25 @@ namespace controller
 		queryUserData = "";
 		ackUserData = "";
 		internalData = "";
+        msgKey = -1;
 		valid = false;
 	}
 
+    std::string TCPMessage::toString()
+    {
+        std::string str;
+        int typeInt = static_cast<int>(type);
+        
+        str = "==========================\n";
+        str += "Message key: " + boost::lexical_cast<std::string>(msgKey) + " \n";
+        str += "Type: " + boost::lexical_cast<std::string>(typeInt) + " \n";
+        str += "Valid: " + boost::lexical_cast<std::string>(valid) + " \n";
+        str += "Query User Data: " + queryUserData + " \n";
+        str += "Ack User Data: " + ackUserData + " \n";
+        str += "Internal Data: " + internalData + " \n";
+        
+        return str;
+    }
+    
 }
 

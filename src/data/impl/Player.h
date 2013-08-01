@@ -24,6 +24,9 @@ namespace data
             int looses;
             int playedGames;
             double winRatio;
+            
+            // Networking
+            bool loggedIn = false;
         public:
             Player(std::string name, std::string pw);
             virtual ~Player();
@@ -41,6 +44,8 @@ namespace data
             virtual int getLooses();
             virtual int getPlayedGames();
             virtual double getWinRatio();
+            virtual bool isLoggedIn();
+            void setLoggedIn(bool l);
     };
 
 }

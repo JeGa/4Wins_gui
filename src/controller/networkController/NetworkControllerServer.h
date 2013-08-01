@@ -25,16 +25,29 @@ namespace controller
         tcp::acceptor acceptor;
         std::string port;
         boost::thread acceptorThreadHandle;
+        boost::thread cleanerThreadHandle;
         
+        boost::condition_variable cleanerCond;
+        boost::mutex cleanerMutex;
+        boost::mutex waitForCleanedMutex;
+        TCPConnection *clean = nullptr;
+
         // Holds all client connections
         std::vector<std::unique_ptr<TCPConnection>> connections;
         
+        // Observers to set for each TCPConnection
+        std::vector<util::Observer*> obs;
+        //!! Be careful here!
+        
         // This thread waits for incoming connections
         void acceptorThread();
+        void connectionCleanerThread();
         
     public:
         NetworkControllerServer(std::string port = "9999");
         virtual ~NetworkControllerServer();
+        
+        void setExternalTCPConnectionObserver(util::Observer *o);
         
         void startServer();
         void stopServer();

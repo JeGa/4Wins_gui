@@ -29,6 +29,8 @@ namespace data
             virtual int getLooses() = 0;
             virtual int getPlayedGames() = 0;
             virtual double getWinRatio() = 0;
+            virtual bool isLoggedIn() = 0;
+            virtual void setLoggedIn(bool l) = 0;
     };
 
 }

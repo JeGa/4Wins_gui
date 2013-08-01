@@ -9,35 +9,47 @@
 #ifndef GAMEMANAGERNETWORKSERVER_H
 #define GAMEMANAGERNETWORKSERVER_H
 
-#include "IGameManager.h"
+#include "IGameManagerServer.h"
 #include "IGame.h"
 #include "IPlayer.h"
 #include "IGameController.h"
 #include <map>
 #include "NetworkControllerServer.h"
+#include "Observer.h"
+#include "GameFactory.h"
 
 namespace controller
 {
     
-    class GameManagerNetworkServer : public IGameManager
+    class GameManagerNetworkServer :
+        public IGameManagerServer,
+        public util::Observer
     {
     private:
         // The gc holds the active game and the 2 players
         // All clients use the same GameController.
         IGameController *gc = nullptr;
         NetworkControllerServer networkController;
-
-        std::map<int, data::IGame *> games;
-        std::map<int, data::IPlayer *> players;
+        GameFactory factory;
+        
+        bool loginPlayer(std::string name, std::string pw);
+        bool registerPlayer(std::string name, std::string pw);
     public:
         GameManagerNetworkServer(IGameController *gc);
         virtual ~GameManagerNetworkServer();
+        
+        void start();
+        void stop();
         
         virtual void newGame(data::IGame *game) {};
         virtual bool deleteGame(data::IGame *game) {return false;};
         virtual bool input(int x, int y) {return false;};
         virtual bool setActiveGame(data::IGame *game) {return false;};
         virtual data::IGame *getActiveGame() {return nullptr;};
+        
+        std::vector<std::unique_ptr<TCPConnection>>& getConnections();
+        
+        virtual void notify(util::Subject * sub);
     };
 
 }

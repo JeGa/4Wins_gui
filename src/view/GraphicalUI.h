@@ -12,6 +12,8 @@
 #include "IUserInterface.h"
 #include "GraphicalUIWindow.h"
 #include "GraphicalUIServer.h"
+#include "IGameManagerClient.h"
+#include <memory>
 
 namespace view { namespace gui {
     class GraphicalUIWindow;
@@ -23,12 +25,11 @@ namespace view
     class GraphicalUI : public IUserInterface
     {
     private:
+        std::unique_ptr<controller::IGameManagerLocal> managerLocal;
+        std::unique_ptr<controller::IGameManagerClient> managerClient;
         controller::GameFactory factory;
-        controller::IGameManager *manager = nullptr;
-        controller::IGameManager *managerServer = nullptr;
         
         void startLocalGame();
-        void startNetworkGame();
         
         // GUI
         gui::GraphicalUIWindow *window;
@@ -39,6 +40,7 @@ namespace view
         static void scb_btn_register(Fl_Widget *w, void *p);
         static void scb_game(Fl_Widget *w, void *p);
         static void scb_btn_logout(Fl_Widget *w, void *p);
+        static void scb_menubar(Fl_Widget *w, void *p);
         
         // Callbacks
         void cb_btn_localGame();
@@ -46,6 +48,7 @@ namespace view
         void cb_btn_register();
         void cb_game(Fl_Widget *w);
         void cb_btn_logout();
+        void cb_menubar();
 
     public:
         GraphicalUI();

@@ -44,8 +44,10 @@ namespace view { namespace gui
         void cb_stopServer();
         void cb_refresh();
         
-//        boost::thread updaterThreadHandle;
-//        void updaterThread();
+        // Updates all (called from FLTK)
+        static void s_updateHandler(void *p);
+        void updateHandler();
+
     public:
         GraphicalUIServer();
         virtual ~GraphicalUIServer();

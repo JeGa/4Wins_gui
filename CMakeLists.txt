@@ -4,24 +4,24 @@ project(4Wins_gui)
 
 # Variables - to build add here the library locations
 set(BOOST_TEST_SEARCH_INCLUDE_DIR
-"F:/ext/boost")
+"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/boost")
 set(BOOST_TEST_SEARCH_LIB_DIR
-"F:/ext/boost_build/boost/bin.v2/libs")
+"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/boost_build/boost/bin.v2/libs")
 set(FLTK_SEARCH_INCLUDE_DIR
-"F:/ext/FLTK/include")
+"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/FLTK/include")
 set(FLTK_SEARCH_LIB_DIR
-"F:/ext/FLTK/lib")
+"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/FLTK/lib")
 
 # Because fluid not found
 set(FLTK_FLUID_EXECUTABLE
-"F:/ext/FLTK/bin/fluid.exe")
+"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/FLTK/bin/fluid.exe")
 
 # Because the libraries are not at standard locations:
 # Set the path were the FLTK and boost test binaries are
 set(CMAKE_INCLUDE_PATH ${BOOST_TEST_SEARCH_INCLUDE_DIR} ${FLTK_SEARCH_INCLUDE_DIR})
 set(CMAKE_LIBRARY_PATH ${BOOST_TEST_SEARCH_LIB_DIR} ${FLTK_SEARCH_LIB_DIR})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -D_WIN32_WINNT=0x0501")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -D_WIN32_WINNT=0x0501 -pg")
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # ==============================================================================

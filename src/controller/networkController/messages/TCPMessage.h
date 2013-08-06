@@ -42,7 +42,9 @@ namespace controller
         LOGIN_QUERY,
         LOGOUT_QUERY,
         REGISTER_QUERY,
-        INPUT_QUERY
+        INPUT_QUERY,
+        GET_PLAYERS_QUERY,
+        GET_GAMES_QUERY
 	};
     
     enum class ACK_MSG_TYPE
@@ -52,7 +54,9 @@ namespace controller
         LOGIN_ACK,
         LOGOUT_ACK,
         REGISTER_ACK,
-        INPUT_ACK
+        INPUT_ACK,
+        GET_PLAYERS_ACK,
+        GET_GAMES_ACK
 	};
     
     class TCPMessage

@@ -67,7 +67,7 @@ namespace controller
         boost::mutex socketMutex;
         boost::chrono::steady_clock::time_point lastKeepAlive;
         
-        bool active = true;
+        bool active = false;
         boost::mutex activeMutex;
         
         std::string remoteAddress;

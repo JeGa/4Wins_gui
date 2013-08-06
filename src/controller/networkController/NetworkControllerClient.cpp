@@ -23,6 +23,9 @@ namespace controller
     {
         bool status = true;
         
+        if (this->isConnected())
+            return true;
+        
         connect();
         
         // If error connecting to server
@@ -36,11 +39,7 @@ namespace controller
 
     void NetworkControllerClient::connect()
     {
-        if (con)
-            if (con->isActive()) {
-                con->disconnect();
-                con.release();
-            }
+        disconnect();
         
         try {
             std::unique_ptr<tcp::socket> clientCon(
@@ -66,7 +65,10 @@ namespace controller
     
     void NetworkControllerClient::disconnect()
     {
-        con->disconnect();
+        if (con) {
+            con->disconnect();
+            con.release();
+        }
     }
     
     void NetworkControllerClient::send(TCPMessage& msg)

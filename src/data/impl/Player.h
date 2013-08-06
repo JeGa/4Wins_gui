@@ -36,7 +36,7 @@ namespace data
             //virtual bool verifypassword(std::string pw);
             virtual std::string toString();
             
-            virtual int getKey();
+            virtual unsigned int getKey();
 
             // Player with statistics
             virtual void addGameStatistic(int result);
@@ -45,7 +45,9 @@ namespace data
             virtual int getPlayedGames();
             virtual double getWinRatio();
             virtual bool isLoggedIn();
-            void setLoggedIn(bool l);
+            virtual void setLoggedIn(bool l);
+            
+            virtual void setAllData(int k, int w, int l, int p, int r, bool logged);
     };
 
 }

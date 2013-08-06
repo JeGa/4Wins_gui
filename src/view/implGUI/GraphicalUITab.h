@@ -6,6 +6,8 @@
 #include "GraphicalUIViewProfiles.h"
 #include <Fl/Fl_Tabs.h>
 
+namespace view {class GraphicalUI;}
+
 namespace view { namespace gui
 {
 
@@ -21,6 +23,7 @@ namespace view { namespace gui
         GraphicalUITab(int x, int y, int w, int h);
         virtual ~GraphicalUITab();
 
+        friend class view::GraphicalUI;
     };
 
 }

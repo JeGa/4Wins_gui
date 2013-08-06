@@ -14,6 +14,7 @@
 #include "TCPMessageUser.h"
 #include "Player.h"
 #include <Fl/fl_ask.h>
+#include <boost/lexical_cast.hpp>
 
 namespace view
 {
@@ -36,11 +37,10 @@ namespace view
         // Menubar callbacks
         window->menubar->callback(scb_menubar, this);
         
-        //!! TODO: Check server status
-//        if (client.ping()) {
-//            window->status->connectionStatusText->color(FL_GREEN);
-//            window->status->redraw();
-//        }
+        // View profile callbacks
+        window->tabs->viewProfiles->btn_viewProfiles->callback(scb_viewProfiles, this);
+        
+        Fl::add_timeout(0.5, s_updateHandler, this);
     }
 
     GraphicalUI::~GraphicalUI()
@@ -110,11 +110,18 @@ namespace view
     
     void GraphicalUI::cb_btn_loginGame()
     {
-        managerClient->login();
-        // Switch to tab group
-//        window->menu->hide();
-//        window->html->hide();
-//        window->tabs->show();
+        const char *name = window->menu->loginName->value();
+        const char *pw = window->menu->loginPassword->value();
+        
+        if (strcmp(name, "") == 0 || strcmp(pw, "") == 0) {
+            fl_alert("Enter name and password.");
+            return;
+        }
+        
+        bool status = managerClient->login(name, pw);
+        
+        if (!status)
+            fl_alert("Failure in logging in user");
     }
     
     void GraphicalUI::scb_btn_register(Fl_Widget *w, void *p)
@@ -184,13 +191,10 @@ namespace view
     
     void GraphicalUI::cb_btn_logout()
     {
-        managerClient->logout();
+        bool status = managerClient->logout();
         
-        // Switch to start screen
-        window->tabs->hide();
-        //window->btn_logout->hide();
-        window->menu->show();
-        window->html->show();
+        if (!status)
+            fl_alert("Failure in logging out user");
     }
 
     void GraphicalUI::scb_menubar(Fl_Widget *w, void *p)
@@ -210,6 +214,70 @@ namespace view
         } else if (item->label() == std::string("&About")) {
             //
         }
+    }
+    
+    void GraphicalUI::scb_viewProfiles(Fl_Widget *w, void *p)
+    {
+        (static_cast<GraphicalUI *>(p))->cb_viewProfiles();
+    }
+    
+    void GraphicalUI::cb_viewProfiles()
+    {
+        if (!managerClient->getData())
+            fl_alert("Failure in getting server data");
+    }
+    
+    void GraphicalUI::s_updateHandler(void *p)
+    {
+        (static_cast<GraphicalUI*>(p))->updateHandler();
+    }
+    
+    void GraphicalUI::updateHandler()
+    {
+//        if (check == 20) {
+//            if (managerClient->ping()) {
+//                window->status->connectionStatusText->color(FL_GREEN);
+//                window->status->redraw();
+//            } else {
+//                window->status->connectionStatusText->color(FL_RED);
+//                window->status->redraw();
+//            }
+//            check = 0;
+//        } else
+//            ++check;
+            
+        if (managerClient->isLoggedIn()) {
+            if (window->tabs->visible() == 0) {
+                window->menu->hide();
+                window->html->hide();
+                window->tabs->show();
+                window->status->statusText->color(FL_GREEN);
+                window->status->redraw();
+            }
+        } else {
+            if (window->menu->visible() == 0) {
+                window->tabs->hide();
+                window->menu->show();
+                window->html->show();
+                window->status->statusText->color(FL_RED);
+                window->status->redraw();
+            }
+        }
+        
+        std::vector<std::string> v;
+        std::map<int, data::IPlayer *> p = managerClient->getPlayers();
+        
+        if (p.size() > 0) {
+            window->tabs->viewProfiles->table->addColHeader("Key");
+            window->tabs->viewProfiles->table->addColHeader("Name");  
+          
+            v.push_back(boost::lexical_cast<std::string>(p.begin()->second->getKey()));
+            v.push_back(p.begin()->second->getName());
+            
+            window->tabs->viewProfiles->table->addRow(v);
+        }
+            
+        Fl::repeat_timeout(0.5, s_updateHandler, this);
     }
     
 }

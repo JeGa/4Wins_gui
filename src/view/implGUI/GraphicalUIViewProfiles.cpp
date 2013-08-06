@@ -11,6 +11,9 @@ namespace view { namespace gui
             
         this->label("View Profiles");
         
+        table = new GraphicalUITable(x() + 20, y() + 50, w() - 40, h() - 80);
+        btn_viewProfiles = new Fl_Button(x() + 20, y() + 20, 100, 20, "Get Data");
+        
         end();
     }
 

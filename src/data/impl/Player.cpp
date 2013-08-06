@@ -16,7 +16,7 @@ namespace data
         : name(name), password(pw), wins(0), looses(0), playedGames(0), winRatio(0.0)
     {
         std::stringstream stream;
-        stream << this->name << Player::playerCounter;
+        stream << this->name << this->password;
         
         std::hash<std::string> str_hash;
         key = str_hash(stream.str());
@@ -26,7 +26,16 @@ namespace data
 
     Player::~Player()
     {
-
+    }
+    
+    void Player::setAllData(int k, int w, int l, int p, int r, bool logged)
+    {
+        key = k;
+        wins = w;
+        looses = l;
+        playedGames = p;
+        winRatio = r;
+        loggedIn = logged;
     }
 
     std::string Player::getName()
@@ -102,7 +111,7 @@ namespace data
         return str;
     }
     
-    int Player::getKey()
+    unsigned int Player::getKey()
     {    
         return key;
     }

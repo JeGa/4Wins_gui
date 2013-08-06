@@ -12,10 +12,13 @@ namespace controller
     public:
         virtual ~IGameManagerClient() {};
         
-        virtual bool login() = 0;
+        virtual bool login(std::string name, std::string pw) = 0;
         virtual bool logout() = 0;
         virtual bool registerUser(std::string name, std::string pw) = 0;
         virtual bool ping() = 0;
+        virtual bool getData() = 0;
+        
+        virtual bool isLoggedIn() = 0;
         
         virtual void newGame(data::IGame *game) = 0;
         virtual bool deleteGame(data::IGame *game) = 0;

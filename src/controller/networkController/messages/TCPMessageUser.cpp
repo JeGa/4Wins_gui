@@ -28,7 +28,12 @@ namespace controller
 		std::string tmpPw = p.getPassword();
 		std::string tmpType = boost::lexical_cast<std::string>(typeInt);
         
-        if (type == QUERY_MSG_TYPE::REGISTER_QUERY) {
+        
+        if (type == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
+            
+            tmpQueryData = tmpType + ": " + tmpKey + " " + tmpName + " " + tmpPw;
+        
+        } else if (type == QUERY_MSG_TYPE::REGISTER_QUERY) {
             
             tmpQueryData = tmpType + ": " + tmpKey + " " + tmpName + " " + tmpPw;
         
@@ -38,7 +43,7 @@ namespace controller
             
         } else if (type == QUERY_MSG_TYPE::LOGOUT_QUERY) {
             
-            tmpQueryData = tmpType + ": " + tmpKey + " " + tmpName;
+            tmpQueryData = tmpType + ": " + tmpKey + " " + tmpName + " " + tmpPw;
 			
         } else
 			return false;
@@ -61,8 +66,10 @@ namespace controller
 		
         if (!parseQueryUserData())
             return false;
-            
-        if (queryType == QUERY_MSG_TYPE::REGISTER_QUERY)
+        
+        if (queryType == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
+            ackType = ACK_MSG_TYPE::GET_PLAYERS_ACK;
+        } else if (queryType == QUERY_MSG_TYPE::REGISTER_QUERY)
             ackType = ACK_MSG_TYPE::REGISTER_ACK;
         else if (queryType == QUERY_MSG_TYPE::LOGIN_QUERY)
             ackType = ACK_MSG_TYPE::LOGIN_ACK;
@@ -70,6 +77,7 @@ namespace controller
             ackType = ACK_MSG_TYPE::LOGOUT_ACK;
         else
             return false;
+            
         return true;
 	}
 	
@@ -90,6 +98,31 @@ namespace controller
 			
 		return setAckMessage(tmp);
 	}
+    
+    bool TCPMessageUser::setAck(std::map<int, data::IPlayer *> &players)
+    {
+        std::string tmp;
+        
+        if (ackType == ACK_MSG_TYPE::NOT_SET)
+			return false;
+        
+        int typeTmp = static_cast<int>(ackType);
+		tmp = boost::lexical_cast<std::string>(typeTmp);
+        tmp += ":";
+        
+        for (auto &i : players) {
+            tmp += " " + boost::lexical_cast<std::string>(i.second->getKey());
+            tmp += " " + i.second->getName();
+            tmp += " " + boost::lexical_cast<std::string>(i.second->getWins());
+            tmp += " " + boost::lexical_cast<std::string>(i.second->getLooses());
+            tmp += " " + boost::lexical_cast<std::string>(i.second->getPlayedGames());
+            tmp += " " + boost::lexical_cast<std::string>(i.second->getWinRatio());
+            tmp += " " + boost::lexical_cast<std::string>(i.second->isLoggedIn());
+            tmp += "#";
+        }
+        
+        return setAckMessage(tmp);
+    }
 	
 	bool TCPMessageUser::createUserMessage(std::string frameData)
 	{
@@ -134,7 +167,7 @@ namespace controller
         if (!tokenizeUserMessage(getQueryUserData(), tokens))
             return false;
             
-        if (tokens.size() != 4)
+        if (tokens.size() <= 1)
 			return false;
         
         // Query type
@@ -146,36 +179,20 @@ namespace controller
         } catch (boost::bad_lexical_cast& e) {
             return false;
         }
-        
-		std::string tmpKey =  "";
-		std::string tmpName = "";
-		std::string tmpPw = "";
 		
-		if (tmpType == QUERY_MSG_TYPE::REGISTER_QUERY) {
-			
-			userKey =  tokens[1];
-			userName = tokens[2];
-			userPw = tokens[3];
-			
-			queryType = tmpType;
-        
-        } else if (tmpType == QUERY_MSG_TYPE::LOGIN_QUERY) {
-			
-			userKey =  tokens[1];
-			userName = tokens[2];
-			userPw = tokens[3];
-			
-			queryType = tmpType;
-
-        } else if (tmpType == QUERY_MSG_TYPE::LOGOUT_QUERY) {
-            
-			userKey =  tokens[1];
-			userName = tokens[2];
-			
-			queryType = tmpType;
-			
+		if (tmpType == QUERY_MSG_TYPE::REGISTER_QUERY ||
+            tmpType == QUERY_MSG_TYPE::LOGIN_QUERY ||
+            tmpType == QUERY_MSG_TYPE::LOGOUT_QUERY ||
+            tmpType == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
+                
+                 
+            userKey =  tokens[1];
+            userName = tokens[2];
+            userPw = tokens[3];
         } else
 			return false;
+                    
+        queryType = tmpType;
             
         return true;
     }
@@ -187,7 +204,7 @@ namespace controller
         if (!tokenizeUserMessage(getAckUserData(), tokens))
             return false;
             
-        if (tokens.size() != 2)
+        if (tokens.size() <= 1)
 			return false;
         
         // Ack type
@@ -203,28 +220,80 @@ namespace controller
 		if (tmpType == ACK_MSG_TYPE::REGISTER_ACK) {
 			
             queryType = QUERY_MSG_TYPE::REGISTER_QUERY;
-			ackType = tmpType;
-        
         } else if (tmpType == ACK_MSG_TYPE::LOGIN_ACK) {
 			
             queryType = QUERY_MSG_TYPE::LOGIN_QUERY;
-			ackType = tmpType;
-
         } else if (tmpType == ACK_MSG_TYPE::LOGOUT_ACK) {
 			
             queryType = QUERY_MSG_TYPE::LOGOUT_QUERY;
-			ackType = tmpType;
+        } else if (tmpType == ACK_MSG_TYPE::GET_PLAYERS_ACK) {
+            
+            queryType = QUERY_MSG_TYPE::GET_PLAYERS_QUERY;
         } else
 			return false;
             
-        if (tokens[1] == "SUCCESS")
+        ackType = tmpType;
+        
+        if (tmpType == ACK_MSG_TYPE::GET_PLAYERS_ACK) {
+            
+            parsePlayersData();
             ackStatus = true;
-        else
-            ackStatus = false;
+            
+        } else {
+            if (tokens[1] == "SUCCESS")
+                ackStatus = true;
+            else if (tokens[1] == "FAILURE")
+                ackStatus = false;
+        }
             
         return true;
     }
 	
+    void TCPMessageUser::parsePlayersData()
+    {
+        players.clear();
+        
+        std::stringstream sstr;
+        std::string tmp = "";
+        std::vector<std::string> tokens;
+
+        sstr << getAckUserData();
+		
+        // Split by ';'
+		while (std::getline(sstr, tmp, '#'))
+            tokens.push_back(tmp);
+        
+        for (auto &i : tokens) {
+            sstr.str(i);
+            
+            int key;
+            std::string name;
+            int wins;
+            int looses;
+            int played;
+            int ratio;
+            bool loggedin;
+            
+            sstr >> tmp;
+            key = boost::lexical_cast<int>(tmp);
+            sstr >> name;
+            sstr >> tmp;
+            wins = boost::lexical_cast<int>(tmp);
+            sstr >> tmp;
+            looses = boost::lexical_cast<int>(tmp);
+            sstr >> tmp;
+            played = boost::lexical_cast<int>(tmp);
+            sstr >> tmp;
+            ratio = boost::lexical_cast<int>(tmp);
+            sstr >> tmp;
+            loggedin = boost::lexical_cast<bool>(tmp);
+            
+            data::IPlayer *p = factory.getPlayer(name, "");
+            p->setAllData(key, wins, looses, played, ratio, loggedin);
+            players[p->getKey()] = p;
+        }
+    }
+    
 	QUERY_MSG_TYPE TCPMessageUser::getQueryType()
 	{
 		return queryType;
@@ -249,6 +318,11 @@ namespace controller
 	{
 		return ackStatus;
 	}
+    
+    std::map<int, data::IPlayer *> TCPMessageUser::getPlayers()
+    {
+        return players;
+    }
 	
 }
 

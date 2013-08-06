@@ -16,13 +16,13 @@ namespace data
 
             virtual ~IPlayer() {}
             virtual void writeToDisk() = 0;
-            //virtual std::vector<IGame> getGames() = 0;
+//            virtual std::vector<IGame> getGames() = 0;
             virtual std::string getName() = 0;
             virtual std::string getPassword() = 0;
-            //virtual bool verifypassword(std::string pw) = 0;
+//            virtual bool verifypassword(std::string pw) = 0;
             virtual std::string toString() = 0;
 
-            virtual int getKey() = 0;
+            virtual unsigned int getKey() = 0;
             
             virtual void addGameStatistic(int result) = 0;
             virtual int getWins() = 0;
@@ -31,6 +31,9 @@ namespace data
             virtual double getWinRatio() = 0;
             virtual bool isLoggedIn() = 0;
             virtual void setLoggedIn(bool l) = 0;
+            // For networking
+            virtual void setAllData(
+                int k, int w, int l, int p, int r, bool logged) = 0;
     };
 
 }

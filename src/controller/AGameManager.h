@@ -20,7 +20,24 @@ namespace controller
         std::map<int, data::IPlayer *> getPlayers()
         {
             return players;
-        } 
+        }
+        
+        void clearPlayers()
+        {
+            for (auto &i : players) {
+                delete i.second;
+            }
+            players.clear();
+        }
+        
+        void clearGames()
+        {
+            for (auto &i : games) {
+                delete i.second;
+            }
+            players.clear();
+        }
+    
     };
     
 }

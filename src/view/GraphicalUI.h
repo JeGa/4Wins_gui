@@ -25,6 +25,7 @@ namespace view
     class GraphicalUI : public IUserInterface
     {
     private:
+        // The server is in the GraphicalUIServer class
         std::unique_ptr<controller::IGameManagerLocal> managerLocal;
         std::unique_ptr<controller::IGameManagerClient> managerClient;
         controller::GameFactory factory;
@@ -41,6 +42,7 @@ namespace view
         static void scb_game(Fl_Widget *w, void *p);
         static void scb_btn_logout(Fl_Widget *w, void *p);
         static void scb_menubar(Fl_Widget *w, void *p);
+        static void scb_viewProfiles(Fl_Widget *w, void *p);
         
         // Callbacks
         void cb_btn_localGame();
@@ -49,6 +51,12 @@ namespace view
         void cb_game(Fl_Widget *w);
         void cb_btn_logout();
         void cb_menubar();
+        void cb_viewProfiles();
+        
+        // Updates all (called from FLTK)
+        static void s_updateHandler(void *p);
+        void updateHandler();
+        int check = 0;
 
     public:
         GraphicalUI();

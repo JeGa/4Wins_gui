@@ -33,7 +33,10 @@ namespace controller
         GameFactory factory;
         
         bool loginPlayer(std::string name, std::string pw);
+        bool logoutPlayer(std::string name, std::string pw);
         bool registerPlayer(std::string name, std::string pw);
+        bool playerStatus(std::string name, std::string pw, bool playerStatus);
+
     public:
         GameManagerNetworkServer(IGameController *gc);
         virtual ~GameManagerNetworkServer();

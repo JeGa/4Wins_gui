@@ -20,6 +20,8 @@ namespace view { namespace gui
         html->end();
         
         end();
+        
+        Fl::scheme("gtk+");
     }
 
     GraphicalUIWindow::~GraphicalUIWindow()
@@ -98,12 +100,12 @@ namespace view { namespace gui
             100, 25, "Logout");
         
         statusText = new Fl_Box(FL_BORDER_BOX, 250, this->y() + 10,
-            25, 25, "Status: Offline ");
+            25, 25, "User ");
         statusText->color(FL_RED);
         statusText->align(FL_ALIGN_LEFT);
         
         connectionStatusText = new Fl_Box(FL_BORDER_BOX, 250, this->y() + 50,
-            25, 25, "Connection Status: Not connected ");
+            25, 25, "Server ");
         connectionStatusText->color(FL_READ);
         connectionStatusText->align(FL_ALIGN_LEFT);
 

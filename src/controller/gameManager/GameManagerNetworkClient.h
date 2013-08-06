@@ -34,15 +34,18 @@ namespace controller
         QUERY_MSG_TYPE waitingFor = QUERY_MSG_TYPE::NOT_SET;
         
         boost::mutex handshake;
-    
+        
     public:
         GameManagerNetworkClient();
         virtual ~GameManagerNetworkClient();
         
-        virtual bool login();
+        virtual bool login(std::string name, std::string pw);
         virtual bool logout();
         virtual bool registerUser(std::string name, std::string pw);
         virtual bool ping();
+        virtual bool getData();
+        
+        virtual bool isLoggedIn();
         
         virtual void newGame(data::IGame *game) {};
         virtual bool deleteGame(data::IGame *game) {return false;};

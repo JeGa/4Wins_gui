@@ -31,8 +31,10 @@ namespace controller
         // Stop the connection threads
         //sendThreadHandle.interrupt(); // Maybe already from receiveThread closed
         //sendThreadHandle.join();
-        receiveThreadHandle.interrupt(); // Closes socket and both threads
-        receiveThreadHandle.join();
+        if (active) {
+            receiveThreadHandle.interrupt(); // Closes socket and both threads
+            receiveThreadHandle.join();
+        }
     }
 
     void TCPConnection::startConnectionThreads()
@@ -42,6 +44,8 @@ namespace controller
             
         receiveThreadHandle = 
             boost::thread(&TCPConnection::receiveThread, this);
+            
+        active = true;
     }
     
     void TCPConnection::send(std::string str)

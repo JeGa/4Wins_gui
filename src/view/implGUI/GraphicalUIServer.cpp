@@ -1,12 +1,13 @@
 #include "GraphicalUIServer.h"
 
+#include <Fl/fl.h>
 #include <boost/lexical_cast.hpp>
 
 namespace view { namespace gui
 {
 
     GraphicalUIServer::GraphicalUIServer()
-        : Fl_Window(600, 500, "4Wins Server"),
+        : Fl_Window(700, 500, "4Wins Server"),
         server(factory.getGameManagerServer(factory.getGameController()))
     {
         startServer = new Fl_Button(20, 10,
@@ -30,7 +31,7 @@ namespace view { namespace gui
         
         // Tab group
         
-        tabs = new Fl_Tabs(20, 100, 520, 380);
+        tabs = new Fl_Tabs(20, 100, 660, 380);
         
         table = new GraphicalUITable(tabs->x(), tabs->y() + 20, tabs->w(),
             tabs->h() - 20, "Connections");
@@ -54,6 +55,8 @@ namespace view { namespace gui
         refresh->callback(scb_refresh, this);
         
         this->end();
+        
+        Fl::add_timeout(0.5, s_updateHandler, this);
     }
 
     GraphicalUIServer::~GraphicalUIServer()
@@ -159,6 +162,17 @@ namespace view { namespace gui
         table->redraw();
         tablePlayers->redraw();
         tableGames->redraw();
+    }
+    
+    void GraphicalUIServer::s_updateHandler(void *p)
+    {
+        (static_cast<GraphicalUIServer*>(p))->updateHandler();
+    }
+    
+    void GraphicalUIServer::updateHandler()
+    {
+        cb_refresh();
+        Fl::repeat_timeout(0.5, s_updateHandler, this);
     }
     
 }

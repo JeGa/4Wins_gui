@@ -259,7 +259,7 @@ namespace controller
 
         sstr << getAckUserData();
 		
-        // Split by ';'
+        // Split
 		while (std::getline(sstr, tmp, '#'))
             tokens.push_back(tmp);
         

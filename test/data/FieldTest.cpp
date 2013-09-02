@@ -19,7 +19,7 @@ namespace data
     BOOST_FIXTURE_TEST_CASE(testSetGet, FieldTest)
     {
         BOOST_CHECK_NO_THROW(field_default->setCellStatus(0, 0, PLAYER1));
-        BOOST_CHECK_EQUAL(PLAYER1, field_default->getCell(0, 0)->getColor());
+        BOOST_CHECK_EQUAL(PLAYER1, field_default->getCellStatus(0, 0));
 
         BOOST_CHECK_THROW(field->setCellStatus(-1, 0, PLAYER1),
             std::out_of_range);

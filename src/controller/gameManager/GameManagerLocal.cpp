@@ -1,33 +1,57 @@
-//!! TODO: Delete player
-
 #include "GameManagerLocal.h"
 
 namespace controller
 {
 
-    GameManagerLocal::GameManagerLocal(IGameController *gc)
-    {
-        if (gc != nullptr)
-            this->gc = gc;
-    }
+    GameManagerLocal::GameManagerLocal(GameFactory& f) :
+        IGameManagerLocal(f),
+        gc(factory->getGameController())
+    { }
 
     GameManagerLocal::~GameManagerLocal()
     {
         clear();
     }
-    
-    void GameManagerLocal::newGame(data::IGame *game)
+
+    bool GameManagerLocal::playerStatus(std::string name, std::string pw)
     {
-        if (gc == nullptr)
-            return;
-        
-        if (game->getPlayer1() == nullptr || game->getPlayer2() == nullptr)
-            return;
-        
+        data::IPlayer *p = factory.getPlayer(name, pw);
+        bool status = false;
+
+        try {
+            data::IPlayer *tmp = players.at(p->getKey());
+            // Player in list
+
+            tmp->setLoggedIn(playerStatus);
+
+            status = true;
+        } catch (std::out_of_range& e) {
+            // Player not in list
+        }
+
+        delete p;
+        return status;
+    }
+    
+    bool GameManagerLocal::newGame(std::string p1, std::string p2)
+    {
+        if (p1 == "" || p2 == "")
+            return false;
+
+        int p1Key = addPlayer(p1, "");
+        int p2Key = addPlayer(p2, "");
+        int gameKey = addGame(p1Key, p2Key);
+
+
+
+
         // If game is not in the map add it
         if (games.find(game->getKey()) == games.end()) {
             games.insert(std::pair<int, data::IGame*>(game->getKey(), game));
         }
+
+
+
         
         // If player is not in the map add it
         addPlayer(game->getPlayer1());

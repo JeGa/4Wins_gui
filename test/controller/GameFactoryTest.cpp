@@ -14,7 +14,16 @@ namespace controller
 
         for (int j = 0; j < field->getHeight(); j++) {
             for (int i = 0; i < field->getWidth(); i++) {
-                strraw.append(field->getCell(i, j)->toString());
+                std::string cellString;
+
+                if (field->getCellStatus(i, j) == PLAYER1)
+                    cellString = PLAYER1_CHAR;
+                else if (field->getCellStatus(i, j) == PLAYER2)
+                    cellString = PLAYER2_CHAR;
+                else
+                    cellString = NOTSET_CHAR;
+
+                strraw.append(cellString);
             }
             strraw.append("\n");
         }

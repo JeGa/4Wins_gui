@@ -188,12 +188,14 @@ namespace controller
                         if (umsg.getAckStatus()) {
                             if (localPlayer) {
                                 clearPlayers();
-                                players = umsg.getPlayers();
+                                localPlayer.release();
                             }
                         }
                         
                     } else if (waitingFor == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
-                        int a;
+                        if (umsg.getAckStatus()) {
+                            players = umsg.getPlayers();
+                        }
                     }
                     
                     waitingFor = QUERY_MSG_TYPE::NOT_SET;

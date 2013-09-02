@@ -9,10 +9,17 @@ namespace data
 {
 
     int Game::gameCounter = 0;
-    
-    Game::Game(IField *field, IPlayer *player1, IPlayer *player2, IPlayer *turn)
-        : running(true), field(field), player1(player1), player2(player2), turn(turn),
-        winner(nullptr)
+
+    Game::Game(IField *field,
+        std::shared_ptr<IPlayer> player1,
+        std::shared_ptr<IPlayer> player2,
+        std::shared_ptr<IPlayer> onTurn)
+            :
+            running(true),
+            field(field), // Unique ptr
+            player1(std::make_shared(player1)),
+            player2(std::make_shared(player2)),
+            turn(std::make_shared(onTurn))
     {
         std::stringstream stream;
         stream << this->getPlayer1()->getName() << this->getPlayer2()->getName()
@@ -21,39 +28,34 @@ namespace data
         std::hash<std::string> str_hash;
         key = str_hash(stream.str());
         
-        gameCounter++;
+        ++gameCounter;
     }
 
-    Game::~Game()
-    {
-        delete field;
-    }
-
-    IPlayer *Game::onTurn()
+    std::shared_ptr<IPlayer> Game::onTurn()
     {
         return turn;
     }
 
-    IPlayer *Game::notOnTurn()
+    std::shared_ptr<IPlayer> Game::notOnTurn()
     {
         if (turn == player1)
             return player2;
         return player1;
     }
 
-    void Game::setCellStatus(int x, int y, IPlayer *player)
+    void Game::setCellStatus(int x, int y, size_t key)
     {
-        if (player == player1) {
+        if (player1->getKey() == key) {
             field->setCellStatus(x, y, PLAYER1);
             turn = player2;
-        } else if (player == player2) {
+        } else if (player2->getKey() == key) {
             field->setCellStatus(x, y, PLAYER2);
             turn = player1;
         } else
-            throw "Player doesnt play this game";
+            throw "Player doesnt play this game"; // Okay this is not nice ...
     }
 
-    IPlayer *Game::getCellStatus(int x, int y)
+    std::shared_ptr<IPlayer> Game::getCellStatus(int x, int y)
     {
         Colors c = field->getCellStatus(x, y);
         if (c == PLAYER1)
@@ -73,23 +75,25 @@ namespace data
         this->running = running;
     }
     
-    IPlayer *Game::getWinner()
+    std::shared_ptr<IPlayer> Game::getWinner()
     {
         return winner;
     }
     
-    void Game::setWinner(IPlayer *winner)
+    void Game::setWinner(size_t keyWinner)
     {
-        if (winner != nullptr && (winner == player1 || winner == player2))
-            this->winner = winner;
+        if (player1->getKey() == keyWinner)
+            winner = std::make_shared(player1);
+        else if (player2->getKey() == keyWinner)
+            winner = std::make_shared(player2);
     }
 
-    IPlayer *Game::getPlayer1()
+    std::shared_ptr<IPlayer> Game::getPlayer1()
     {
         return player1;
     }
 
-    IPlayer *Game::getPlayer2()
+    std::shared_ptr<IPlayer> Game::getPlayer2()
     {
         return player2;
     }

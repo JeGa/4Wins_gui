@@ -3,6 +3,7 @@
 
 #include "IPlayer.h"
 #include <string>
+#include <memory>
 
 namespace data
 {
@@ -11,20 +12,24 @@ namespace data
     {
         public:
             virtual ~IGame() {}
-            virtual IPlayer *onTurn() = 0;
-            virtual IPlayer *notOnTurn() = 0;
-            virtual void setCellStatus(int x, int y, IPlayer *player) = 0; // Wrapper for field
-            virtual IPlayer *getCellStatus(int x, int y) = 0; // Wrapper for field
-            virtual IPlayer *getPlayer1() = 0;
-            virtual IPlayer *getPlayer2() = 0;
+
+            virtual void setRunning(bool running) = 0;
+            virtual void setWinner(size_t keyWinner) = 0;
+            // Wrapper for field
+            virtual void setCellStatus(int x, int y, size_t key) = 0;
+
+            virtual bool isRunning() = 0;
+            virtual std::shared_ptr<IPlayer> getPlayer1() = 0;
+            virtual std::shared_ptr<IPlayer> getPlayer2() = 0;
+            virtual std::shared_ptr<IPlayer> getWinner() = 0;
+            virtual std::shared_ptr<IPlayer> onTurn() = 0;
+            virtual std::shared_ptr<IPlayer> notOnTurn() = 0;
+            // Wrapper for field
+            virtual std::shared_ptr<IPlayer> getCellStatus(int x, int y) = 0;
             virtual int getWidth() = 0;
             virtual int getHeight() = 0;
             virtual int getKey() = 0;
             virtual std::string toString() = 0;
-            virtual bool isRunning() = 0;
-            virtual void setRunning(bool running) = 0;
-            virtual IPlayer *getWinner() = 0;
-            virtual void setWinner(IPlayer *winner) = 0;
     };
 
 }

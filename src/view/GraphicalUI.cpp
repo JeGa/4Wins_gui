@@ -252,6 +252,7 @@ namespace view
                 window->html->hide();
                 window->tabs->show();
                 window->status->statusText->color(FL_GREEN);
+//                window->status->connectionStatusText->color(FL_GREEN);
                 window->status->redraw();
             }
         } else {
@@ -260,6 +261,7 @@ namespace view
                 window->menu->show();
                 window->html->show();
                 window->status->statusText->color(FL_RED);
+//                window->status->connectionStatusText->color(FL_RED);
                 window->status->redraw();
             }
         }
@@ -267,15 +269,19 @@ namespace view
         std::vector<std::string> v;
         std::map<int, data::IPlayer *> p = managerClient->getPlayers();
         
-        if (p.size() > 0) {
-            window->tabs->viewProfiles->table->addColHeader("Key");
-            window->tabs->viewProfiles->table->addColHeader("Name");  
-          
-            v.push_back(boost::lexical_cast<std::string>(p.begin()->second->getKey()));
-            v.push_back(p.begin()->second->getName());
-            
-            window->tabs->viewProfiles->table->addRow(v);
-        }
+//        if (p.size() > 0) {
+//            window->tabs->viewProfiles->table->clearRows();
+//            window->tabs->viewProfiles->table->addColHeader("Key");
+//            window->tabs->viewProfiles->table->addColHeader("Name");
+//        }
+        
+//        for (auto& i : p) {
+//            v.clear();
+//            v.push_back(boost::lexical_cast<std::string>(i.second->getKey()));
+//            v.push_back(i.second->getName());
+//            
+//            window->tabs->viewProfiles->table->addRow(v);
+//        }
             
         Fl::repeat_timeout(0.5, s_updateHandler, this);
     }

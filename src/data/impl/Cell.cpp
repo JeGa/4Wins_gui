@@ -28,12 +28,10 @@ namespace data
     std::string Cell::toString()
     {
         if (color == PLAYER1)
-            return "X";
+            return PLAYER1_CHAR;
         if (color == PLAYER2)
-            return "O";
-        if (color == NOTSET)
-            return "-";
-        return "R";
+            return PLAYER2_CHAR;
+        return NOTSET_CHAR;
     }
 
 }

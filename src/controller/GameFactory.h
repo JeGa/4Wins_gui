@@ -15,6 +15,7 @@
 #include "IGameManagerClient.h"
 #include "IGameManagerServer.h"
 #include <string>
+#include <memory>
 
 namespace controller
 {
@@ -31,18 +32,24 @@ namespace controller
             static const int DEFAULT_WIDTH = 5;
             static const int DEFAULT_HEIGHT = 8;
 
-            virtual IField *getField(int x, int y);
-            virtual IField *getDefaultField();
             virtual GameControllerStrategy *getGameController();
-            virtual IPlayer *getPlayer(string name, string pw);
-            // Given size
-            virtual IGame *getGame(int x, int y, IPlayer *p1, IPlayer *p2, IPlayer *turn);
-            // Default size
-            virtual IGame *getGameDefault(IPlayer *p1, IPlayer *p2, IPlayer *turn);
-            // Creates new game with new players
+
             virtual IGameManagerLocal *getGameManagerLocal(IGameController *gc);
             virtual IGameManagerClient *getGameManagerClient();
             virtual IGameManagerServer *getGameManagerServer(IGameController *gc);
+
+            virtual IField *getField(int x, int y);
+            virtual IField *getDefaultField();
+            virtual IPlayer *getPlayer(string name, string pw);
+
+            // Given size
+            virtual IGame *getGame(int x, int y, std::shared_ptr<IPlayer> p1,
+                std::shared_ptr<IPlayer> p2,
+                std::shared_ptr<IPlayer> turn);
+            // Default size
+            virtual IGame *getGameDefault(std::shared_ptr<IPlayer> p1,
+                std::shared_ptr<IPlayer> p2,
+                std::shared_ptr<IPlayer> turn);
     };
 
 }

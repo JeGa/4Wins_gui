@@ -7,14 +7,9 @@
 namespace controller
 {
 
-    GameControllerStrategy::GameControllerStrategy() :
-        game(nullptr) {}
-
-    GameControllerStrategy::~GameControllerStrategy() {}
-
-    void GameControllerStrategy::playGame(data::IGame *game)
+    void GameControllerStrategy::playGame(std::shared_ptr<data::IGame> game)
     {
-        this->game = game;
+        this->game = std::make_shared(game);
     }
 
     bool GameControllerStrategy::toggleTurn(int x, int y)
@@ -39,7 +34,7 @@ namespace controller
         }
 
         // Set cell (changes onTurn!!)
-        game->setCellStatus(x, y, game->onTurn());
+        game->setCellStatus(x, y, game->onTurn()->getKey());
 
         // Check if win (because of the last set cell, so last turn player is needed)
         if (checkRow(x, y, game->notOnTurn())) {
@@ -61,12 +56,12 @@ namespace controller
         return true;
     }
 
-    data::IPlayer *GameControllerStrategy::onTurn()
+    std::shared_ptr<data::IPlayer> GameControllerStrategy::onTurn()
     {
         return game->onTurn();
     }
 
-    data::IGame *GameControllerStrategy::getGame()
+    std::shared_ptr<data::IGame> GameControllerStrategy::getGame()
     {
         return game;
     }

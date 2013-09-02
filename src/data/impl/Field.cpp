@@ -48,14 +48,6 @@ namespace data
         return cell_field[x][y]->getColor();
     }
 
-    ICell *Field::getCell(int x, int y)
-    {
-        if (!checkInField(x, y))
-            throw std::out_of_range("Index not valid.");
-
-        return cell_field[x][y];
-    }
-
     int Field::getWidth()
     {
         return width;

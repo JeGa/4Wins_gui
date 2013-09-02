@@ -7,6 +7,8 @@ namespace data
 {
 
     enum Colors {PLAYER1, PLAYER2, NOTSET};
+	// How to print
+    enum ColorsChar {PLAYER1_CHAR = 'X', PLAYER2_CHAR = 'O', NOTSET_CHAR = '-'}
 
     class ICell
     {

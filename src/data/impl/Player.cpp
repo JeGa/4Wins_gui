@@ -16,7 +16,7 @@ namespace data
         : name(name), password(pw), wins(0), looses(0), playedGames(0), winRatio(0.0)
     {
         std::stringstream stream;
-        stream << this->name << this->password;
+        stream << this->name;
         
         std::hash<std::string> str_hash;
         key = str_hash(stream.str());
@@ -28,7 +28,7 @@ namespace data
     {
     }
     
-    void Player::setAllData(int k, int w, int l, int p, int r, bool logged)
+    void Player::setAllData(int k, int w, int l, int p, double r, bool logged)
     {
         key = k;
         wins = w;
@@ -76,7 +76,7 @@ namespace data
         } else
             throw "Add game statistics: Wrong argument.";
 
-        winRatio = getWinRatio();
+        winRatio = static_cast<double>(wins)/playedGames;
     }
 
     int Player::getWins()
@@ -96,7 +96,7 @@ namespace data
 
     double Player::getWinRatio()
     {
-        return static_cast<double>(wins)/playedGames;
+        return winRatio;
     }
 
     std::string Player::toString()

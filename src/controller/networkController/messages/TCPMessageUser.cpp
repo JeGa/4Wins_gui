@@ -13,6 +13,7 @@ namespace controller
 	
 	TCPMessageUser::~TCPMessageUser()
     {
+        clearPlayers();
     }
 	
     // =========================================================================
@@ -108,7 +109,7 @@ namespace controller
         
         int typeTmp = static_cast<int>(ackType);
 		tmp = boost::lexical_cast<std::string>(typeTmp);
-        tmp += ":";
+        tmp += ": #";
         
         for (auto &i : players) {
             tmp += " " + boost::lexical_cast<std::string>(i.second->getKey());
@@ -251,7 +252,7 @@ namespace controller
 	
     void TCPMessageUser::parsePlayersData()
     {
-        players.clear();
+        clearPlayers();
         
         std::stringstream sstr;
         std::string tmp = "";
@@ -262,8 +263,12 @@ namespace controller
         // Split
 		while (std::getline(sstr, tmp, '#'))
             tokens.push_back(tmp);
+        tokens.erase(tokens.begin()); // Remove first element: The msg type
+        sstr.str("");
+        sstr.clear();
         
-        for (auto &i : tokens) {
+        for (auto& i : tokens) {
+            sstr.clear();
             sstr.str(i);
             
             int key;
@@ -271,7 +276,7 @@ namespace controller
             int wins;
             int looses;
             int played;
-            int ratio;
+            double ratio;
             bool loggedin;
             
             sstr >> tmp;
@@ -284,13 +289,22 @@ namespace controller
             sstr >> tmp;
             played = boost::lexical_cast<int>(tmp);
             sstr >> tmp;
-            ratio = boost::lexical_cast<int>(tmp);
+            ratio = boost::lexical_cast<double>(tmp);
             sstr >> tmp;
             loggedin = boost::lexical_cast<bool>(tmp);
             
             data::IPlayer *p = factory.getPlayer(name, "");
             p->setAllData(key, wins, looses, played, ratio, loggedin);
             players[p->getKey()] = p;
+        }
+    }
+    
+    void TCPMessageUser::clearPlayers()
+    {
+        if (!players.empty()) {
+            for (auto& i : players)
+                delete i.second;
+            players.clear();
         }
     }
     
@@ -319,9 +333,12 @@ namespace controller
 		return ackStatus;
 	}
     
+    // Caller is now responsible for memory-management
     std::map<int, data::IPlayer *> TCPMessageUser::getPlayers()
     {
-        return players;
+        std::map<int, data::IPlayer *> tmp = players;
+        players.clear();
+        return tmp;
     }
 	
 }

@@ -4,17 +4,17 @@ project(4Wins_gui)
 
 # Variables - to build add here the library locations
 set(BOOST_TEST_SEARCH_INCLUDE_DIR
-"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/boost")
+"C:/Data/Projects/C_C++/ext/boost")
 set(BOOST_TEST_SEARCH_LIB_DIR
-"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/boost_build/boost/bin.v2/libs")
+"C:/Data/Projects/C_C++/ext/boost_build/boost/bin.v2/libs")
 set(FLTK_SEARCH_INCLUDE_DIR
-"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/FLTK/include")
+"C:/Data/Projects/C_C++/ext/FLTK/include")
 set(FLTK_SEARCH_LIB_DIR
-"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/FLTK/lib")
+"C:/Data/Projects/C_C++/ext/FLTK/lib")
 
 # Because fluid not found
 set(FLTK_FLUID_EXECUTABLE
-"C:/Dokumente und Einstellungen/p331502/Eigene Dateien/development/ext/FLTK/bin/fluid.exe")
+"C:/Data/Projects/C_C++/ext/FLTK/bin/fluid.exe")
 
 # Because the libraries are not at standard locations:
 # Set the path were the FLTK and boost test binaries are

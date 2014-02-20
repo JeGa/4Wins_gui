@@ -6,7 +6,8 @@
 namespace data
 {
 
-    enum Colors {PLAYER1, PLAYER2, NOTSET};
+    enum Colors {PLAYER1 = 0, PLAYER2, NOTSET};
+    static const char *colorsChar[] = {"X", "O", "-"};
 
     class ICell
     {

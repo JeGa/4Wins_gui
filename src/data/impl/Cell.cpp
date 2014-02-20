@@ -1,5 +1,4 @@
 #include "Cell.h"
-
 #include <string>
 
 namespace data
@@ -27,13 +26,7 @@ namespace data
 
     std::string Cell::toString()
     {
-        if (color == PLAYER1)
-            return "X";
-        if (color == PLAYER2)
-            return "O";
-        if (color == NOTSET)
-            return "-";
-        return "R";
+        return colorsChar[color];
     }
 
 }

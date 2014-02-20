@@ -48,6 +48,9 @@ namespace data
             virtual void setLoggedIn(bool l);
             
             virtual void setAllData(int k, int w, int l, int p, int r, bool logged);
+
+            Player& operator=(Player& other) = delete;
+            Player(Player& other) = delete;
     };
 
 }

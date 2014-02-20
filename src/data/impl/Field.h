@@ -25,6 +25,9 @@ namespace data
             virtual int getWidth();
             virtual int getHeight();
             virtual std::string toString();
+
+            Field& operator=(Field& other) = delete;
+            Field(Field& other) = delete;
     };
 
 }

@@ -34,6 +34,10 @@ namespace data
             // For networking
             virtual void setAllData(
                 int k, int w, int l, int p, int r, bool logged) = 0;
+
+            IPlayer() = default;
+            IPlayer& operator=(IPlayer& other) = delete;
+            IPlayer(IPlayer& other) = delete;
     };
 
 }

@@ -18,6 +18,9 @@ namespace data
             virtual void setColor(Colors c);
             virtual Colors getColor();
             virtual std::string toString();
+
+            Cell& operator=(Cell& other) = delete;
+            Cell(Cell& other) = delete;
     };
 
 }

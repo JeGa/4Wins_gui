@@ -17,6 +17,10 @@ namespace data
             virtual int getWidth() = 0;
             virtual int getHeight() = 0;
             virtual std::string toString() = 0;
+
+            IField() = default;
+            IField& operator=(IField& other) = delete;
+            IField(IField& other) = delete;
     };
 
 }

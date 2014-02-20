@@ -21,7 +21,6 @@ namespace data
 
             virtual void setCellStatus(int x, int y, Colors c);
             virtual Colors getCellStatus(int x, int y);
-            virtual ICell *getCell(int x, int y);
             virtual int getWidth();
             virtual int getHeight();
             virtual std::string toString();

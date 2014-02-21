@@ -24,14 +24,14 @@ namespace controller
         IGameController *gc = nullptr;
         
         void clear();
-        void addPlayer(data::IPlayer *player);
+        void addPlayer(std::shared_ptr<data::IPlayer> player);
     public:
-        GameManagerLocal(IGameController *gc);
+        GameManagerLocal(GameFactory& factory);
         virtual ~GameManagerLocal();
         
         // Game has to contain 2 players, adds the game to the manager
         // and sets it to the active game
-        virtual void newGame(data::IGame *game);
+        virtual void newGame(std::string p1, std::string p2);
         virtual bool deleteGame(data::IGame *game);
         virtual bool input(int x, int y); // For active game
         virtual bool setActiveGame(data::IGame *game);

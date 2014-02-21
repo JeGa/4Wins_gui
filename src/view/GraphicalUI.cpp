@@ -59,7 +59,8 @@ namespace view
     {
         const char *p1Name = window->menu->p1Name->value();
         const char *p2Name = window->menu->p2Name->value();
-        
+
+        /*
         data::IPlayer *p1 = nullptr;
         data::IPlayer *p2 = nullptr;
         
@@ -87,7 +88,7 @@ namespace view
         
         game->callback(scb_game, this);
         game->displayGame(managerLocal->getActiveGame());
-        game->show();
+        game->show();*/
     }
     
     // Callbacks =====================================================
@@ -110,6 +111,7 @@ namespace view
     
     void GraphicalUI::cb_btn_loginGame()
     {
+        /*
         const char *name = window->menu->loginName->value();
         const char *pw = window->menu->loginPassword->value();
         
@@ -121,7 +123,7 @@ namespace view
         bool status = managerClient->login(name, pw);
         
         if (!status)
-            fl_alert("Failure in logging in user");
+            fl_alert("Failure in logging in user");*/
     }
     
     void GraphicalUI::scb_btn_register(Fl_Widget *w, void *p)
@@ -131,6 +133,7 @@ namespace view
     
     void GraphicalUI::cb_btn_register()
     {
+        /*
         const char *name = window->menu->registerName->value();
         const char *pw = window->menu->registerPassword->value();
         
@@ -142,7 +145,7 @@ namespace view
         bool status = managerClient->registerUser(name, pw);
         
         if (!status)
-            fl_alert("Failure in register user");
+            fl_alert("Failure in register user");*/
     }
     
     void GraphicalUI::scb_game(Fl_Widget *w, void *p)
@@ -153,6 +156,7 @@ namespace view
     // Field is clicked
     void GraphicalUI::cb_game(Fl_Widget *w)
     {
+        /*
         gui::GraphicalUIGame *game = static_cast<gui::GraphicalUIGame *>(w);
         
         // If the window is closed: Delete the game from the manager
@@ -181,7 +185,7 @@ namespace view
             game->setWinnerOutput(winner);
         }
         
-        game->field->redraw();
+        game->field->redraw();*/
     }
     
     void GraphicalUI::scb_btn_logout(Fl_Widget *w, void *p)
@@ -191,10 +195,11 @@ namespace view
     
     void GraphicalUI::cb_btn_logout()
     {
+        /*
         bool status = managerClient->logout();
         
         if (!status)
-            fl_alert("Failure in logging out user");
+            fl_alert("Failure in logging out user");*/
     }
 
     void GraphicalUI::scb_menubar(Fl_Widget *w, void *p)
@@ -223,8 +228,9 @@ namespace view
     
     void GraphicalUI::cb_viewProfiles()
     {
+        /*
         if (!managerClient->getData())
-            fl_alert("Failure in getting server data");
+            fl_alert("Failure in getting server data");*/
     }
     
     void GraphicalUI::s_updateHandler(void *p)
@@ -245,7 +251,7 @@ namespace view
 //            check = 0;
 //        } else
 //            ++check;
-            
+            /*
         if (managerClient->isLoggedIn()) {
             if (window->tabs->visible() == 0) {
                 window->menu->hide();
@@ -277,7 +283,7 @@ namespace view
             window->tabs->viewProfiles->table->addRow(v);
         }
             
-        Fl::repeat_timeout(0.5, s_updateHandler, this);
+        Fl::repeat_timeout(0.5, s_updateHandler, this);*/
     }
     
 }

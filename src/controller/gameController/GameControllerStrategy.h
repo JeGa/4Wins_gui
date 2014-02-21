@@ -22,6 +22,7 @@
 #include "IGame.h"
 #include "IPlayer.h"
 #include "IGameController.h"
+#include <memory>
 
 namespace controller
 {
@@ -39,7 +40,7 @@ namespace controller
             virtual ~GameControllerStrategy();
 
             virtual void playGame(data::IGame *game);
-            virtual data::IPlayer *onTurn(); // From field
+            virtual std::shared_ptr<data::IPlayer> onTurn(); // From field
             virtual bool toggleTurn(int x, int y); // Switches between the 2 players
             virtual data::IGame *getGame();
     };

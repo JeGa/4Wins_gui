@@ -1,45 +1,102 @@
+/*
+* The GameFactory given in the constructor specifies the implementation used
+* for the instantiated GameManager class.
+*/
+
 #ifndef AGAMEMANAGER_H
 #define AGAMEMANAGER_H
 
 #include <map>
+#include <memory>
+#include "GameFactory.h"
 
 namespace controller
 {
-    
+
     class AGameManager
     {
-    protected:
-        std::map<int, data::IGame *> games;
-        std::map<int, data::IPlayer *> players;
     public:
-        std::map<int, data::IGame *> getGames()
+        AGameManager(GameFactory& f) : factory(f) {}
+
+        std::map<int, std::unique_ptr<data::IGame>>& getGames()
         {
             return games;
         }
-    
-        std::map<int, data::IPlayer *> getPlayers()
+
+        std::map<int, std::unique_ptr<data::IPlayer>>& getPlayers()
         {
             return players;
         }
-        
+
+    protected:
+        std::map<int, std::unique_ptr<data::IGame>> games;
+        std::map<int, std::shared_ptr<data::IPlayer>> players;
+        std::unique_ptr<controller::GameFactory> factory;
+
         void clearPlayers()
         {
-            for (auto &i : players) {
-                delete i.second;
-            }
             players.clear();
         }
-        
+
         void clearGames()
         {
-            for (auto &i : games) {
-                delete i.second;
-            }
-            players.clear();
+            games.clear();
         }
-    
+
+        /*
+        * Adds the player to the map if he is not in the map.
+        * Returns the key from the player.
+        */
+        int addPlayer(std::string name, std::string pw)
+        {
+            auto p = factory.getPlayer(name, pw);
+
+            try {
+                players.at(p->getKey());
+
+                // Already in map
+            } catch (std::out_of_range& e) {
+
+                // Add to map
+                players[p->getKey()] = p;
+            }
+
+            return p->getKey();
+        }
+
+        /*
+        * Adds a new game.
+        * Returns the key from the game.
+        */
+        int addGame(int p1Key, int p2Key)
+        {
+            std::unique_ptr<data::IGame> g(factory.getGameDefault(
+                players[p1Key],
+                players[p2Key],
+                players[p1Key]
+            ));
+
+            int key = g->getKey();
+            games[key] = std::move(g);
+            return key;
+        }
+
+        int addGame(int p1Key, int p2Key, int x, int y)
+        {
+            std::unique_ptr<data::IGame> g(factory.getGame(
+                x,
+                y,
+                players[p1Key],
+                players[p2Key],
+                players[p1Key]
+            ));
+
+            int key = g->getKey();
+            games[key] = std::move(g);
+            return key;
+        }
     };
-    
+
 }
 
 #endif

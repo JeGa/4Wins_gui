@@ -57,23 +57,29 @@ namespace controller
         return gc;
     }
 
-    IGame *GameFactory::getGame(int x, int y, IPlayer *p1, IPlayer *p2, IPlayer *turn)
+    IGame *GameFactory::getGame(int x, int y,
+        std::shared_ptr<data::IPlayer> p1,
+        std::shared_ptr<data::IPlayer> p2,
+        std::shared_ptr<data::IPlayer>turn)
     {
         IGame *game = new Game(getField(x, y), p1, p2, turn);
 
         return game;
     }
 
-    IGame *GameFactory::getGameDefault(IPlayer *p1, IPlayer *p2, IPlayer *turn)
+    IGame *GameFactory::getGameDefault(
+        std::shared_ptr<data::IPlayer> p1,
+        std::shared_ptr<data::IPlayer> p2,
+        std::shared_ptr<data::IPlayer> turn)
     {
         IGame *game = new Game(getDefaultField(), p1, p2, turn);
 
         return game;
     }
 
-    IPlayer *GameFactory::getPlayer(string name, string pw)
+    std::shared_ptr<data::IPlayer> GameFactory::getPlayer(string name, string pw)
     {
-        return new Player(name, pw);
+        return std::make_shared<Player>(name, pw);
     }
 
     IGameManagerLocal *GameFactory::getGameManagerLocal(IGameController *gc)

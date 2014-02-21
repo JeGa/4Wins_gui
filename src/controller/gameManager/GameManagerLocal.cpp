@@ -5,10 +5,9 @@
 namespace controller
 {
 
-    GameManagerLocal::GameManagerLocal(IGameController *gc)
+    GameManagerLocal::GameManagerLocal(GameFactory& factory)
+        : IGameManagerLocal(factory), gc(factory->getGameController())
     {
-        if (gc != nullptr)
-            this->gc = gc;
     }
 
     GameManagerLocal::~GameManagerLocal()
@@ -16,22 +15,16 @@ namespace controller
         clear();
     }
     
-    void GameManagerLocal::newGame(data::IGame *game)
+    void GameManagerLocal::newGame(std::string p1, std::string p2)
     {
-        if (gc == nullptr)
-            return;
-        
-        if (game->getPlayer1() == nullptr || game->getPlayer2() == nullptr)
-            return;
-        
-        // If game is not in the map add it
-        if (games.find(game->getKey()) == games.end()) {
-            games.insert(std::pair<int, data::IGame*>(game->getKey(), game));
-        }
-        
-        // If player is not in the map add it
-        addPlayer(game->getPlayer1());
-        addPlayer(game->getPlayer2());
+        if (p1 == "" || p2 == "")
+            return false;
+
+        int p1Key = addPlayer(p1, "");
+        int p2Key = addPlayer(p2, "");
+        int gameKey = addGame(p1Key, p2Key);
+
+        addGame(p1Key, p2Key);
         
         // Set active
         gc->playGame(game);
@@ -99,7 +92,7 @@ namespace controller
         }
     }
     
-    void GameManagerLocal::addPlayer(data::IPlayer *player)
+    void GameManagerLocal::addPlayer(std::shared_ptr<data::IPlayer> player)
     {
         if (players.find(player->getKey()) == players.end()) {
             players.insert(std::pair<int, data::IPlayer *>(player->getKey(), player));

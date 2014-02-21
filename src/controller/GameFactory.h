@@ -15,6 +15,7 @@
 #include "IGameManagerClient.h"
 #include "IGameManagerServer.h"
 #include <string>
+#include <memory>
 
 namespace controller
 {
@@ -33,13 +34,21 @@ namespace controller
 
             virtual IField *getField(int x, int y);
             virtual IField *getDefaultField();
-            virtual GameControllerStrategy *getGameController();
-            virtual IPlayer *getPlayer(string name, string pw);
+
+            virtual std::shared_ptr<data::IPlayer> getPlayer(string name, string pw);
+            // TODO: Game nor raw pointer
             // Given size
-            virtual IGame *getGame(int x, int y, IPlayer *p1, IPlayer *p2, IPlayer *turn);
+            virtual IGame *getGame(int x, int y,
+                std::shared_ptr<data::IPlayer> p1,
+                std::shared_ptr<data::IPlayer> p2,
+                std::shared_ptr<data::IPlayer> turn);
             // Default size
-            virtual IGame *getGameDefault(IPlayer *p1, IPlayer *p2, IPlayer *turn);
-            // Creates new game with new players
+            virtual IGame *getGameDefault(
+                std::shared_ptr<data::IPlayer> p1,
+                std::shared_ptr<data::IPlayer> p2,
+                std::shared_ptr<data::IPlayer> turn);
+
+            virtual GameControllerStrategy *getGameController();
             virtual IGameManagerLocal *getGameManagerLocal(IGameController *gc);
             virtual IGameManagerClient *getGameManagerClient();
             virtual IGameManagerServer *getGameManagerServer(IGameController *gc);

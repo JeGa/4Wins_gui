@@ -60,11 +60,6 @@ namespace data
         out.close(); // Flush buffer
     }
 
-    /*bool Player::verifypassword(std::string pw)
-    {
-
-    }*/
-
     void Player::addGameStatistic(int result)
     {
         if (result == WIN) {

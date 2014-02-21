@@ -16,9 +16,10 @@ namespace controller
     class IGameManagerLocal : public AGameManager
     {
     public:
+        IGameManagerLocal() : AGameManager(GameFactory& f) {}
         virtual ~IGameManagerLocal() {};
         
-        virtual void newGame(data::IGame *game) = 0;
+        virtual void newGame(std::string p1, std::string p2) = 0;
         virtual bool deleteGame(data::IGame *game) = 0;
         virtual bool input(int x, int y) = 0;
         virtual bool setActiveGame(data::IGame *game) = 0;

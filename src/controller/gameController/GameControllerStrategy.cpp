@@ -42,17 +42,17 @@ namespace controller
         game->setCellStatus(x, y, game->onTurn());
 
         // Check if win (because of the last set cell, so last turn player is needed)
-        if (checkRow(x, y, game->notOnTurn())) {
+        if (checkRow(x, y, game->notOnTurn().get())) {
             if (game->notOnTurn() == game->getPlayer1()) {
                 // P1 Wins
                 game->getPlayer1()->addGameStatistic(data::IPlayer::WIN);
                 game->getPlayer2()->addGameStatistic(data::IPlayer::LOOSE);
-                game->setWinner(game->getPlayer1());
+                game->setWinner(game->getPlayer1()->getKey());
             } else {
                 // P2 Wins
                 game->getPlayer2()->addGameStatistic(data::IPlayer::WIN);
                 game->getPlayer1()->addGameStatistic(data::IPlayer::LOOSE);
-                game->setWinner(game->getPlayer2());
+                game->setWinner(game->getPlayer2()->getKey());
             }
 
             game->setRunning(false);
@@ -61,7 +61,7 @@ namespace controller
         return true;
     }
 
-    data::IPlayer *GameControllerStrategy::onTurn()
+    std::shared_ptr<data::IPlayer> GameControllerStrategy::onTurn()
     {
         return game->onTurn();
     }

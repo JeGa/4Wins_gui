@@ -67,7 +67,7 @@ namespace controller
         //std::cout << "## countCells: " << x << " " << y << " with direction: " << xDirection << " " << yDirection << std::endl;
         //std::cout << "## In field: " << inField(x, y) << " cell status: " << getGame()->getCellStatus(x, y) << " player: "<< p <<std::endl;
 
-        while (inField(x, y) && (getGame()->getCellStatus(x, y) == p)) {
+        while (inField(x, y) && (getGame()->getCellStatus(x, y).get() == p)) {
             sum++;
 
             x += xDirection;

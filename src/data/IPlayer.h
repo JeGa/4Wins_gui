@@ -16,10 +16,8 @@ namespace data
 
             virtual ~IPlayer() {}
             virtual void writeToDisk() = 0;
-//            virtual std::vector<IGame> getGames() = 0;
             virtual std::string getName() = 0;
             virtual std::string getPassword() = 0;
-//            virtual bool verifypassword(std::string pw) = 0;
             virtual std::string toString() = 0;
 
             virtual unsigned int getKey() = 0;

@@ -10,6 +10,7 @@ namespace controller
     class IGameManagerClient : public AGameManager
     {
     public:
+        IGameManagerClient(GameFactory *f) : AGameManager::AGameManager(f) {}
         virtual ~IGameManagerClient() {};
         
         virtual bool login(std::string name, std::string pw) = 0;

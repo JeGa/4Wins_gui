@@ -1,14 +1,10 @@
-/*
-* The GameManager is resonsible for the memory management.
-* One GameController is used for all games.
-*/
-
 #ifndef IGAMEMANAGERLOCAL_H
 #define IGAMEMANAGERLOCAL_H
 
 #include "IGameController.h"
 #include "IGame.h"
 #include "AGameManager.h"
+#include "GameFactory.h"
 
 namespace controller
 {
@@ -16,14 +12,14 @@ namespace controller
     class IGameManagerLocal : public AGameManager
     {
     public:
-        IGameManagerLocal() : AGameManager(GameFactory& f) {}
-        virtual ~IGameManagerLocal() {};
-        
-        virtual void newGame(std::string p1, std::string p2) = 0;
-        virtual bool deleteGame(data::IGame *game) = 0;
+        IGameManagerLocal(GameFactory *f) : AGameManager::AGameManager(f) {}
+        virtual ~IGameManagerLocal() {}
+
+        // adds the game to the manager and sets it to the active game
         virtual bool input(int x, int y) = 0;
-        virtual bool setActiveGame(data::IGame *game) = 0;
-        virtual data::IGame *getActiveGame() = 0; // From GameController
+        // Sets/gets game as active game for GameController
+        virtual bool setActiveGame(int key) = 0;
+        virtual int getActiveGame() = 0;
     };
     
 }

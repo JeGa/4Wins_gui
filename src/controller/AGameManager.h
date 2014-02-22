@@ -1,6 +1,13 @@
 /*
-* The GameFactory given in the constructor specifies the implementation used
-* for the instantiated GameManager class.
+* TODO:
+* The GameFactory given in the constructor specifies the implementation
+* used for the instantiated GameManager class.
+*
+* TODO:
+* Maybe a getPlayer().
+*
+* TODO:
+* Maybe deleteGame().
 */
 
 #ifndef AGAMEMANAGER_H
@@ -8,6 +15,7 @@
 
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include "GameFactory.h"
 
 namespace controller
@@ -15,23 +23,19 @@ namespace controller
 
     class AGameManager
     {
-    public:
-        AGameManager(GameFactory& f) : factory(f) {}
-
-        std::map<int, std::unique_ptr<data::IGame>>& getGames()
+    private:
+        int addGame(std::shared_ptr<data::IGame> g)
         {
-            return games;
-        }
-
-        std::map<int, std::unique_ptr<data::IPlayer>>& getPlayers()
-        {
-            return players;
+            int key = g->getKey();
+            games[key] = g;
+            return key;
         }
 
     protected:
-        std::map<int, std::unique_ptr<data::IGame>> games;
+        std::map<int, std::shared_ptr<data::IGame>> games;
         std::map<int, std::shared_ptr<data::IPlayer>> players;
-        std::unique_ptr<controller::GameFactory> factory;
+
+        std::unique_ptr<GameFactory> factory;
 
         void clearPlayers()
         {
@@ -45,18 +49,16 @@ namespace controller
 
         /*
         * Adds the player to the map if he is not in the map.
-        * Returns the key from the player.
         */
         int addPlayer(std::string name, std::string pw)
         {
-            auto p = factory.getPlayer(name, pw);
+            std::shared_ptr<data::IPlayer> p(factory->getPlayer(name, pw));
 
             try {
                 players.at(p->getKey());
 
                 // Already in map
             } catch (std::out_of_range& e) {
-
                 // Add to map
                 players[p->getKey()] = p;
             }
@@ -64,36 +66,39 @@ namespace controller
             return p->getKey();
         }
 
-        /*
-        * Adds a new game.
-        * Returns the key from the game.
-        */
         int addGame(int p1Key, int p2Key)
         {
-            std::unique_ptr<data::IGame> g(factory.getGameDefault(
+            std::shared_ptr<data::IGame> g(factory->getGameDefault(
                 players[p1Key],
                 players[p2Key],
                 players[p1Key]
             ));
-
-            int key = g->getKey();
-            games[key] = std::move(g);
-            return key;
+            return addGame(g);
         }
 
-        int addGame(int p1Key, int p2Key, int x, int y)
+        int addGame(int p1Key, int p2Key, int width, int height)
         {
-            std::unique_ptr<data::IGame> g(factory.getGame(
-                x,
-                y,
+            std::shared_ptr<data::IGame> g(factory->getGame(
+                width,
+                height,
                 players[p1Key],
                 players[p2Key],
                 players[p1Key]
             ));
+            return addGame(g);
+        }
 
-            int key = g->getKey();
-            games[key] = std::move(g);
-            return key;
+    public:
+        AGameManager(GameFactory *f) : factory(f) {}
+
+        std::map<int, std::shared_ptr<data::IGame>>& getGames()
+        {
+            return games;
+        }
+
+        std::map<int, std::shared_ptr<data::IPlayer>>& getPlayers()
+        {
+            return players;
         }
     };
 

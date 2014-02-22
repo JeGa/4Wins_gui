@@ -82,7 +82,7 @@ namespace controller
         return std::make_shared<Player>(name, pw);
     }
 
-    IGameManagerLocal *GameFactory::getGameManagerLocal(IGameController *gc)
+    /*IGameManagerLocal *GameFactory::getGameManagerLocal(IGameController *gc)
     {
         GameManagerLocal *manager = new GameManagerLocal(gc);
         return manager;
@@ -98,6 +98,6 @@ namespace controller
     {
         GameManagerNetworkServer *manager = new GameManagerNetworkServer(gc);
         return manager;
-    }
+    }*/
 
 }

@@ -1,6 +1,7 @@
 /*
-* Override for different implementations.
-* All classes use interfaces!
+* Override for different implementations. All classes use interfaces!
+*
+* TODO: Return smart pointers instead of raw pointers.
 */
 
 #ifndef GAMEFACTORY_H
@@ -11,9 +12,9 @@
 #include "IGame.h"
 #include "IPlayer.h"
 #include "GameControllerStrategy.h"
-#include "IGameManagerLocal.h"
-#include "IGameManagerClient.h"
-#include "IGameManagerServer.h"
+//#include "IGameManagerLocal.h"
+//#include "IGameManagerClient.h"
+//#include "IGameManagerServer.h"
 #include <string>
 #include <memory>
 
@@ -49,9 +50,9 @@ namespace controller
                 std::shared_ptr<data::IPlayer> turn);
 
             virtual GameControllerStrategy *getGameController();
-            virtual IGameManagerLocal *getGameManagerLocal(IGameController *gc);
+            /*virtual IGameManagerLocal *getGameManagerLocal(IGameController *gc);
             virtual IGameManagerClient *getGameManagerClient();
-            virtual IGameManagerServer *getGameManagerServer(IGameController *gc);
+            virtual IGameManagerServer *getGameManagerServer(IGameController *gc);*/
     };
 
 }

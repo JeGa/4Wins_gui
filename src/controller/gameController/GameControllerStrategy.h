@@ -14,6 +14,8 @@
 * -> getWinner()
 * 
 * Access to the game infos with the function getGame().
+*
+* TODO: Use smart ptrs (unique ptr).
 */
 
 #ifndef GAMECONTROLLERSTRATEGY_H

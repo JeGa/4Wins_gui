@@ -7,12 +7,7 @@
 namespace controller
 {
 
-    GameControllerStrategy::GameControllerStrategy() :
-        game(nullptr) {}
-
-    GameControllerStrategy::~GameControllerStrategy() {}
-
-    void GameControllerStrategy::playGame(data::IGame *game)
+    void GameControllerStrategy::playGame(std::shared_ptr<data::IGame> game)
     {
         this->game = game;
     }
@@ -66,7 +61,7 @@ namespace controller
         return game->onTurn();
     }
 
-    data::IGame *GameControllerStrategy::getGame()
+    std::shared_ptr<data::IGame> GameControllerStrategy::getGame()
     {
         return game;
     }

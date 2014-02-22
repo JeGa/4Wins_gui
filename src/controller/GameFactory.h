@@ -2,6 +2,7 @@
 * Override for different implementations. All classes use interfaces!
 *
 * TODO: Return smart pointers instead of raw pointers.
+* TODO: The manager stuff.
 */
 
 #ifndef GAMEFACTORY_H
@@ -36,18 +37,17 @@ namespace controller
             virtual IField *getField(int x, int y);
             virtual IField *getDefaultField();
 
-            virtual std::shared_ptr<data::IPlayer> getPlayer(string name, string pw);
-            // TODO: Game nor raw pointer
+            virtual std::shared_ptr<IPlayer> getPlayer(string name, string pw);
             // Given size
-            virtual IGame *getGame(int x, int y,
-                std::shared_ptr<data::IPlayer> p1,
-                std::shared_ptr<data::IPlayer> p2,
-                std::shared_ptr<data::IPlayer> turn);
+            virtual std::shared_ptr<IGame> getGame(int x, int y,
+                std::shared_ptr<IPlayer> p1,
+                std::shared_ptr<IPlayer> p2,
+                std::shared_ptr<IPlayer> turn);
             // Default size
-            virtual IGame *getGameDefault(
-                std::shared_ptr<data::IPlayer> p1,
-                std::shared_ptr<data::IPlayer> p2,
-                std::shared_ptr<data::IPlayer> turn);
+            virtual std::shared_ptr<IGame> getGameDefault(
+                std::shared_ptr<IPlayer> p1,
+                std::shared_ptr<IPlayer> p2,
+                std::shared_ptr<IPlayer> turn);
 
             virtual GameControllerStrategy *getGameController();
             /*virtual IGameManagerLocal *getGameManagerLocal(IGameController *gc);

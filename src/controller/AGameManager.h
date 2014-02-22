@@ -8,6 +8,9 @@
 *
 * TODO:
 * Maybe deleteGame().
+*
+* TODO:
+* Delete Player.
 */
 
 #ifndef AGAMEMANAGER_H

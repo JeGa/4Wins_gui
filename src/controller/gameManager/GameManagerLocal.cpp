@@ -1,5 +1,3 @@
-//!! TODO: Delete player
-
 #include "GameManagerLocal.h"
 
 namespace controller
@@ -23,10 +21,8 @@ namespace controller
         try {
             std::shared_ptr<data::IGame>& activeGameRef = games.at(key);
 
-            // TODO:
-            //gc->playGame(activeGameRef);
-
             // Is in map
+            gc->playGame(activeGameRef);
         } catch (std::out_of_range& e) {
             // Not in map
             return false;

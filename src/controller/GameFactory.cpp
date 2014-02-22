@@ -50,6 +50,7 @@ namespace controller
                          DEFAULT_WIDTH, DEFAULT_HEIGHT);
     }
 
+    // TODO
     GameControllerStrategy *GameFactory::getGameController()
     {
         GameControllerStrategy *gc = new GameControllerStandard;
@@ -57,24 +58,20 @@ namespace controller
         return gc;
     }
 
-    IGame *GameFactory::getGame(int x, int y,
+    std::shared_ptr<data::IGame> GameFactory::getGame(int x, int y,
         std::shared_ptr<data::IPlayer> p1,
         std::shared_ptr<data::IPlayer> p2,
         std::shared_ptr<data::IPlayer>turn)
     {
-        IGame *game = new Game(getField(x, y), p1, p2, turn);
-
-        return game;
+        return std::make_shared<Game>(getField(x, y), p1, p2, turn);
     }
 
-    IGame *GameFactory::getGameDefault(
+    std::shared_ptr<data::IGame> GameFactory::getGameDefault(
         std::shared_ptr<data::IPlayer> p1,
         std::shared_ptr<data::IPlayer> p2,
         std::shared_ptr<data::IPlayer> turn)
     {
-        IGame *game = new Game(getDefaultField(), p1, p2, turn);
-
-        return game;
+        return std::make_shared<Game>(getDefaultField(), p1, p2, turn);
     }
 
     std::shared_ptr<data::IPlayer> GameFactory::getPlayer(string name, string pw)
@@ -82,6 +79,7 @@ namespace controller
         return std::make_shared<Player>(name, pw);
     }
 
+    // TODO
     /*IGameManagerLocal *GameFactory::getGameManagerLocal(IGameController *gc)
     {
         GameManagerLocal *manager = new GameManagerLocal(gc);

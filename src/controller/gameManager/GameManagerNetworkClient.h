@@ -1,6 +1,6 @@
 /*
-* Theres no GameController for the client network manager.
-* All calculations are made on the server.
+* There is no GameController for the client network manager.
+* All calculations are made by the server.
 * 
 * The GameManager provides an abstraction to access the server
 * through network.
@@ -10,12 +10,12 @@
 #define GAMEMANAGERNETWORKCLIENT_H
 
 #include "IGameManagerClient.h"
-#include <map>
 #include "NetworkControllerClient.h"
 #include "TCPMessage.h"
 #include "Observer.h"
 #include "GameFactory.h"
 #include <boost/thread.hpp>
+#include <map>
 
 namespace controller
 {
@@ -25,7 +25,7 @@ namespace controller
         public util::Observer
     {
     private:
-        std::unique_ptr<data::IPlayer> localPlayer; // The own player
+        std::unique_ptr<data::IPlayer> localPlayer;
         
         NetworkControllerClient networkController;
         GameFactory factory;

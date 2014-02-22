@@ -16,9 +16,6 @@ namespace controller
         // With the local version, there is only one GameManager,
         // so it needs a GameController to play a game.
         std::unique_ptr<IGameController> gc;
-        
-        void clear();
-        void addPlayer(std::shared_ptr<data::IPlayer> player);
     public:
         GameManagerLocal();
         virtual ~GameManagerLocal() {}

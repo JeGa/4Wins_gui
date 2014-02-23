@@ -14,7 +14,7 @@ namespace controller
     class IGameManagerServer : public AGameManager
     {
     public:
-        IGameManagerServer(GameFactory *f) : AGameManager::AGameManager(f) {}
+        IGameManagerServer(GameFactory *f) : AGameManager(f) {}
         virtual ~IGameManagerServer() {};
         
         virtual void start() = 0;

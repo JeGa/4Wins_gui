@@ -1,18 +1,15 @@
 #ifndef IGAMEMANAGERLOCAL_H
 #define IGAMEMANAGERLOCAL_H
 
-#include "IGameController.h"
-#include "IGame.h"
 #include "AGameManager.h"
-#include "GameFactory.h"
 
 namespace controller
 {
-    
+
     class IGameManagerLocal : public AGameManager
     {
     public:
-        IGameManagerLocal(GameFactory *f) : AGameManager::AGameManager(f) {}
+        IGameManagerLocal(GameFactory *f) : AGameManager(f) {}
         virtual ~IGameManagerLocal() {}
 
         // adds the game to the manager and sets it to the active game

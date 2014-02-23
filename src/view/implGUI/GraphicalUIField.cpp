@@ -80,16 +80,16 @@ namespace view { namespace gui
             
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
-                data::IPlayer *p = game->getCellStatus(i, j);
+                data::IPlayer *p = game->getCellStatus(i, j).get(); // TODO: Smart pointers?
                 
                 int xCell = 10 + x() + i * sizeX;
                 int yCell = 10 + y() + j * sizeY;
                 
                 CellDrawing cell(xCell, yCell);
                 
-                if (game->getPlayer1() == p) {
+                if (game->getPlayer1().get() == p) { // TODO: Remove .get()?
                    draw_box(FL_DOWN_BOX, cell.x, cell.y, cell.w, cell.h, FL_BLACK);
-                } else if (game->getPlayer2() == p) {
+                } else if (game->getPlayer2().get() == p) { // TODO: Remove .get()?
                     draw_box(FL_DOWN_BOX, cell.x, cell.y, cell.w, cell.h, FL_BLUE);
                 } else {
                     draw_box(FL_DOWN_BOX, cell.x, cell.y, cell.w, cell.h, FL_GRAY);

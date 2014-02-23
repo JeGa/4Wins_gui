@@ -28,12 +28,12 @@ namespace data
         ++gameCounter;
     }
 
-    IPlayer *Game::onTurn()
+    std::shared_ptr<IPlayer> Game::onTurn()
     {
         return turn;
     }
 
-    IPlayer *Game::notOnTurn()
+    std::shared_ptr<IPlayer> Game::notOnTurn()
     {
         if (turn == player1)
             return player2;
@@ -80,9 +80,9 @@ namespace data
     void Game::setWinner(size_t keyWinner)
     {
         if (player1->getKey() == keyWinner)
-            winner = std::make_shared(player1);
+            winner = player1;
         else if (player2->getKey() == keyWinner)
-            winner = std::make_shared(player2);
+            winner = player2;
     }
 
     std::shared_ptr<IPlayer> Game::getPlayer1()

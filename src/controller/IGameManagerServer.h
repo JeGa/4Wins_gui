@@ -4,9 +4,9 @@
 #include "IGame.h"
 #include "IPlayer.h"
 #include "TCPConnection.h"
+#include "AGameManager.h"
 #include <vector>
 #include <memory>
-#include "AGameManager.h"
 
 namespace controller
 {
@@ -19,10 +19,12 @@ namespace controller
         
         virtual void start() = 0;
         virtual void stop() = 0;
-        
+
+        // TODO: Smart pointer
         virtual void newGame(data::IGame *game) = 0;
         virtual bool deleteGame(data::IGame *game) = 0;
         virtual bool input(int x, int y) = 0;
+
         virtual bool setActiveGame(data::IGame *game) = 0;
         virtual data::IGame *getActiveGame() = 0;
         

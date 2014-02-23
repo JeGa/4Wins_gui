@@ -19,9 +19,9 @@
 namespace view
 {
     
-    GraphicalUI::GraphicalUI() :
-        managerClient(factory.getGameManagerClient()),
-        managerLocal(factory.getGameManagerLocal(factory.getGameController()))
+    GraphicalUI::GraphicalUI() /*:
+        managerClient(std::move(factory.getGameManagerClient())),
+        managerLocal(std::move(factory.getGameManagerLocal()))*/
     {
         // The main window
         window = new gui::GraphicalUIWindow();

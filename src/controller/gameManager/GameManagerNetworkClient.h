@@ -25,16 +25,15 @@ namespace controller
         public util::Observer
     {
     private:
-        std::unique_ptr<data::IPlayer> localPlayer;
-        
+        // Contains only a reference if the player is logged in or
+        // tries to log in.
+        std::shared_ptr<data::IPlayer> localPlayer;
         NetworkControllerClient networkController;
-        GameFactory factory;
         
         // If the game manager is waiting for a message from the server
         QUERY_MSG_TYPE waitingFor = QUERY_MSG_TYPE::NOT_SET;
         
         boost::mutex handshake;
-        
     public:
         GameManagerNetworkClient();
         virtual ~GameManagerNetworkClient();
@@ -44,9 +43,9 @@ namespace controller
         virtual bool registerUser(std::string name, std::string pw);
         virtual bool ping();
         virtual bool getData();
-        
         virtual bool isLoggedIn();
-        
+
+        // TODO:
         virtual void newGame(data::IGame *game) {};
         virtual bool deleteGame(data::IGame *game) {return false;};
         virtual bool input(int x, int y) {return false;};

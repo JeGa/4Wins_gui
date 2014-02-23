@@ -80,18 +80,17 @@ namespace controller
     }
 
     // TODO
-    /*IGameManagerLocal *GameFactory::getGameManagerLocal(IGameController *gc)
+    /*
+    std::unique_ptr<IGameManagerLocal> GameFactory::getGameManagerLocal(IGameController *gc)
     {
-        GameManagerLocal *manager = new GameManagerLocal(gc);
-        return manager;
+        return std::unique_ptr<IGameManagerLocal>(new GameManagerLocal());
     }
 
-    IGameManagerClient *GameFactory::getGameManagerClient()
+    std::unique_ptr<IGameManagerClient> GameFactory::getGameManagerClient()
     {
-        GameManagerNetworkClient *manager = new GameManagerNetworkClient();
-        return manager;
+        return std::unique_ptr<IGameManagerClient>(new GameManagerNetworkClient());
     }
-    
+    /*
     IGameManagerServer *GameFactory::getGameManagerServer(IGameController *gc)
     {
         GameManagerNetworkServer *manager = new GameManagerNetworkServer(gc);

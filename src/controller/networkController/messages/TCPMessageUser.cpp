@@ -288,7 +288,7 @@ namespace controller
             sstr >> tmp;
             loggedin = boost::lexical_cast<bool>(tmp);
             
-            data::IPlayer *p = factory.getPlayer(name, "");
+            std::shared_ptr<data::IPlayer> p(factory.getPlayer(name, ""));
             p->setAllData(key, wins, looses, played, ratio, loggedin);
             players[p->getKey()] = p;
         }
@@ -319,7 +319,7 @@ namespace controller
 		return ackStatus;
 	}
     
-    std::map<int, data::IPlayer *> TCPMessageUser::getPlayers()
+    std::map<int, std::shared_ptr<data::IPlayer>> TCPMessageUser::getPlayers()
     {
         return players;
     }

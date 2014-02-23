@@ -4,8 +4,10 @@
 namespace controller
 {
 
-    GameManagerNetworkServer::GameManagerNetworkServer(IGameController *gc)
-        : gc(gc)
+    // TODO: Get factory as parameter
+    GameManagerNetworkServer::GameManagerNetworkServer() :
+        IGameManagerServer::IGameManagerServer(new GameFactory()),
+        gc(factory->getGameController())
     {
         networkController.setExternalTCPConnectionObserver(this);
     }
@@ -27,42 +29,16 @@ namespace controller
         return playerStatus(name, pw, true);
     }
     
-    bool GameManagerNetworkServer::registerPlayer(std::string name, std::string pw)
+    int GameManagerNetworkServer::registerPlayer(std::string name, std::string pw)
     {
-        data::IPlayer *p = factory.getPlayer(name, pw);
-        
-        try {
-            players.at(p->getKey());
-            delete p;
-            
-            return false;
-        } catch (std::out_of_range& e) {
-            
-            players[p->getKey()] = p;
-            
-            return true;
-        }
+        return addPlayer(name, pw);
     }
     
     bool GameManagerNetworkServer::playerStatus(
         std::string name, std::string pw, bool playerStatus)
     {
-        data::IPlayer *p = factory.getPlayer(name, pw);
-        bool status = false;
-        
-        try {
-            data::IPlayer *tmp = players.at(p->getKey());
-            // Player in list
-            
-            tmp->setLoggedIn(playerStatus);
-            
-            status = true;
-        } catch (std::out_of_range& e) {
-            // Player not in list
-        }
-        
-        delete p;
-        return status;
+        players[addPlayer(name, pw)]->setLoggedIn(playerStatus);
+        return true; // TODO
     }
     
     void GameManagerNetworkServer::start()
@@ -132,7 +108,7 @@ namespace controller
                         
                     } else if (userMsg.getQueryType() == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
                         
-                        userMsg.setAck(players);
+                        //userMsg.setAck(players);
                             
                         con->sendMessage(userMsg);
                         

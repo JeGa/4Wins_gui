@@ -1,6 +1,6 @@
 /*
-* This class is used by multiple threads! To access the data synchronization
-* mechanism must be used!
+* This class is used by multiple threads! To access the data
+* synchronization mechanism must be used!
 *
 * Holds multiple game instances, the game controller holds one game
 * that is played.
@@ -13,10 +13,11 @@
 #include "IGame.h"
 #include "IPlayer.h"
 #include "IGameController.h"
-#include <map>
 #include "NetworkControllerServer.h"
 #include "Observer.h"
 #include "GameFactory.h"
+#include <map>
+#include <memory>
 
 namespace controller
 {
@@ -28,22 +29,21 @@ namespace controller
     private:
         // The gc holds the active game and the 2 players
         // All clients use the same GameController.
-        IGameController *gc = nullptr;
+        std::unique_ptr<IGameController> gc;
         NetworkControllerServer networkController;
-        GameFactory factory;
         
         bool loginPlayer(std::string name, std::string pw);
         bool logoutPlayer(std::string name, std::string pw);
-        bool registerPlayer(std::string name, std::string pw);
+        int registerPlayer(std::string name, std::string pw);
         bool playerStatus(std::string name, std::string pw, bool playerStatus);
-
     public:
-        GameManagerNetworkServer(IGameController *gc);
+        GameManagerNetworkServer();
         virtual ~GameManagerNetworkServer();
         
         void start();
         void stop();
-        
+
+        // TODO:
         virtual void newGame(data::IGame *game) {};
         virtual bool deleteGame(data::IGame *game) {return false;};
         virtual bool input(int x, int y) {return false;};

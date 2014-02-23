@@ -5,7 +5,9 @@
 namespace controller
 {
 
-    GameManagerNetworkClient::GameManagerNetworkClient()
+    // TODO: Get factory as parameter
+    GameManagerNetworkClient::GameManagerNetworkClient() :
+         IGameManagerClient::IGameManagerClient(new GameFactory())
     {
         networkController.setExternalTCPConnectionObserver(this);
     }
@@ -30,15 +32,16 @@ namespace controller
         if (localPlayer)
             return false;
             
-        // Create player 
-        std::unique_ptr<data::IPlayer> p(factory.getPlayer(name, pw));
-        localPlayer = std::move(p);
-     
+        // Create player
+        // TODO: Could use unique ptr ...
+        localPlayer = std::move(std::shared_ptr<data::IPlayer>(
+            factory->getPlayer(name, pw)));
+
         // Create message
         TCPMessageUser umsg;
         if (!umsg.createQuery(QUERY_MSG_TYPE::LOGIN_QUERY, *localPlayer))
             return false;
-            
+
         // Login player: Send message
         networkController.send(umsg);
         
@@ -85,7 +88,7 @@ namespace controller
             networkController.connect();
         
         // Create player (only local variable)
-        std::unique_ptr<data::IPlayer> p(factory.getPlayer(name, pw));
+        std::shared_ptr<data::IPlayer> p(factory->getPlayer(name, pw));
      
         // Create message
         TCPMessageUser umsg;
@@ -112,8 +115,9 @@ namespace controller
     
     bool GameManagerNetworkClient::isLoggedIn()
     {
+        // TODO: Race condition at isLoggedIn()
         if (localPlayer)
-            return true;
+            return localPlayer->isLoggedIn();
         return false;
     }
     
@@ -176,24 +180,30 @@ namespace controller
                         if (umsg.getAckStatus()) {
                         
                         }
-                        
+
                     } else if (waitingFor == QUERY_MSG_TYPE::LOGIN_QUERY) {
                         if (umsg.getAckStatus()) {
                             if (localPlayer)
                                 localPlayer->setLoggedIn(true);
                         } else
-                            localPlayer.release();
+                            localPlayer.reset();
                         
                     } else if (waitingFor == QUERY_MSG_TYPE::LOGOUT_QUERY) {
                         if (umsg.getAckStatus()) {
                             if (localPlayer) {
-                                clearPlayers();
-                                players = umsg.getPlayers();
+                                // TODO: This is not so good here
+                                localPlayer->setLoggedIn(false);
+                                localPlayer.reset();
                             }
                         }
                         
                     } else if (waitingFor == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
-                        int a;
+                        if (umsg.getAckStatus()) {
+                            clearPlayers();
+                            //clearGames();
+                            //players = umsg.getPlayers();
+                            //games = umsg.getGames();
+                        }
                     }
                     
                     waitingFor = QUERY_MSG_TYPE::NOT_SET;

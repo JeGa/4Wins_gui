@@ -50,9 +50,9 @@ namespace controller
                 std::shared_ptr<IPlayer> turn);
 
             virtual GameControllerStrategy *getGameController();
-            /*virtual IGameManagerLocal *getGameManagerLocal(IGameController *gc);
-            virtual IGameManagerClient *getGameManagerClient();
-            virtual IGameManagerServer *getGameManagerServer(IGameController *gc);*/
+            /*virtual std::unique_ptr<IGameManagerLocal> getGameManagerLocal(IGameController *gc);
+            virtual std::unique_ptr<IGameManagerClient> getGameManagerClient();
+            /*virtual IGameManagerServer *getGameManagerServer(IGameController *gc);*/
     };
 
 }

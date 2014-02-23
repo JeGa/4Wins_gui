@@ -7,7 +7,6 @@ namespace controller
     GameManagerLocal::GameManagerLocal() :
         IGameManagerLocal::IGameManagerLocal(new GameFactory()),
         gc(factory->getGameController())
-
     {   
     }
 

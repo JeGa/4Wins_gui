@@ -6,6 +6,7 @@
 #define GRAPHICALUIFIELD_H
 
 #include <Fl/Fl_Widget.H> // Base class: Fl_Widget
+#include <memory>
 #include "IField.h"
 #include "IGameManagerLocal.h"
 
@@ -17,7 +18,7 @@ namespace view { namespace gui
     class GraphicalUIField : public Fl_Widget
     {
     private:
-        data::IGame *game;
+        std::shared_ptr<data::IGame> game;
         CellDrawing *clickedCell;
         
         bool cellIsClicked(int x, int y);
@@ -31,7 +32,7 @@ namespace view { namespace gui
         GraphicalUIField(int x, int y);
         virtual ~GraphicalUIField();
         
-        void displayGame(data::IGame *game);
+        void displayGame(std::shared_ptr<data::IGame> game);
         CellDrawing *getClickedCell();
     };
     

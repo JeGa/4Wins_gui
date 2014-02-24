@@ -20,7 +20,7 @@ namespace view { namespace gui
     
     // Sets the game to display and get inputs for and
     // resizes the widget
-    void GraphicalUIField::displayGame(data::IGame *game)
+    void GraphicalUIField::displayGame(std::shared_ptr<data::IGame> game)
     {
         if (game == nullptr)
             return;

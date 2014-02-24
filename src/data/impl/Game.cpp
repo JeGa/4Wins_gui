@@ -16,7 +16,7 @@ namespace data
         std::shared_ptr<IPlayer> onTurn)
             : running(true), field(field),
             player1(player1), player2(player2),
-            turn(turn), winner(nullptr)
+            turn(onTurn), winner(nullptr)
     {
         std::stringstream stream;
         stream << this->getPlayer1()->getName() << this->getPlayer2()->getName()

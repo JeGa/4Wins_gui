@@ -37,16 +37,19 @@ namespace controller
         void clearPlayers();
         void clearGames();
 
-        // Adds the player to the map if he is not in the map.
-        int addPlayer(std::string name, std::string pw);
-        int addGame(int p1Key, int p2Key);
-        int addGame(int p1Key, int p2Key, int width, int height);
     public:
         AGameManager(GameFactory *f);
         virtual ~AGameManager() {};
 
+        // Adds the player to the map if he is not in the map.
+        // Return keys
+        int addPlayer(std::string name, std::string pw);
+        int addGame(int p1Key, int p2Key);
+        int addGame(int p1Key, int p2Key, int width, int height);
+
         std::map<int, std::shared_ptr<data::IGame>>& getGames();
         std::map<int, std::shared_ptr<data::IPlayer>>& getPlayers();
+        std::string toString();
     };
 
 }

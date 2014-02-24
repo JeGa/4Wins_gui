@@ -13,15 +13,16 @@
 #include "TCPMessage.h"
 #include "TCPMessageUser.h"
 #include "Player.h"
+#include "GameManagerLocal.h"
 #include <Fl/fl_ask.h>
 #include <boost/lexical_cast.hpp>
 
 namespace view
 {
     
-    GraphicalUI::GraphicalUI() /*:
-        managerClient(std::move(factory.getGameManagerClient())),
-        managerLocal(std::move(factory.getGameManagerLocal()))*/
+    GraphicalUI::GraphicalUI() :
+        /*managerClient(std::move(factory.getGameManagerClient())),*/
+        managerLocal(new controller::GameManagerLocal())
     {
         // The main window
         window = new gui::GraphicalUIWindow();
@@ -60,35 +61,23 @@ namespace view
         const char *p1Name = window->menu->p1Name->value();
         const char *p2Name = window->menu->p2Name->value();
 
-        /*
-        data::IPlayer *p1 = nullptr;
-        data::IPlayer *p2 = nullptr;
-        
-        if (managerLocal->getActiveGame() == nullptr) {
-            p1 = factory.getPlayer(p1Name, "");
-            p2 = factory.getPlayer(p2Name, "");
-        } else {
-            p1 = managerLocal->getActiveGame()->getPlayer1();
-            p2 = managerLocal->getActiveGame()->getPlayer2();
-        
-            // If the name is the same, use the old player
-            // else create new player.
-            if (p1->getName().compare(p1Name))
-                p1 = factory.getPlayer(p1Name, "");
-            if (p2->getName().compare(p2Name))
-                p2 = factory.getPlayer(p2Name, "");
-        }
-    
-        // Sets the new game
-        managerLocal->newGame(factory.getGame(window->menu->hor->value(),
-            window->menu->vert->value(), p1, p2, p1));
-        
+        int p1Key = managerLocal->addPlayer(p1Name, "");
+        int p2Key = managerLocal->addPlayer(p2Name, "");
+        int gameKey = managerLocal->addGame(p1Key, p2Key,
+            window->menu->hor->value(),
+            window->menu->vert->value());
+
+        // TODO:
+        std::cout << managerLocal->toString();
+
+        managerLocal->setActiveGame(gameKey);
+
         // GUI for one game
         gui::GraphicalUIGame *game = new gui::GraphicalUIGame();
         
         game->callback(scb_game, this);
-        game->displayGame(managerLocal->getActiveGame());
-        game->show();*/
+        game->displayGame(managerLocal->getActiveGameRef());
+        game->show();
     }
     
     // Callbacks =====================================================
@@ -156,12 +145,10 @@ namespace view
     // Field is clicked
     void GraphicalUI::cb_game(Fl_Widget *w)
     {
-        /*
         gui::GraphicalUIGame *game = static_cast<gui::GraphicalUIGame *>(w);
         
         // If the window is closed: Delete the game from the manager
         if (Fl::event() == FL_CLOSE) {
-            managerLocal->deleteGame(game->game);
             game->hide();
             return;
         }
@@ -170,22 +157,21 @@ namespace view
         gui::CellDrawing *cell = game->field->getClickedCell();
         
         // Set the active game for the manager
-        if (!managerLocal->setActiveGame(game->game))
-            return;
+        managerLocal->setActiveGame(game->game->getKey());
         
         // Only make turn if the game is running
-        if (managerLocal->getActiveGame()->isRunning()) {
+        if (managerLocal->getActiveGameRef()->isRunning()) {
             managerLocal->input(cell->xNr, cell->yNr);
             game->setInfoOutput();
         }
         
-        if (!managerLocal->getActiveGame()->isRunning()) {
-            data::IPlayer *winner = managerLocal->getActiveGame()->getWinner();
+        if (!managerLocal->getActiveGameRef()->isRunning()) {
+            std::shared_ptr<data::IPlayer> winner(managerLocal->getActiveGameRef()->getWinner());
             
-            game->setWinnerOutput(winner);
+            game->setWinnerOutput(winner.get());
         }
         
-        game->field->redraw();*/
+        game->field->redraw();
     }
     
     void GraphicalUI::scb_btn_logout(Fl_Widget *w, void *p)

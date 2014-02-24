@@ -1,4 +1,5 @@
 #include "AGameManager.h"
+#include <boost/lexical_cast.hpp>
 
 namespace controller
 {
@@ -70,6 +71,28 @@ namespace controller
     std::map<int, std::shared_ptr<data::IPlayer>>& controller::AGameManager::getPlayers()
     {
         return players;
+    }
+
+    std::string controller::AGameManager::toString()
+    {
+        std::string strGames;
+        std::string strPlayers;
+
+        strGames = "Games:\n";
+        for (auto i : games) {
+            strGames += boost::lexical_cast<std::string>(i.first);
+            strGames += " | " + i.second->getPlayer1()->getName();
+            strGames += " <-> " + i.second->getPlayer2()->getName();
+            strGames += "\n";
+        }
+        strPlayers = "Players:\n";
+        for (auto i : players) {
+            strPlayers += boost::lexical_cast<std::string>(i.first);
+            strPlayers += " | " + i.second->getName();
+            strPlayers += "\n";
+        }
+
+        return (strGames + "\n\n" + strPlayers);
     }
 
 }

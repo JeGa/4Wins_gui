@@ -23,6 +23,7 @@ namespace controller
         virtual bool input(int x, int y);
         virtual bool setActiveGame(int key);
         virtual int getActiveGame();
+        virtual std::shared_ptr<data::IGame> getActiveGameRef();
     };
 
 }

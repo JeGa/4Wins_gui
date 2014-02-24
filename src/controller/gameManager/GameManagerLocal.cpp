@@ -34,4 +34,9 @@ namespace controller
         return gc->getGame()->getKey();
     }
 
+    std::shared_ptr<data::IGame> GameManagerLocal::getActiveGameRef()
+    {
+        return gc->getGame();
+    }
+
 }

@@ -19,9 +19,10 @@ namespace view { namespace gui
     {
     }
 
-    void GraphicalUIGame::displayGame(data::IGame *game)
+    void GraphicalUIGame::displayGame(std::shared_ptr<data::IGame> game)
     {
-        if (game == nullptr)
+        // TODO: ??? nullptr
+        if (!game)
             return;
             
         this->game = game;

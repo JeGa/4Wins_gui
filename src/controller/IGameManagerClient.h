@@ -19,6 +19,7 @@ namespace controller
         virtual bool ping() = 0;
         virtual bool getData() = 0;
         virtual bool isLoggedIn() = 0;
+        virtual std::shared_ptr<data::IPlayer> getLocalPlayerRef() = 0;
 
         virtual void newGame(data::IGame *game) = 0;
         virtual bool deleteGame(data::IGame *game) = 0;

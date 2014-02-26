@@ -14,6 +14,7 @@
 #include "TCPMessageUser.h"
 #include "Player.h"
 #include "GameManagerLocal.h"
+#include "GameManagerNetworkClient.h"
 #include <Fl/fl_ask.h>
 #include <boost/lexical_cast.hpp>
 
@@ -21,7 +22,7 @@ namespace view
 {
     
     GraphicalUI::GraphicalUI() :
-        /*managerClient(std::move(factory.getGameManagerClient())),*/
+        managerClient(new controller::GameManagerNetworkClient()),
         managerLocal(new controller::GameManagerLocal())
     {
         // The main window
@@ -67,9 +68,6 @@ namespace view
             window->menu->hor->value(),
             window->menu->vert->value());
 
-        // TODO:
-        std::cout << managerLocal->toString();
-
         managerLocal->setActiveGame(gameKey);
 
         // GUI for one game
@@ -100,7 +98,6 @@ namespace view
     
     void GraphicalUI::cb_btn_loginGame()
     {
-        /*
         const char *name = window->menu->loginName->value();
         const char *pw = window->menu->loginPassword->value();
         
@@ -112,7 +109,7 @@ namespace view
         bool status = managerClient->login(name, pw);
         
         if (!status)
-            fl_alert("Failure in logging in user");*/
+            fl_alert("Failure in logging in user");
     }
     
     void GraphicalUI::scb_btn_register(Fl_Widget *w, void *p)
@@ -122,7 +119,6 @@ namespace view
     
     void GraphicalUI::cb_btn_register()
     {
-        /*
         const char *name = window->menu->registerName->value();
         const char *pw = window->menu->registerPassword->value();
         
@@ -134,7 +130,7 @@ namespace view
         bool status = managerClient->registerUser(name, pw);
         
         if (!status)
-            fl_alert("Failure in register user");*/
+            fl_alert("Failure in register user");
     }
     
     void GraphicalUI::scb_game(Fl_Widget *w, void *p)
@@ -145,7 +141,7 @@ namespace view
     // Field is clicked
     void GraphicalUI::cb_game(Fl_Widget *w)
     {
-        gui::GraphicalUIGame *game = static_cast<gui::GraphicalUIGame *>(w);
+        gui::GraphicalUIGame *game = dynamic_cast<gui::GraphicalUIGame *>(w);
         
         // If the window is closed: Delete the game from the manager
         if (Fl::event() == FL_CLOSE) {
@@ -226,18 +222,18 @@ namespace view
     
     void GraphicalUI::updateHandler()
     {
-//        if (check == 20) {
-//            if (managerClient->ping()) {
-//                window->status->connectionStatusText->color(FL_GREEN);
-//                window->status->redraw();
-//            } else {
-//                window->status->connectionStatusText->color(FL_RED);
-//                window->status->redraw();
-//            }
-//            check = 0;
-//        } else
-//            ++check;
-            /*
+        if (check == 20) {
+            if (managerClient->ping()) {
+                window->status->connectionStatusText->color(FL_GREEN);
+                window->status->redraw();
+            } else {
+                window->status->connectionStatusText->color(FL_RED);
+                window->status->redraw();
+            }
+            check = 0;
+        } else
+            ++check;
+
         if (managerClient->isLoggedIn()) {
             if (window->tabs->visible() == 0) {
                 window->menu->hide();
@@ -255,7 +251,8 @@ namespace view
                 window->status->redraw();
             }
         }
-        
+
+        /*
         std::vector<std::string> v;
         std::map<int, data::IPlayer *> p = managerClient->getPlayers();
         
@@ -267,9 +264,9 @@ namespace view
             v.push_back(p.begin()->second->getName());
             
             window->tabs->viewProfiles->table->addRow(v);
-        }
+        }*/
             
-        Fl::repeat_timeout(0.5, s_updateHandler, this);*/
+        Fl::repeat_timeout(0.5, s_updateHandler, this);
     }
     
 }

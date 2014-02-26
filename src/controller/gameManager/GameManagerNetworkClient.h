@@ -14,6 +14,7 @@
 #include "TCPMessage.h"
 #include "Observer.h"
 #include "GameFactory.h"
+#include "TCPMessageUser.h"
 #include <boost/thread.hpp>
 #include <map>
 
@@ -34,6 +35,8 @@ namespace controller
         QUERY_MSG_TYPE waitingFor = QUERY_MSG_TYPE::NOT_SET;
         
         boost::mutex handshake;
+
+        void handleUserMessage(TCPMessageUser& umsg);
     public:
         GameManagerNetworkClient();
         virtual ~GameManagerNetworkClient();
@@ -41,16 +44,19 @@ namespace controller
         virtual bool login(std::string name, std::string pw);
         virtual bool logout();
         virtual bool registerUser(std::string name, std::string pw);
+
         virtual bool ping();
-        virtual bool getData();
         virtual bool isLoggedIn();
+        virtual bool getData();
+
+        virtual std::shared_ptr<data::IPlayer> getLocalPlayerRef();
 
         // TODO:
         virtual void newGame(data::IGame *game) {};
         virtual bool deleteGame(data::IGame *game) {return false;};
         virtual bool input(int x, int y) {return false;};
         
-        virtual void notify(util::Subject * sub);
+        virtual void notify(util::Subject* sub);
     };
 
 }

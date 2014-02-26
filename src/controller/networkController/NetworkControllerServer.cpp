@@ -148,7 +148,7 @@ namespace controller
     // Notified from the TCPConnection receive thread
     void NetworkControllerServer::notify(util::Subject *sub)
     {
-        TCPConnection *con = static_cast<TCPConnection *>(sub);
+        TCPConnection *con = dynamic_cast<TCPConnection*>(sub);
         
         // Connection is closed:
         if (!con->isActive()) {

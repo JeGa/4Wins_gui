@@ -9,7 +9,7 @@ namespace controller
 	namespace util
 	{
 
-		// Forward declare wegen circular dependency
+		// Forward declare because of circular dependency
 		class Observer;
 
 		class Subject

@@ -9,18 +9,16 @@
 * control data. After that the Observers are notified.
 * 
 * ==============================================================================
-* 
-* NOT IMPLEMENTED:
-* 
-* There are two different receive modes available:
-* 
+*
 * AUTO_RECEIVE:
 * 
 * Messages are received in a receiver-thread. This is the standard mode.
 * In this mode the clients can receive status and control messages from
 * the server. When a messages is received, all observers are notified
 * from the receive-thread.
-* 
+*
+* NOT IMPLEMENTED:
+*
 * MANUAL_RECEIVE:
 * 
 * Messages are only received, if the receive() method is invoked.
@@ -38,20 +36,15 @@
 // MinGW/Boost/Python problem
 #undef hypot
 
+#include "Subject.h"
+#include "TCPMessage.h"
 #include <boost/thread.hpp>
 #include <boost/asio.hpp>
 #include <string>
-#include "Subject.h"
-#include "TCPMessage.h"
 #include <memory>
 
 namespace controller
 {
-
-//    enum class RECEIVE_MODE
-//    {
-//        AUTO_RECEIVE, MANUAL_RECEIVE
-//    }
     
     using boost::asio::ip::tcp;
 
@@ -89,21 +82,18 @@ namespace controller
         void send(std::string str);
         std::string receive();
         
-        // Mode
-//        RECEIVE_MODE receiveMode = RECEIVE_MODE::AUTO_RECEIVE;
     public:
         TCPConnection(std::unique_ptr<tcp::socket> s);
         virtual ~TCPConnection();
 
         void startConnectionThreads(); // Start receiving and keep alive
-        
+
         void sendMessage(TCPMessage& msg);
         std::unique_ptr<TCPMessage> receiveMessage();
         
         // If threads are running, closes the threads and the socket
         void disconnect();
         bool isActive();
-//        void setReceiveMode(RECEIVE_MODE m);
         
         std::unique_ptr<TCPMessage> getLastMessage();
         int getRemotePort();

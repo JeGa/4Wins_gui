@@ -53,7 +53,7 @@ namespace controller
         void stopServer();
         std::vector<std::unique_ptr<TCPConnection>>& getConnections();
         
-        virtual void notify(util::Subject * sub);
+        virtual void notify(util::Subject *sub);
     };
 
 }

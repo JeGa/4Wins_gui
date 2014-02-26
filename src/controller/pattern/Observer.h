@@ -16,7 +16,7 @@ namespace controller
 		public:
 			Observer(void);
 			virtual ~Observer(void);
-			virtual void notify(Subject * sub) = 0;
+			virtual void notify(Subject *sub) = 0;
 		};
 
 	}

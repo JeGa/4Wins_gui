@@ -17,6 +17,8 @@ namespace controller
         // Sets/gets game as active game for GameController
         virtual bool setActiveGame(int key) = 0;
         virtual int getActiveGame() = 0;
+        // When a external pointer is required.
+        // Do only use
         virtual std::shared_ptr<data::IGame> getActiveGameRef() = 0;
     };
     

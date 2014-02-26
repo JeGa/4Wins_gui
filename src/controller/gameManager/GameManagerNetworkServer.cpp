@@ -68,7 +68,7 @@ namespace controller
             TCPMessageUser umsg;
 
             // Is it a user message
-            if (umsg.createAck(msg->getFrameData())) {
+            if (umsg.createMessage(msg->getFrameData())) {
                 if (umsg.isValid())
                     handleUserMessage(con, umsg);
             }
@@ -77,30 +77,32 @@ namespace controller
 
     void GameManagerNetworkServer::handleUserMessage(TCPConnection *con, TCPMessageUser& umsg)
     {
-        if (umsg.getQueryType() == QUERY_MSG_TYPE::REGISTER_QUERY) {
+        std::shared_ptr<data::IPlayer> p(umsg.getUser());
 
-            addPlayer(umsg.getName(), umsg.getPw());
-            umsg.setAck(true); // TODO: Validation
+        if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::REGISTER_QUERY) {
 
-            con->sendMessage(umsg);
-
-        } else if (umsg.getQueryType() == QUERY_MSG_TYPE::LOGIN_QUERY) {
-
-            loginPlayer(umsg.getName(), umsg.getPw());
-            umsg.setAck(true); // TODO: Validation
+            addPlayer(p->getName(), p->getPassword());
+            umsg.setAckMessage(true); // TODO: Validation
 
             con->sendMessage(umsg);
 
-        } else if (umsg.getQueryType() == QUERY_MSG_TYPE::LOGOUT_QUERY) {
+        } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::LOGIN_QUERY) {
 
-            logoutPlayer(umsg.getName(), umsg.getPw());
-            umsg.setAck(true); // TODO: Validation
+            loginPlayer(p->getName(), p->getPassword());
+            umsg.setAckMessage(true); // TODO: Validation
 
             con->sendMessage(umsg);
 
-        } else if (umsg.getQueryType() == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
+        } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::LOGOUT_QUERY) {
 
-            //umsg.setAck(players);
+            logoutPlayer(p->getName(), p->getPassword());
+            umsg.setAckMessage(true); // TODO: Validation
+
+            con->sendMessage(umsg);
+
+        } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY) {
+
+            //umsg.setAckMessage(players);
 
             con->sendMessage(umsg);
 

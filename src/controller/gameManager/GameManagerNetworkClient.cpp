@@ -20,9 +20,6 @@ namespace controller
 
     bool GameManagerNetworkClient::login(std::string name, std::string pw)
     {
-        if (waitingFor != QUERY_MSG_TYPE::NOT_SET)
-            return false;
-
         if (!networkController.isConnected())
             networkController.connect();
 
@@ -35,25 +32,21 @@ namespace controller
         if (localPlayer)
             return false;
 
-        // TODO: Could use unique ptr ...
         localPlayer = std::shared_ptr<data::IPlayer>(
                           factory->getPlayer(name, pw));
 
-        TCPMessageUser umsg;
-        if (!umsg.createQuery(QUERY_MSG_TYPE::LOGIN_QUERY, *localPlayer))
+        std::unique_ptr<TCPMessageUser> umsg(new TCPMessageUser);
+        if (!umsg->createQueryMessage(QUERY_MSG_TYPE_USER::LOGIN_QUERY, localPlayer))
             return false;
 
-        networkController.send(umsg);
-        waitingFor = QUERY_MSG_TYPE::LOGIN_QUERY;
+        networkController.send(*umsg);
 
+        messageQueue[umsg->getMsgKey()] = std::move(umsg);
         return true;
     }
 
     bool GameManagerNetworkClient::logout()
     {
-        if (waitingFor != QUERY_MSG_TYPE::NOT_SET)
-            return false;
-
         // Should normally be connected
         if (!networkController.isConnected())
             networkController.connect();
@@ -67,21 +60,18 @@ namespace controller
         if (!localPlayer)
             return false;
 
-        TCPMessageUser umsg;
-        if (!umsg.createQuery(QUERY_MSG_TYPE::LOGOUT_QUERY, *localPlayer))
+        std::unique_ptr<TCPMessageUser> umsg(new TCPMessageUser);
+        if (!umsg->createQueryMessage(QUERY_MSG_TYPE_USER::LOGOUT_QUERY, localPlayer))
             return false;
 
-        networkController.send(umsg);
-        waitingFor = QUERY_MSG_TYPE::LOGOUT_QUERY;
+        networkController.send(*umsg);
 
+        messageQueue[umsg->getMsgKey()] = std::move(umsg);
         return true;
     }
 
     bool GameManagerNetworkClient::registerUser(std::string name, std::string pw)
     {
-        if (waitingFor != QUERY_MSG_TYPE::NOT_SET)
-            return false;
-
         if (!networkController.isConnected())
             networkController.connect();
 
@@ -91,15 +81,15 @@ namespace controller
         // Create player (only local variable)
         std::shared_ptr<data::IPlayer> p(factory->getPlayer(name, pw));
 
-        TCPMessageUser umsg;
-        if (!umsg.createQuery(QUERY_MSG_TYPE::REGISTER_QUERY, *p))
+        std::unique_ptr<TCPMessageUser> umsg(new TCPMessageUser);
+        if (!umsg->createQueryMessage(QUERY_MSG_TYPE_USER::REGISTER_QUERY, p))
             return false;
 
         boost::unique_lock<boost::mutex> l(handshake);
 
-        networkController.send(umsg);
-        waitingFor = QUERY_MSG_TYPE::REGISTER_QUERY;
+        networkController.send(*umsg);
 
+        messageQueue[umsg->getMsgKey()] = std::move(umsg);
         return true;
     }
 
@@ -120,9 +110,6 @@ namespace controller
 
     bool GameManagerNetworkClient::getData()
     {
-        if (waitingFor != QUERY_MSG_TYPE::NOT_SET)
-            return false;
-
         // Should normally be connected
         if (!networkController.isConnected())
             networkController.connect();
@@ -133,16 +120,14 @@ namespace controller
             return false;
 
         // Create message
-        TCPMessageUser umsg;
-        if (!umsg.createQuery(QUERY_MSG_TYPE::GET_PLAYERS_QUERY, *localPlayer))
+        std::unique_ptr<TCPMessageUser> umsg(new TCPMessageUser);
+        if (!umsg->createQueryMessage(QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY, localPlayer))
             return false;
 
         // Logout player: Send message
-        networkController.send(umsg);
+        networkController.send(*umsg);
 
-        // Wait for ack
-        waitingFor = QUERY_MSG_TYPE::GET_PLAYERS_QUERY;
-
+        messageQueue[umsg->getMsgKey()] = std::move(umsg);
         return true;
     }
 
@@ -156,7 +141,7 @@ namespace controller
     // Notified from the TCPConnection receive thread
     void GameManagerNetworkClient::notify(util::Subject *sub)
     {
-        TCPConnection *con = dynamic_cast<TCPConnection *>(sub);
+        TCPConnection *con = dynamic_cast<TCPConnection*>(sub);
 
         if (con->isActive()) {
             std::unique_ptr<TCPMessage> msg = con->getLastMessage();
@@ -170,14 +155,13 @@ namespace controller
 
             boost::unique_lock<boost::mutex> l(handshake);
 
-            // When the manager is waiting for this message
+            // When the manager is waiting for this message (check messageQueue)
 
             // User message
-            if (umsg.createUserMessage(msg->getFrameData())) {
+            if (umsg.createMessage(msg->getFrameData())) {
                 if (umsg.isValid()) {
-                    if (waitingFor == umsg.getQueryType()) {
+                    if (isWaitingFor(umsg.getMsgKey()))
                         handleUserMessage(umsg);
-                    }
                 }
             }
         }
@@ -185,22 +169,22 @@ namespace controller
 
     void GameManagerNetworkClient::handleUserMessage(TCPMessageUser& umsg)
     {
-        if (waitingFor == QUERY_MSG_TYPE::REGISTER_QUERY) {
+        if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::REGISTER_QUERY) {
             if (umsg.getAckStatus()) {
                 // TODO: How to notify?
             }
-        } else if (waitingFor == QUERY_MSG_TYPE::LOGIN_QUERY) {
+        } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::LOGIN_QUERY) {
             if (umsg.getAckStatus()) {
                 if (localPlayer)
                     localPlayer->setLoggedIn(true);
             } else
                 localPlayer.reset();
-        } else if (waitingFor == QUERY_MSG_TYPE::LOGOUT_QUERY) {
+        } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::LOGOUT_QUERY) {
             if (umsg.getAckStatus()) {
                 if (localPlayer)
                     localPlayer.reset();
             }
-        } else if (waitingFor == QUERY_MSG_TYPE::GET_PLAYERS_QUERY) {
+        } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY) {
             if (umsg.getAckStatus()) {
                 clearPlayers();
                 //clearGames();
@@ -208,8 +192,20 @@ namespace controller
                 //games = umsg.getGames();
             }
         }
+    }
 
-        waitingFor = QUERY_MSG_TYPE::NOT_SET;
+    bool GameManagerNetworkClient::isWaitingFor(int key)
+    {
+        try {
+            messageQueue.at(key);
+
+            // Waiting for this message
+            messageQueue.erase(key);
+            return true;
+        } catch (std::out_of_range& e) {
+            // Not waiting for this message
+            return false;
+        }
     }
 
 }

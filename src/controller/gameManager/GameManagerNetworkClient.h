@@ -30,13 +30,13 @@ namespace controller
         // tries to log in.
         std::shared_ptr<data::IPlayer> localPlayer;
         NetworkControllerClient networkController;
-        
-        // If the game manager is waiting for a message from the server
-        QUERY_MSG_TYPE waitingFor = QUERY_MSG_TYPE::NOT_SET;
+
+        std::map<int, std::unique_ptr<TCPMessage>> messageQueue;
         
         boost::mutex handshake;
 
         void handleUserMessage(TCPMessageUser& umsg);
+        bool isWaitingFor(int key);
     public:
         GameManagerNetworkClient();
         virtual ~GameManagerNetworkClient();

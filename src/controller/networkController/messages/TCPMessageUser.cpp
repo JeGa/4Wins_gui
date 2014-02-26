@@ -180,7 +180,7 @@ namespace controller
         if (!parseQueryUserData())
             return false;
 
-        if (getAckUserData().length() != "")
+        if (getAckUserData() != "")
             if (!parseAckUserData())
                 return false;
 
@@ -194,7 +194,7 @@ namespace controller
         if (queryType == QUERY_MSG_TYPE_USER::NOT_SET)
             return false;
 
-        ackType = static_cast<ACK_MSG_TYPE_USER>(queryType)
+        ackType = static_cast<ACK_MSG_TYPE_USER>(queryType);
 
         int typeTmp = static_cast<int>(ackType);
         tmp = boost::lexical_cast<std::string>(typeTmp);
@@ -230,7 +230,7 @@ namespace controller
             tmp += "#";
         }
 
-        return setAckMessage(tmp);
+        return TCPMessage::setAckMessage(tmp);
     }
 
     void TCPMessageUser::reset()
@@ -249,9 +249,15 @@ namespace controller
         return ackStatus;
     }
 
+    std::shared_ptr<data::IPlayer> TCPMessageUser::getUser()
+    {
+        return queryUser;
+    }
+
     std::map<int, std::shared_ptr<data::IPlayer>> TCPMessageUser::getPlayers()
     {
         return players;
     }
 
 }
+

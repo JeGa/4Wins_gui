@@ -91,7 +91,7 @@ namespace controller
             QUERY_MSG_TYPE_USER getQueryType();
             bool getAckStatus();
 
-            std::shared_ptr<data::IPlayer> getQueryUser();
+            std::shared_ptr<data::IPlayer> getUser();
             std::map<int, std::shared_ptr<data::IPlayer>> getPlayers();
     };
 

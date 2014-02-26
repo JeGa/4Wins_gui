@@ -2,8 +2,7 @@
 * This class is used by multiple threads! To access the data
 * synchronization mechanism must be used!
 *
-* Holds multiple game instances, the game controller holds one game
-* that is played.
+* The game controller holds one game that is played.
 */
 
 #ifndef GAMEMANAGERNETWORKSERVER_H
@@ -16,6 +15,8 @@
 #include "NetworkControllerServer.h"
 #include "Observer.h"
 #include "GameFactory.h"
+#include "TCPConnection.h"
+#include "TCPMessageUser.h"
 #include <map>
 #include <memory>
 
@@ -32,10 +33,10 @@ namespace controller
         std::unique_ptr<IGameController> gc;
         NetworkControllerServer networkController;
         
-        bool loginPlayer(std::string name, std::string pw);
-        bool logoutPlayer(std::string name, std::string pw);
-        int registerPlayer(std::string name, std::string pw);
-        bool playerStatus(std::string name, std::string pw, bool playerStatus);
+        void loginPlayer(std::string name, std::string pw);
+        void logoutPlayer(std::string name, std::string pw);
+        void playerStatus(std::string name, std::string pw, bool playerStatus);
+        void handleUserMessage(TCPConnection *con, TCPMessageUser& umsg);
     public:
         GameManagerNetworkServer();
         virtual ~GameManagerNetworkServer();

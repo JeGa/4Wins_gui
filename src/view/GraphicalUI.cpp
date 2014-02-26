@@ -177,11 +177,10 @@ namespace view
     
     void GraphicalUI::cb_btn_logout()
     {
-        /*
         bool status = managerClient->logout();
         
         if (!status)
-            fl_alert("Failure in logging out user");*/
+            fl_alert("Failure in logging out user");
     }
 
     void GraphicalUI::scb_menubar(Fl_Widget *w, void *p)
@@ -252,7 +251,7 @@ namespace view
             }
         }
 
-        /*
+/*
         std::vector<std::string> v;
         std::map<int, data::IPlayer *> p = managerClient->getPlayers();
         

@@ -1,14 +1,14 @@
 #include "GraphicalUIServer.h"
-
+#include "GameManagerNetworkServer.h"
 #include <Fl/fl.h>
 #include <boost/lexical_cast.hpp>
 
 namespace view { namespace gui
 {
 
-    GraphicalUIServer::GraphicalUIServer()
-        : Fl_Window(700, 500, "4Wins Server")/*,
-        server(factory.getGameManagerServer(factory.getGameController()))*/
+    GraphicalUIServer::GraphicalUIServer() :
+        Fl_Window(700, 500, "4Wins Server"),
+        server(new controller::GameManagerNetworkServer())
     {
         startServer = new Fl_Button(20, 10,
             100, 25, "Start Server");
@@ -61,7 +61,7 @@ namespace view { namespace gui
 
     GraphicalUIServer::~GraphicalUIServer()
     {
-        //server->stop();
+        server->stop();
     }
     
     void GraphicalUIServer::addColHeaders()
@@ -101,7 +101,7 @@ namespace view { namespace gui
         
     void GraphicalUIServer::cb_startServer()
     {
-        //server->start();
+        server->start();
         
         serverStatus->color(FL_GREEN);
         serverStatus->redraw();
@@ -109,7 +109,7 @@ namespace view { namespace gui
     
     void GraphicalUIServer::cb_stopServer()
     {
-        //server->stop();
+        server->stop();
         
         serverStatus->color(FL_RED);
         serverStatus->redraw();
@@ -124,7 +124,7 @@ namespace view { namespace gui
     {
         addColHeaders();
         
-        /*std::vector<std::unique_ptr<controller::TCPConnection>>& cons =
+        std::vector<std::unique_ptr<controller::TCPConnection>>& cons =
             server->getConnections();
         
         int s = cons.size();
@@ -143,7 +143,7 @@ namespace view { namespace gui
             table->addRow(row);
         }
         
-        std::map<int, data::IPlayer *> players = server->getPlayers();
+        std::map<int, std::shared_ptr<data::IPlayer>>& players = server->getPlayers();
         
         for (auto &i : players) {
             std::vector<std::string> row;
@@ -157,7 +157,7 @@ namespace view { namespace gui
             row.push_back(boost::lexical_cast<std::string>(i.second->isLoggedIn()));
             
             tablePlayers->addRow(row);
-        }*/
+        }
         
         table->redraw();
         tablePlayers->redraw();

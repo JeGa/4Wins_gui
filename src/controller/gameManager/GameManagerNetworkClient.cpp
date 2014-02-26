@@ -159,7 +159,6 @@ namespace controller
         TCPConnection *con = dynamic_cast<TCPConnection *>(sub);
 
         if (con->isActive()) {
-
             std::unique_ptr<TCPMessage> msg = con->getLastMessage();
             if (!msg)
                 return; // Message was already handled
@@ -175,8 +174,10 @@ namespace controller
 
             // User message
             if (umsg.createUserMessage(msg->getFrameData())) {
-                if (waitingFor == umsg.getQueryType()) {
-                    handleUserMessage(umsg);
+                if (umsg.isValid()) {
+                    if (waitingFor == umsg.getQueryType()) {
+                        handleUserMessage(umsg);
+                    }
                 }
             }
         }

@@ -21,12 +21,12 @@ namespace controller
 
     bool NetworkControllerClient::ping()
     {
-        bool status = true;
-
         if (this->isConnected())
             return true;
 
         connect();
+
+        bool status = true;
 
         // If error connecting to server
         if (!con)

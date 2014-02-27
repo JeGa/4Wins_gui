@@ -10,7 +10,6 @@ namespace controller
     TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s)
         : socket(std::move(s))
     {
-        // TODO
         socket->non_blocking(true);
 
         tcp::endpoint localEndp = socket->local_endpoint();
@@ -24,7 +23,7 @@ namespace controller
 
     TCPConnection::~TCPConnection()
     {
-        this->disconnect();
+        disconnect();
     }
 
     void TCPConnection::disconnect()
@@ -140,11 +139,11 @@ namespace controller
         while (true) {
 
             // TODO: Remove busy loop!!
-            //boost::this_thread::sleep_for(boost::chrono::seconds(1));
+//            boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
 
             // Check if thread interrupted -> Closed from other thread
             // Check if keep alive is expired -> Closed from client (or error)
-            if (checkInterrupt() | !checkKeepAlive()) {
+            if (checkInterrupt() || !checkKeepAlive()) {
 
                 // Close send thread
                 sendThreadHandle.interrupt();
@@ -162,8 +161,6 @@ namespace controller
 
             if (msg->isValid()) {
                 // CONTINUE HERE: Message received
-
-//                std::cout << msg.getFrameData() << std::endl;
 
                 if (msg->getType() == MSG_TYPE::KEEP_ALIVE)
                     parseMessageInternal(*msg);
@@ -195,7 +192,7 @@ namespace controller
 
         while (true) {
 
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
 
             // Check if thread interrupted -> Closed from other thread
             if (checkInterrupt()) {
@@ -204,7 +201,7 @@ namespace controller
 
             TCPMessage msg;
             msg.createKeepAliveMessage();
-            send(msg.getFrameData());
+            sendMessage(msg);
         }
 
         std::cout<< "#> Send thread closing" << std::endl;
@@ -229,8 +226,6 @@ namespace controller
 
     void TCPConnection::parseMessageInternal(TCPMessage& msg)
     {
-        tcp::endpoint remoteEndpoint = socket->remote_endpoint();
-
         // Check keep alive
         if (msg.getQueryUserData() ==
                 TCPMessage::KEEP_ALIVE_MESSAGE) {

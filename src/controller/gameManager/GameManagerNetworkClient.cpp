@@ -1,5 +1,4 @@
 #include "GameManagerNetworkClient.h"
-
 #include "TCPMessageUser.h"
 
 namespace controller

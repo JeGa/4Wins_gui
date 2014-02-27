@@ -18,8 +18,6 @@
 * - GET_PLAYERS
 *
 * ====================================================================
-*
-* This class is not responsible for the memory management of players map!
 */
 
 #ifndef TCPMESSAGEUSER_H
@@ -65,8 +63,14 @@ namespace controller
             bool tokenizeUserMessage(std::string msg, std::vector<std::string>& tokens);
             bool parseQueryUserData();
             bool parseAckUserData();
-            void clearPlayers();
             void parsePlayersData();
+            std::string playerToMessageString(data::IPlayer& p);
+            std::string queryMsgTypeUserToString(QUERY_MSG_TYPE_USER type);
+            std::string ackMsgTypeUserToString(ACK_MSG_TYPE_USER type);
+            QUERY_MSG_TYPE_USER stringToQueryMsgType(std::string type);
+            ACK_MSG_TYPE_USER stringToAckMsgType(std::string type);
+            ACK_MSG_TYPE_USER queryToAckMsgType(QUERY_MSG_TYPE_USER type);
+            QUERY_MSG_TYPE_USER ackToQueryMsgType(ACK_MSG_TYPE_USER type);
 
             // Query data (set from sender, get from receiver):
             std::shared_ptr<data::IPlayer> queryUser;
@@ -74,23 +78,27 @@ namespace controller
             // Ack data (set from receiver, get from sender):
             std::map<int, std::shared_ptr<data::IPlayer>> players;
 
+            // TODO: Make inherited functions private
+            //bool createQueryMessage(std::string data);
+            //bool setAckMessage(std::string data);
+
         public:
             TCPMessageUser() {} // TODO: Get factory as parameter?
             virtual ~TCPMessageUser() {}
 
-            // Override/overload
             bool createQueryMessage(
                 QUERY_MSG_TYPE_USER type,
                 std::shared_ptr<data::IPlayer> p);
-            bool createMessage(std::string frameData);
-            bool setAckMessage(bool status);
             bool setAckMessage(
-                std::map<int, std::shared_ptr<data::IPlayer>>& players);
-            void reset();
+                std::map<int, std::shared_ptr<data::IPlayer>>& players
+            );
+            bool setAckMessage(bool status);
+
+            virtual bool createMessage(std::string frameData) override;
+            virtual void reset() override;
 
             QUERY_MSG_TYPE_USER getQueryType();
             bool getAckStatus();
-
             std::shared_ptr<data::IPlayer> getUser();
             std::map<int, std::shared_ptr<data::IPlayer>> getPlayers();
     };

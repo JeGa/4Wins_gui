@@ -10,6 +10,7 @@ namespace controller
     TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s)
         : socket(std::move(s))
     {
+        // TODO
         socket->non_blocking(true);
 
         tcp::endpoint localEndp = socket->local_endpoint();
@@ -137,6 +138,10 @@ namespace controller
         lastKeepAlive = boost::chrono::steady_clock::now();
 
         while (true) {
+
+            // TODO: Remove busy loop!!
+            //boost::this_thread::sleep_for(boost::chrono::seconds(1));
+
             // Check if thread interrupted -> Closed from other thread
             // Check if keep alive is expired -> Closed from client (or error)
             if (checkInterrupt() | !checkKeepAlive()) {

@@ -50,6 +50,12 @@ namespace controller
         return networkController.getConnections();
     }
 
+    bool GameManagerNetworkServer::isLoggedIn(int key)
+    {
+        // TODO: Is in Map?
+        return players[key]->isLoggedIn();
+    }
+
     // =========================================================================
 
     // Notified from the TCPConnection receive thread
@@ -102,7 +108,10 @@ namespace controller
 
         } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY) {
 
-            //umsg.setAckMessage(players);
+            if (isLoggedIn(umsg.getUser()->getKey()))
+                umsg.setAckMessage(players);
+            else
+                umsg.setAckMessage(false);
 
             con->sendMessage(umsg);
 

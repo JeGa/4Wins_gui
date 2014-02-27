@@ -12,10 +12,6 @@ namespace controller
     const std::string TCPMessage::KEEP_ALIVE_MESSAGE = "4WINS ALIVE";
     int TCPMessage::msgKeyCounter = 0;
 
-    TCPMessage::TCPMessage()
-    {
-    }
-
     // Create and format the string to send over the network.
     void TCPMessage::buildFrameData()
     {

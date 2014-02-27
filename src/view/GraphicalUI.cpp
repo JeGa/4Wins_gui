@@ -209,9 +209,8 @@ namespace view
     
     void GraphicalUI::cb_viewProfiles()
     {
-        /*
         if (!managerClient->getData())
-            fl_alert("Failure in getting server data");*/
+            fl_alert("Failure in getting server data");
     }
     
     void GraphicalUI::s_updateHandler(void *p)
@@ -251,9 +250,8 @@ namespace view
             }
         }
 
-/*
         std::vector<std::string> v;
-        std::map<int, data::IPlayer *> p = managerClient->getPlayers();
+        std::map<int, std::shared_ptr<data::IPlayer>> p = managerClient->getPlayers();
         
         if (p.size() > 0) {
             window->tabs->viewProfiles->table->addColHeader("Key");
@@ -263,7 +261,7 @@ namespace view
             v.push_back(p.begin()->second->getName());
             
             window->tabs->viewProfiles->table->addRow(v);
-        }*/
+        }
             
         Fl::repeat_timeout(0.5, s_updateHandler, this);
     }

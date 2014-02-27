@@ -46,6 +46,7 @@ namespace controller
 
             int msgKey = -1;
             MSG_TYPE type = MSG_TYPE::NOT_SET;
+
             // What the client sends
             std::string queryUserData = "";
             // What the server sends back
@@ -64,7 +65,7 @@ namespace controller
         public:
             static const std::string KEEP_ALIVE_MESSAGE;
 
-            TCPMessage();
+            TCPMessage() {}
             virtual ~TCPMessage() {}
 
             /* FOR QUERY SEND:
@@ -74,13 +75,13 @@ namespace controller
              *
              * Message must be a new message (or reset() is needed).
              */
-            bool createQueryMessage(std::string data);
+            virtual bool createQueryMessage(std::string data);
 
             /* FOR ANY MESSAGE RECEIVE:
              *
              * Create message based on a frame data string.
              */
-            bool createMessage(std::string frameData);
+            virtual bool createMessage(std::string frameData);
 
             /* FOR ACK SEND:
              *
@@ -88,24 +89,20 @@ namespace controller
              *
              * Message must be a QUERY message.
              */
-            bool setAckMessage(std::string data);
+            virtual bool setAckMessage(std::string data);
 
             /*
              * This resets the message to create a new message. Normally the user
              * is prevented from creating a new message if the object is already
              * a valid message (to prevent loss of message information).
              */
-            void reset();
+            virtual void reset();
 
-            /*
-             * Create a keep-alive message.
-             */
             bool createKeepAliveMessage();
 
             bool isValid();
 
             MSG_TYPE getType();
-            // Return the data with the frame (to send)
             std::string getFrameData();
             std::string getQueryUserData();
             std::string getAckUserData();

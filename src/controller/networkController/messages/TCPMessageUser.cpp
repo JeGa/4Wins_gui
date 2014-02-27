@@ -33,22 +33,13 @@ namespace controller
     bool TCPMessageUser::parseQueryUserData()
     {
         std::vector<std::string> tokens;
-
         if (!tokenizeUserMessage(getQueryUserData(), tokens))
             return false;
 
         if (tokens.size() != 4)
             return false;
 
-        // Query type
-        int tmpTypeInt = boost::lexical_cast<int>(tokens[0]);
-
-        QUERY_MSG_TYPE_USER tmpType;
-        try {
-            tmpType = static_cast<QUERY_MSG_TYPE_USER>(tmpTypeInt);
-        } catch (boost::bad_lexical_cast& e) {
-            return false;
-        }
+        QUERY_MSG_TYPE_USER tmpType = stringToQueryMsgType(tokens[0]);
 
         if (tmpType == QUERY_MSG_TYPE_USER::NOT_SET)
             return false;
@@ -64,34 +55,25 @@ namespace controller
 
     bool TCPMessageUser::parseAckUserData()
     {
-        std::vector<std::string> tokens;
+        // Can be empty, if frameData is from a query.
+        if (getAckUserData() == "")
+            return true;
 
+        std::vector<std::string> tokens;
         if (!tokenizeUserMessage(getAckUserData(), tokens))
             return false;
 
-        if (tokens.size() <= 1)
-            return false;
-
-        // Ack type
-        int tmpTypeInt = boost::lexical_cast<int>(tokens[0]);
-
-        ACK_MSG_TYPE_USER tmpType;
-        try {
-            tmpType = static_cast<ACK_MSG_TYPE_USER>(tmpTypeInt);
-        } catch (boost::bad_lexical_cast& e) {
-            return false;
-        }
+        ACK_MSG_TYPE_USER tmpType = stringToAckMsgType(tokens[0]);
 
         if (tmpType == ACK_MSG_TYPE_USER::NOT_SET)
             return false;
 
-        queryType = static_cast<QUERY_MSG_TYPE_USER>(tmpTypeInt);
         ackType = tmpType;
+        queryType = ackToQueryMsgType(ackType);
 
-        if (tmpType == ACK_MSG_TYPE_USER::GET_PLAYERS_ACK) {
+        if (ackType == ACK_MSG_TYPE_USER::GET_PLAYERS_ACK) {
             parsePlayersData();
             ackStatus = true;
-
         } else {
             if (tokens[1] == "SUCCESS")
                 ackStatus = true;
@@ -147,6 +129,53 @@ namespace controller
         }
     }
 
+    std::string TCPMessageUser::playerToMessageString(data::IPlayer& p)
+    {
+        std::string tmp;
+
+        std::string tmpKey =  boost::lexical_cast<std::string>(p.getKey());
+        std::string tmpName = p.getName();
+        std::string tmpPw = p.getPassword();
+
+        tmp = tmpKey + " " + tmpName + " " + tmpPw;
+
+        return tmp;
+    }
+
+    std::string TCPMessageUser::queryMsgTypeUserToString(QUERY_MSG_TYPE_USER type)
+    {
+        int typeInt = static_cast<int>(type);
+        return boost::lexical_cast<std::string>(typeInt);
+    }
+
+    std::string TCPMessageUser::ackMsgTypeUserToString(ACK_MSG_TYPE_USER type)
+    {
+        int typeInt = static_cast<int>(type);
+        return boost::lexical_cast<std::string>(typeInt);
+    }
+
+    QUERY_MSG_TYPE_USER TCPMessageUser::stringToQueryMsgType(std::string type)
+    {
+        int typeInt = boost::lexical_cast<int>(type);
+        return static_cast<QUERY_MSG_TYPE_USER>(typeInt);
+    }
+
+    ACK_MSG_TYPE_USER TCPMessageUser::stringToAckMsgType(std::string type)
+    {
+        int typeInt = boost::lexical_cast<int>(type);
+        return static_cast<ACK_MSG_TYPE_USER>(typeInt);
+    }
+
+    ACK_MSG_TYPE_USER TCPMessageUser::queryToAckMsgType(QUERY_MSG_TYPE_USER type)
+    {
+        return static_cast<ACK_MSG_TYPE_USER>(type);
+    }
+
+    QUERY_MSG_TYPE_USER TCPMessageUser::ackToQueryMsgType(ACK_MSG_TYPE_USER type)
+    {
+        return static_cast<QUERY_MSG_TYPE_USER>(type);
+    }
+
     // ===============================================================
 
     bool TCPMessageUser::createQueryMessage(
@@ -156,16 +185,8 @@ namespace controller
         if (type == QUERY_MSG_TYPE_USER::NOT_SET)
             return false;
 
-        // Set the query data
-        std::string tmpQueryData;
-        int typeInt = static_cast<int>(type);
-
-        std::string tmpKey =  boost::lexical_cast<std::string>(p->getKey());
-        std::string tmpName = p->getName();
-        std::string tmpPw = p->getPassword();
-        std::string tmpType = boost::lexical_cast<std::string>(typeInt);
-
-        tmpQueryData = tmpType + ": " + tmpKey + " " + tmpName + " " + tmpPw;
+        std::string tmpQueryData = queryMsgTypeUserToString(type)
+            + ": " + playerToMessageString(*p);
 
         queryType = type;
         queryUser = p;
@@ -180,24 +201,20 @@ namespace controller
         if (!parseQueryUserData())
             return false;
 
-        if (getAckUserData() != "")
-            if (!parseAckUserData())
-                return false;
+        if (!parseAckUserData())
+            return false;
 
         return true;
     }
 
     bool TCPMessageUser::setAckMessage(bool status)
     {
-        std::string tmp;
-
-        if (queryType == QUERY_MSG_TYPE_USER::NOT_SET)
+        if (queryType == QUERY_MSG_TYPE_USER::NOT_SET ||
+            queryType == QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY)
             return false;
 
-        ackType = static_cast<ACK_MSG_TYPE_USER>(queryType);
-
-        int typeTmp = static_cast<int>(ackType);
-        tmp = boost::lexical_cast<std::string>(typeTmp);
+        ackType = queryToAckMsgType(queryType);
+        std::string tmp = ackMsgTypeUserToString(ackType);
 
         if (status)
             tmp += ": SUCCESS";
@@ -210,13 +227,11 @@ namespace controller
     bool TCPMessageUser::setAckMessage(
         std::map<int, std::shared_ptr<data::IPlayer>>& players)
     {
-        std::string tmp;
-
-        if (ackType == ACK_MSG_TYPE_USER::NOT_SET)
+        if (queryType != QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY)
             return false;
 
-        int typeTmp = static_cast<int>(ackType);
-        tmp = boost::lexical_cast<std::string>(typeTmp);
+        ackType = queryToAckMsgType(queryType);
+        std::string tmp = ackMsgTypeUserToString(ackType);
         tmp += ":";
 
         for (auto& i : players) {
@@ -237,6 +252,7 @@ namespace controller
     {
         queryUser.reset();
         players.clear();
+        TCPMessage::reset();
     }
 
     QUERY_MSG_TYPE_USER TCPMessageUser::getQueryType()
@@ -260,4 +276,3 @@ namespace controller
     }
 
 }
-

@@ -37,6 +37,7 @@ namespace controller
         void logoutPlayer(std::string name, std::string pw);
         void playerStatus(std::string name, std::string pw, bool playerStatus);
         void handleUserMessage(TCPConnection *con, TCPMessageUser& umsg);
+        bool isLoggedIn(int key);
     public:
         GameManagerNetworkServer();
         virtual ~GameManagerNetworkServer();

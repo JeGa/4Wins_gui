@@ -2,32 +2,10 @@
 * Represents a network TCP connection. For each client there is one
 * TCPConnection object. Each connection listens for incoming messages
 * in an own thread. A second thread sends the keep alive message to the
-* remote socket. To send and receive manually, the public send() and
-* receive() functions can be used: The socket is protected with a mutex.
+* remote socket.
 *
 * After a message is received, the TCPConnection parses the internal
 * control data. After that the Observers are notified.
-*
-* ==============================================================================
-*
-* AUTO_RECEIVE:
-*
-* Messages are received in a receiver-thread. This is the standard mode.
-* In this mode the clients can receive status and control messages from
-* the server. When a messages is received, all observers are notified
-* from the receive-thread.
-*
-* NOT IMPLEMENTED:
-*
-* MANUAL_RECEIVE:
-*
-* Messages are only received, if the receive() method is invoked.
-* This is useful for the send-receive handshake. For example, this mode
-* is enabled when sending register_user messages:
-* sendMsg()
-* rcvMsg()
-* Both functions are called from the same thread, so there are no
-* synchronisation mechanics needed.
 */
 
 #ifndef TCPCONNECTION_H
@@ -40,6 +18,7 @@
 #include "TCPMessage.h"
 #include <boost/thread.hpp>
 #include <boost/asio.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 #include <memory>
 
@@ -51,14 +30,20 @@ namespace controller
     class TCPConnection : public util::Subject
     {
         private:
-            static const int KEEP_ALIVE_TIME_SECONDS;
+            static const int KEEP_ALIVE_TIME_SEND_SECONDS;
+            static const int KEEP_ALIVE_TIME_CHECK_SECONDS;
 
-            boost::thread receiveThreadHandle;
-            boost::thread sendThreadHandle;
+            boost::thread threadHandle;
 
             std::unique_ptr<tcp::socket> socket;
-            boost::mutex socketMutex;
+
+            boost::asio::streambuf receive_buf;
+            boost::asio::deadline_timer checkKeepAliveTimer;
+            boost::asio::deadline_timer sendKeepAliveTimer;
             boost::chrono::steady_clock::time_point lastKeepAlive;
+
+            // Last received message
+            std::unique_ptr<TCPMessage> lastMessage;
 
             bool active = false;
             boost::mutex activeMutex;
@@ -68,33 +53,35 @@ namespace controller
             std::string localAddress;
             int localPort;
 
-            // Last received message
-            std::unique_ptr<TCPMessage> lastMessage;
+            void thread();
 
-            void sendThread();
-            void receiveThread();
+            void receive();
+            void receiveHandler(const boost::system::error_code& e,
+                               std::size_t size);
 
-            void parseMessageInternal(TCPMessage& msg);
-            bool checkKeepAlive();
-            void closeSocket();
-            bool checkInterrupt();
+            void checkKeepAlive();
+            void checkKeepAliveHandler();
+
+            void sendKeepAlive();
+            void sendKeepAliveHandler();
 
             void send(std::string str);
-            std::string receive();
+
+            bool parseMessageInternal(TCPMessage& msg);
+            void setKeepAlive();
+            bool setActive(bool status);
+
+            void closeConnectionThread();
+            void closeSocket();
 
         public:
             TCPConnection(std::unique_ptr<tcp::socket> s);
             virtual ~TCPConnection();
 
-            void startConnectionThreads(); // Start receiving and keep alive
-
+            void startConnectionThread();
             void sendMessage(TCPMessage& msg);
-            std::unique_ptr<TCPMessage> receiveMessage();
 
-            // If threads are running, closes the threads and the socket
-            void disconnect();
             bool isActive();
-
             std::unique_ptr<TCPMessage> getLastMessage();
             int getRemotePort();
             std::string getRemoteAddress();

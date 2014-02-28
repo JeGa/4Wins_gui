@@ -61,7 +61,7 @@ namespace controller
         for (auto i : obs)
             con->addObserver(i);
 
-        con->startConnectionThreads();
+        con->startConnectionThread();
 
         std::cout << "Client: Connected" << std::endl;
     }
@@ -69,7 +69,6 @@ namespace controller
     void NetworkControllerClient::disconnect()
     {
         if (con) {
-            con->disconnect();
             con.release();
         }
     }
@@ -77,11 +76,6 @@ namespace controller
     void NetworkControllerClient::send(TCPMessage& msg)
     {
         con->sendMessage(msg);
-    }
-
-    std::unique_ptr<TCPMessage> NetworkControllerClient::receive()
-    {
-        return con->receiveMessage();
     }
 
     void NetworkControllerClient::setExternalTCPConnectionObserver(util::Observer *o)

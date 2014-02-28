@@ -89,7 +89,7 @@ namespace controller
                 for (auto i : obs)
                     con->addObserver(i);
                 
-                con->startConnectionThreads();
+                con->startConnectionThread();
                 this->connections.push_back(std::move(con));
                 
             } catch (std::exception& e) {

@@ -43,6 +43,7 @@ namespace controller
 
             static const std::string HEADER;
             static const std::string FOOTER;
+            static const std::string KEEP_ALIVE_MESSAGE;
 
             int msgKey = -1;
             MSG_TYPE type = MSG_TYPE::NOT_SET;
@@ -63,8 +64,6 @@ namespace controller
             bool parseFrameData(std::string data);
 
         public:
-            static const std::string KEEP_ALIVE_MESSAGE;
-
             TCPMessage() {}
             virtual ~TCPMessage() {}
 

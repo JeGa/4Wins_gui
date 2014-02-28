@@ -46,7 +46,6 @@ namespace controller
             void disconnect();
 
             void send(TCPMessage& msg);
-            std::unique_ptr<TCPMessage> receive();
 
             bool isConnected();
     };

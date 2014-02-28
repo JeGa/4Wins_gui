@@ -19,6 +19,9 @@ namespace controller
 
     bool GameManagerNetworkClient::login(std::string name, std::string pw)
     {
+        networkController.connect();
+        return false;
+
         if (!networkController.isConnected())
             networkController.connect();
 

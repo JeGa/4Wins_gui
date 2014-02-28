@@ -4,23 +4,51 @@ namespace controller
 {
 
     NetworkControllerClient::NetworkControllerClient(std::string addr, std::string port)
-        : address(addr), port(port)
+        : address(addr), port(port), work(io_service)
     {
         tcp::resolver resolver(io_service);
         tcp::resolver::query query(address, port);
 
         // DNS resolve
         endpoint_iterator = resolver.resolve(query);
+
+        startThreads();
     }
 
     NetworkControllerClient::~NetworkControllerClient()
     {
-        disconnect();
+        stopThreads();
+        con.release();
+    }
+
+    void NetworkControllerClient::startThreads(int count)
+    {
+        for (int i = 0; i < count; ++i) {
+            threadHandles.push_back(
+                boost::thread(
+                    boost::bind(&boost::asio::io_service::run, &io_service)));
+        }
+    }
+
+    void NetworkControllerClient::stopThreads()
+    {
+        io_service.stop();
+        for (auto& i : threadHandles)
+            i.join();
+        threadHandles.clear();
+        io_service.reset();
+    }
+
+    void NetworkControllerClient::disconnect()
+    {
+        // TODO: Cancel all io service events ?
+
+        con.release();
     }
 
     bool NetworkControllerClient::ping()
     {
-        if (this->isConnected())
+        /*if (this->isConnected())
             return true;
 
         connect();
@@ -31,13 +59,12 @@ namespace controller
         else
             disconnect();
 
-        return true;
+        return true;*/
+        return false;
     }
 
     void NetworkControllerClient::connect()
     {
-        disconnect();
-
         try {
             std::unique_ptr<tcp::socket> clientCon(
                 new tcp::socket(io_service));
@@ -61,21 +88,13 @@ namespace controller
         for (auto i : obs)
             con->addObserver(i);
 
-        con->startConnectionThread();
-
+        con->start();
         std::cout << "Client: Connected" << std::endl;
-    }
-
-    void NetworkControllerClient::disconnect()
-    {
-        if (con) {
-            con.release();
-        }
     }
 
     void NetworkControllerClient::send(TCPMessage& msg)
     {
-        con->sendMessage(msg);
+//        con->sendMessage(msg);
     }
 
     void NetworkControllerClient::setExternalTCPConnectionObserver(util::Observer *o)
@@ -85,9 +104,7 @@ namespace controller
 
     bool NetworkControllerClient::isConnected()
     {
-        if (con)
-            return true;
-        return false;
+        return (con ? true : false);
     }
 
 }

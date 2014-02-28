@@ -16,11 +16,11 @@
 
 #include "Subject.h"
 #include "TCPMessage.h"
-#include <boost/thread.hpp>
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 #include <memory>
+#include <boost/thread.hpp>
 
 namespace controller
 {
@@ -33,14 +33,16 @@ namespace controller
             static const int KEEP_ALIVE_TIME_SEND_SECONDS;
             static const int KEEP_ALIVE_TIME_CHECK_SECONDS;
 
-            boost::thread threadHandle;
-
             std::unique_ptr<tcp::socket> socket;
 
             boost::asio::streambuf receive_buf;
             boost::asio::deadline_timer checkKeepAliveTimer;
             boost::asio::deadline_timer sendKeepAliveTimer;
             boost::chrono::steady_clock::time_point lastKeepAlive;
+
+            boost::asio::strand strand_receive;
+            boost::asio::strand strand_sendKeepAlive;
+            boost::asio::strand strand_checkKeepAlive;
 
             // Last received message
             std::unique_ptr<TCPMessage> lastMessage;
@@ -52,8 +54,6 @@ namespace controller
             int remotePort;
             std::string localAddress;
             int localPort;
-
-            void thread();
 
             void receive();
             void receiveHandler(const boost::system::error_code& e,
@@ -71,14 +71,13 @@ namespace controller
             void setKeepAlive();
             bool setActive(bool status);
 
-            void closeConnectionThread();
             void closeSocket();
 
         public:
             TCPConnection(std::unique_ptr<tcp::socket> s);
             virtual ~TCPConnection();
 
-            void startConnectionThread();
+            void start();
             void sendMessage(TCPMessage& msg);
 
             bool isActive();

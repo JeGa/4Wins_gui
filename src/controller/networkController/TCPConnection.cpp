@@ -13,7 +13,10 @@ namespace controller
         checkKeepAliveTimer(socket->get_io_service(),
                             boost::posix_time::seconds(KEEP_ALIVE_TIME_CHECK_SECONDS)),
         sendKeepAliveTimer(socket->get_io_service(),
-                           boost::posix_time::seconds(KEEP_ALIVE_TIME_SEND_SECONDS))
+                           boost::posix_time::seconds(KEEP_ALIVE_TIME_SEND_SECONDS)),
+        strand_receive(socket->get_io_service()),
+        strand_checkKeepAlive(socket->get_io_service()),
+        strand_sendKeepAlive(socket->get_io_service())
     {
         tcp::endpoint localEndp = socket->local_endpoint();
         localAddress = localEndp.address().to_string();
@@ -26,25 +29,17 @@ namespace controller
 
     TCPConnection::~TCPConnection()
     {
-        closeConnectionThread();
         closeSocket();
+        setActive(false);
     }
 
-    void TCPConnection::startConnectionThread()
+    void TCPConnection::start()
     {
-        threadHandle = boost::thread(&TCPConnection::thread, this);
+        receive();
+        checkKeepAlive();
+        sendKeepAlive();
 
         setActive(true);
-    }
-
-    // TODO: Is this okay?
-    void TCPConnection::closeConnectionThread()
-    {
-        // Close io service
-        socket->get_io_service().stop();
-        threadHandle.join();
-
-        setActive(false);
     }
 
     void TCPConnection::closeSocket()
@@ -91,26 +86,16 @@ namespace controller
 
     // =========================================================================
 
-    void TCPConnection::thread()
-    {
-        receive();
-        checkKeepAlive();
-        sendKeepAlive();
-
-        boost::asio::io_service& service = socket->get_io_service();
-        service.run();
-    }
-
     void TCPConnection::receive()
     {
         boost::asio::async_read_until(*socket, receive_buf, '\n',
-                                      boost::bind(
-                                          &TCPConnection::receiveHandler,
-                                          this,
-                                          boost::asio::placeholders::error,
-                                          boost::asio::placeholders::bytes_transferred
-                                      )
-                                     );
+                                      strand_receive.wrap(
+                                          boost::bind(
+                                              &TCPConnection::receiveHandler,
+                                              this,
+                                              boost::asio::placeholders::error,
+                                              boost::asio::placeholders::bytes_transferred
+                                          )));
     }
 
     void TCPConnection::receiveHandler(
@@ -137,16 +122,23 @@ namespace controller
                     lastMessage.release();
                 }
             }
+        } else {
+            std::cerr << e.message();
+
+            // TODO: Error codes
+            // notifyObservers();
+            //setActive(false);
         }
-        // TODO: Error codes
-//        notifyObservers();
 
         receive();
     }
 
     void TCPConnection::checkKeepAlive()
     {
-        checkKeepAliveTimer.async_wait(boost::bind(&TCPConnection::checkKeepAliveHandler, this));
+        checkKeepAliveTimer.async_wait(strand_checkKeepAlive.wrap(
+                                           boost::bind(&TCPConnection::checkKeepAliveHandler, this)
+                                       )
+                                      );
     }
 
     void TCPConnection::checkKeepAliveHandler()
@@ -159,7 +151,8 @@ namespace controller
 
         if (d >= boost::chrono::seconds(KEEP_ALIVE_TIME_SEND_SECONDS + 5)) {
             // No keep alive after x seconds: Client closed the socket
-            // Close thread TODO
+//            socket->get_io_service().stop(); // TODO !!!!!!
+// setActive(false);
         }
 
         checkKeepAliveTimer.expires_at(checkKeepAliveTimer.expires_at() +
@@ -169,7 +162,10 @@ namespace controller
 
     void TCPConnection::sendKeepAlive()
     {
-        sendKeepAliveTimer.async_wait(boost::bind(&TCPConnection::sendKeepAliveHandler, this));
+        sendKeepAliveTimer.async_wait(strand_sendKeepAlive.wrap(
+                                          boost::bind(&TCPConnection::sendKeepAliveHandler, this)
+                                      )
+                                     );
     }
 
     void TCPConnection::sendKeepAliveHandler()
@@ -178,7 +174,7 @@ namespace controller
 
         TCPMessage msg;
         msg.createKeepAliveMessage();
-        sendMessage(msg);
+        sendMessage(msg); // TODO ??
 
         sendKeepAliveTimer.expires_at(sendKeepAliveTimer.expires_at() +
                                       boost::posix_time::seconds(KEEP_ALIVE_TIME_SEND_SECONDS));

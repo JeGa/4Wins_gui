@@ -10,6 +10,7 @@
 #include <iostream>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 namespace controller
 {
@@ -19,11 +20,15 @@ namespace controller
     {
         private:
             boost::asio::io_service io_service;
+            boost::asio::io_service::work work;
+
             std::unique_ptr<TCPConnection> con;
 
             tcp::resolver::iterator endpoint_iterator;
             std::string port;
             std::string address;
+
+            std::vector<boost::thread> threadHandles;
 
             /*
              * Observers to set for the TCPConnection.
@@ -32,6 +37,8 @@ namespace controller
             std::vector<util::Observer*> obs;
 
             void startTCPConnection(std::unique_ptr<tcp::socket> clientCon);
+            void startThreads(int count = 1);
+            void stopThreads();
 
         public:
             NetworkControllerClient(
@@ -39,7 +46,7 @@ namespace controller
                 std::string port = "9999");
             virtual ~NetworkControllerClient();
 
-            void setExternalTCPConnectionObserver(util::Observer* o);
+            void setExternalTCPConnectionObserver(util::Observer *o);
 
             bool ping();
             void connect();

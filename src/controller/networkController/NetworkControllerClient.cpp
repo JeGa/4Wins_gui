@@ -1,5 +1,4 @@
 #include "NetworkControllerClient.h"
-#include <iostream>
 
 namespace controller
 {
@@ -26,15 +25,13 @@ namespace controller
 
         connect();
 
-        bool status = true;
-
         // If error connecting to server
         if (!con)
-            status = false;
+            return false;
         else
             disconnect();
 
-        return status;
+        return true;
     }
 
     void NetworkControllerClient::connect()
@@ -47,19 +44,26 @@ namespace controller
 
             boost::asio::connect(*clientCon, endpoint_iterator);
 
-            // Move ownership to TCPConnection
-            con = std::unique_ptr<TCPConnection>(
-                      new TCPConnection(std::move(clientCon)));
-
-            for (auto i : obs)
-                con->addObserver(i);
-            con->startConnectionThreads();
-
-            std::cout << "Client: Connected" << std::endl;
+            startTCPConnection(std::move(clientCon));
 
         } catch (std::exception& e) {
             std::cerr << e.what() << std::endl;
         }
+    }
+
+    void NetworkControllerClient::startTCPConnection(
+        std::unique_ptr<tcp::socket> clientCon)
+    {
+        // Move ownership to TCPConnection
+        con = std::unique_ptr<TCPConnection>(
+                  new TCPConnection(std::move(clientCon)));
+
+        for (auto i : obs)
+            con->addObserver(i);
+
+        con->startConnectionThreads();
+
+        std::cout << "Client: Connected" << std::endl;
     }
 
     void NetworkControllerClient::disconnect()

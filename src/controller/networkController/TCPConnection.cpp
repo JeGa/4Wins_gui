@@ -5,7 +5,7 @@
 namespace controller
 {
 
-    const int TCPConnection::KEEP_ALIVE = 10;
+    const int TCPConnection::KEEP_ALIVE_TIME_SECONDS = 10;
 
     TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s)
         : socket(std::move(s))
@@ -127,12 +127,6 @@ namespace controller
 
     void TCPConnection::receiveThread()
     {
-        std::cout<< "#> Receive thread started" << std::endl;
-
-        // Print remote endpoint infos
-        std::cout << "#> " << remoteAddress << " "
-                  << remotePort << std::endl;
-
         // Initialize the keep alive value
         lastKeepAlive = boost::chrono::steady_clock::now();
 
@@ -181,15 +175,11 @@ namespace controller
         // Notify observers:
         // - On server side, this connection is removed from the vector
         notifyObservers();
-
-        std::cout<< "#> Receive thread closing" << std::endl;
     }
 
     // Sends keep alive message
     void TCPConnection::sendThread()
     {
-        std::cout<< "#> Send thread started" << std::endl;
-
         while (true) {
 
             boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
@@ -203,8 +193,6 @@ namespace controller
             msg.createKeepAliveMessage();
             sendMessage(msg);
         }
-
-        std::cout<< "#> Send thread closing" << std::endl;
     }
 
     // =========================================================================
@@ -216,7 +204,7 @@ namespace controller
 
         auto d = now - lastKeepAlive;
 
-        if (d >= boost::chrono::seconds(KEEP_ALIVE)) {
+        if (d >= boost::chrono::seconds(KEEP_ALIVE_TIME_SECONDS)) {
             // No keep alive after x seconds: Client closed the socket
             return false;
         }

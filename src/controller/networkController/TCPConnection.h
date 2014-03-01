@@ -33,6 +33,7 @@ namespace controller
             static const int KEEP_ALIVE_TIME_SEND_SECONDS;
             static const int KEEP_ALIVE_TIME_CHECK_SECONDS;
 
+            boost::mutex socketMutex;
             std::unique_ptr<tcp::socket> socket;
 
             boost::asio::streambuf receive_buf;
@@ -56,14 +57,13 @@ namespace controller
             int localPort;
 
             void receive();
-            void receiveHandler(const boost::system::error_code& e,
-                               std::size_t size);
+            void receiveHandler(const boost::system::error_code& e);
 
             void checkKeepAlive();
             void checkKeepAliveHandler();
 
             void sendKeepAlive();
-            void sendKeepAliveHandler();
+            void sendKeepAliveHandler(const boost::system::error_code& e);
 
             void send(std::string str);
 
@@ -72,12 +72,14 @@ namespace controller
             bool setActive(bool status);
 
             void closeSocket();
+            void closeWaits();
 
         public:
             TCPConnection(std::unique_ptr<tcp::socket> s);
             virtual ~TCPConnection();
 
             void start();
+            void stop();
             void sendMessage(TCPMessage& msg);
 
             bool isActive();

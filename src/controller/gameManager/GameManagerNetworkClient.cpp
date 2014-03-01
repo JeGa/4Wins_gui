@@ -20,7 +20,7 @@ namespace controller
     bool GameManagerNetworkClient::login(std::string name, std::string pw)
     {
         networkController.connect();
-        return false;
+        return true;
 
         if (!networkController.isConnected())
             networkController.connect();
@@ -49,6 +49,9 @@ namespace controller
 
     bool GameManagerNetworkClient::logout()
     {
+        networkController.disconnect();
+        return true;
+
         // Should normally be connected
         if (!networkController.isConnected())
             networkController.connect();

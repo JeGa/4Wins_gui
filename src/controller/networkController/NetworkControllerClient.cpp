@@ -18,7 +18,7 @@ namespace controller
     NetworkControllerClient::~NetworkControllerClient()
     {
         stopThreads();
-        con.release();
+        con.reset();
     }
 
     void NetworkControllerClient::startThreads(int count)
@@ -42,13 +42,15 @@ namespace controller
     void NetworkControllerClient::disconnect()
     {
         // TODO: Cancel all io service events ?
-
-        con.release();
+        con.reset();
     }
 
+    // TODO
     bool NetworkControllerClient::ping()
     {
-        /*if (this->isConnected())
+        return false;
+
+        if (isConnected())
             return true;
 
         connect();
@@ -59,8 +61,7 @@ namespace controller
         else
             disconnect();
 
-        return true;*/
-        return false;
+        return true;
     }
 
     void NetworkControllerClient::connect()

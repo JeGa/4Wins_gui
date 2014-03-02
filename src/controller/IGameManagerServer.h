@@ -28,7 +28,7 @@ namespace controller
         virtual bool setActiveGame(data::IGame *game) = 0;
         virtual data::IGame *getActiveGame() = 0;
         
-        virtual std::vector<std::unique_ptr<TCPConnection>>& getConnections() = 0;
+        virtual std::vector<std::shared_ptr<TCPConnection>>& getConnections() = 0;
     };
     
 }

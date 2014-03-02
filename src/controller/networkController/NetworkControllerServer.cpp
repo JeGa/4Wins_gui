@@ -64,7 +64,7 @@ namespace controller
         connections.clear();
     }
 
-    std::vector<std::unique_ptr<TCPConnection>>&
+    std::vector<std::shared_ptr<TCPConnection>>&
             NetworkControllerServer::getConnections()
     {
         return connections;
@@ -102,7 +102,7 @@ namespace controller
                 std::cout << "=> Incoming connection ..." << std::endl;
 
                 // Create connection
-                std::unique_ptr<TCPConnection> con(
+                std::shared_ptr<TCPConnection> con(
                     new TCPConnection(std::move(incomingCon)));
 
                 con->addObserver(this);
@@ -146,7 +146,7 @@ namespace controller
                 // Clean connection
                 std::cout << "=> Cleaning closed connection" << std::endl;
 
-                std::vector<std::unique_ptr<TCPConnection>>::iterator rem;
+                std::vector<std::shared_ptr<TCPConnection>>::iterator rem;
                 for (rem = connections.begin(); rem < connections.end();
                 rem++) {
 

@@ -27,7 +27,9 @@ namespace controller
 
     using boost::asio::ip::tcp;
 
-    class TCPConnection : public util::Subject
+    class TCPConnection :
+        public util::Subject,
+        public std::enable_shared_from_this<TCPConnection>
     {
         private:
             static const int KEEP_ALIVE_TIME_SEND_SECONDS;
@@ -35,6 +37,8 @@ namespace controller
 
             boost::mutex socketMutex;
             std::unique_ptr<tcp::socket> socket;
+
+            boost::asio::io_service& io_service;
 
             boost::asio::streambuf receive_buf;
             boost::asio::deadline_timer checkKeepAliveTimer;
@@ -57,13 +61,19 @@ namespace controller
             int localPort;
 
             void receive();
-            void receiveHandler(const boost::system::error_code& e);
+            void receiveHandler(
+                const boost::system::error_code& e,
+                std::shared_ptr<TCPConnection> c);
 
             void checkKeepAlive();
-            void checkKeepAliveHandler();
+            void checkKeepAliveHandler(
+                const boost::system::error_code& e,
+                std::shared_ptr<TCPConnection> c);
 
             void sendKeepAlive();
-            void sendKeepAliveHandler(const boost::system::error_code& e);
+            void sendKeepAliveHandler(
+                const boost::system::error_code& e,
+                std::shared_ptr<TCPConnection> c);
 
             void send(std::string str);
 
@@ -75,7 +85,8 @@ namespace controller
             void closeWaits();
 
         public:
-            TCPConnection(std::unique_ptr<tcp::socket> s);
+            TCPConnection(
+                std::unique_ptr<tcp::socket> s);
             virtual ~TCPConnection();
 
             void start();

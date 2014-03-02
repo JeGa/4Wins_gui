@@ -124,14 +124,14 @@ namespace view { namespace gui
     {
         addColHeaders();
         
-        std::vector<std::unique_ptr<controller::TCPConnection>>& cons =
+        std::vector<std::shared_ptr<controller::TCPConnection>>& cons =
             server->getConnections();
         
         int s = cons.size();
         std::string tmp = boost::lexical_cast<std::string>(s);
         conCount->value(tmp.c_str());
        
-        for (std::unique_ptr<controller::TCPConnection>& i : cons) {
+        for (std::shared_ptr<controller::TCPConnection>& i : cons) {
             std::vector<std::string> row;
             
             std::string t2 = i->getRemoteAddress();

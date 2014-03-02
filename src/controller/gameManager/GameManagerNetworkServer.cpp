@@ -44,7 +44,7 @@ namespace controller
         networkController.stopServer();
     }
 
-    std::vector<std::unique_ptr<TCPConnection>>&
+    std::vector<std::shared_ptr<TCPConnection>>&
             GameManagerNetworkServer::getConnections()
     {
         return networkController.getConnections();

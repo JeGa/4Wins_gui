@@ -39,7 +39,7 @@ namespace controller
             TCPConnection *clean = nullptr;
 
             // Holds all client connections
-            std::vector<std::unique_ptr<TCPConnection>> connections;
+            std::vector<std::shared_ptr<TCPConnection>> connections;
 
             /*
              * Observers to set for the TCPConnection.
@@ -62,7 +62,7 @@ namespace controller
 
             void startServer();
             void stopServer();
-            std::vector<std::unique_ptr<TCPConnection>>& getConnections();
+            std::vector<std::shared_ptr<TCPConnection>>& getConnections();
 
             virtual void notify(util::Subject *sub);
     };

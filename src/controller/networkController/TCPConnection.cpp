@@ -10,13 +10,14 @@ namespace controller
 
     TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s) :
         socket(std::move(s)),
-        checkKeepAliveTimer(socket->get_io_service(),
+        io_service(socket->get_io_service()),
+        checkKeepAliveTimer(io_service,
                             boost::posix_time::seconds(KEEP_ALIVE_TIME_CHECK_SECONDS)),
-        sendKeepAliveTimer(socket->get_io_service(),
+        sendKeepAliveTimer(io_service,
                            boost::posix_time::seconds(KEEP_ALIVE_TIME_SEND_SECONDS)),
-        strand_receive(socket->get_io_service()),
-        strand_checkKeepAlive(socket->get_io_service()),
-        strand_sendKeepAlive(socket->get_io_service())
+        strand_receive(io_service),
+        strand_checkKeepAlive(io_service),
+        strand_sendKeepAlive(io_service)
     {
         tcp::endpoint localEndp = socket->local_endpoint();
         localAddress = localEndp.address().to_string();
@@ -35,8 +36,8 @@ namespace controller
     void TCPConnection::start()
     {
         receive();
-        checkKeepAlive();
-        sendKeepAlive();
+//        checkKeepAlive();
+//        sendKeepAlive();
 
         setKeepAlive();
 
@@ -45,9 +46,12 @@ namespace controller
 
     void TCPConnection::stop()
     {
-        setActive(false); // TODO: OKAY?
+        if (!isActive())
+            return;
+        setActive(false);
         closeSocket();
         closeWaits();
+        std::cout << "CLOSE TCPCON" << std::endl;
     }
 
     void TCPConnection::closeSocket()
@@ -56,6 +60,7 @@ namespace controller
             try {
                 if (socket->is_open()) {
                     std::cout << this->localPort << " close socket" << std::endl;
+                    socket->cancel();
                     socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
                     socket->close();
                 }
@@ -67,6 +72,7 @@ namespace controller
 
     void TCPConnection::closeWaits()
     {
+        std::cout << this->localPort << " close waits" << std::endl;
         strand_sendKeepAlive.dispatch([this]() {
             checkKeepAliveTimer.cancel();
         });
@@ -109,16 +115,23 @@ namespace controller
 
     void TCPConnection::receive()
     {
-        boost::asio::async_read_until(*socket, receive_buf, '\n',
-                                      strand_receive.wrap(
-                                          boost::bind(
-                                              &TCPConnection::receiveHandler,
-                                              this,
-                                              boost::asio::placeholders::error
-                                          )));
+        try {
+            boost::asio::async_read_until(*socket, receive_buf, '\n',
+                                          strand_receive.wrap(
+                                              boost::bind(
+                                                  &TCPConnection::receiveHandler,
+                                                  this,
+                                                  boost::asio::placeholders::error,
+                                                  shared_from_this()
+                                              )));
+        } catch (std::exception& e) {
+            std::cout << e.what() << std::endl;
+        }
     }
 
-    void TCPConnection::receiveHandler(const boost::system::error_code& e)
+    void TCPConnection::receiveHandler(
+        const boost::system::error_code& e,
+        std::shared_ptr<TCPConnection> c)
     {
         if (!e) {
             std::cout << this->localPort << " Receive Message" << std::endl;
@@ -138,19 +151,31 @@ namespace controller
                     lastMessage.reset();
                 }
             }
+
+            receive();
         } else {
-            std::cerr << "1 " << this->localPort << e.message();
+            std::cerr << "RECEIVE HANDLER " << this->localPort << " " << e.message() << std::endl;
 
             if (e == boost::asio::error::eof ||
                     e == boost::asio::error::connection_reset) {
 
-                //stop(); Deadlock???? strand
-                //notifyObservers();
+                if (isActive()) {
+                    std::cout << this->localPort << " close from handler" << std::endl;
+                    setActive(false);
+                    try {
+                        if (socket->is_open()) {
+                            std::cout << this->localPort << " close socket" << std::endl;
+                            socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+                            socket->close();
+                        }
+                    } catch (std::exception& e) {
+                        std::cerr << e.what() << std::endl;
+                    }
+                    closeWaits();
+                }
+                notifyObservers();
             }
         }
-
-        if (isActive())
-            receive();
     }
 
     void TCPConnection::checkKeepAlive()
@@ -158,29 +183,55 @@ namespace controller
         checkKeepAliveTimer.async_wait(strand_checkKeepAlive.wrap(
                                            boost::bind(
                                                &TCPConnection::checkKeepAliveHandler,
-                                               this
+                                               this,
+                                               boost::asio::placeholders::error,
+                                               shared_from_this()
                                            )));
     }
 
-    void TCPConnection::checkKeepAliveHandler()
+    void TCPConnection::checkKeepAliveHandler(
+        const boost::system::error_code& e,
+        std::shared_ptr<TCPConnection> c)
     {
-        std::cout << this->localPort << "Check Keep Alive" << std::endl;
+        std::cout << this->localPort << " Check Keep Alive" << std::endl;
 
-        boost::chrono::steady_clock::time_point now =
-            boost::chrono::steady_clock::now();
-        auto d = now - lastKeepAlive;
+        if (!e) {
+            boost::chrono::steady_clock::time_point now =
+                boost::chrono::steady_clock::now();
+            auto d = now - lastKeepAlive;
 
-        if (d >= boost::chrono::seconds(KEEP_ALIVE_TIME_SEND_SECONDS + 5)) {
-            // No keep alive after x seconds: Client closed the socket
-            //closeSocket();
-            //notifyObservers();
-        }
+            if (d >= boost::chrono::seconds(KEEP_ALIVE_TIME_SEND_SECONDS + 5)) {
+                // No keep alive after x seconds: Client closed the socket
+//                if (isActive()) {
+//                    closeSocket();
+//                    checkKeepAliveTimer.cancel();
+//                    sendKeepAliveTimer.cancel();
+//                }
+//                notifyObservers();
+            }
 
-        checkKeepAliveTimer.expires_at(checkKeepAliveTimer.expires_at() +
-                                       boost::posix_time::seconds(KEEP_ALIVE_TIME_CHECK_SECONDS));
+            checkKeepAliveTimer.expires_at(checkKeepAliveTimer.expires_at() +
+                                           boost::posix_time::seconds(KEEP_ALIVE_TIME_CHECK_SECONDS));
 
-        if (isActive())
             checkKeepAlive();
+        } else {
+            std::cerr << "CHECKKA: " <<this->localPort << " " << e.message() << std::endl;
+
+            if (e == boost::asio::error::eof ||
+                    e == boost::asio::error::connection_reset) {
+
+//                if (isActive()) {
+//                    std::cout << this->localPort << " close from handler" << std::endl;
+//                    setActive(false);
+//                    closeSocket();
+//                    checkKeepAliveTimer.cancel();
+//                    strand_sendKeepAlive.dispatch([this]() {
+//                        checkKeepAliveTimer.cancel();
+//                    });
+//                }
+//                notifyObservers();
+            }
+        }
     }
 
     void TCPConnection::sendKeepAlive()
@@ -189,11 +240,14 @@ namespace controller
                                           boost::bind(
                                               &TCPConnection::sendKeepAliveHandler,
                                               this,
-                                              boost::asio::placeholders::error
+                                              boost::asio::placeholders::error,
+                                              shared_from_this()
                                           )));
     }
 
-    void TCPConnection::sendKeepAliveHandler(const boost::system::error_code& e)
+    void TCPConnection::sendKeepAliveHandler(
+        const boost::system::error_code& e,
+        std::shared_ptr<TCPConnection> c)
     {
         std::cout << this->localPort << " Send Keep Alive" << std::endl;
 
@@ -204,19 +258,26 @@ namespace controller
 
             sendKeepAliveTimer.expires_at(sendKeepAliveTimer.expires_at() +
                                           boost::posix_time::seconds(KEEP_ALIVE_TIME_SEND_SECONDS));
+
+            sendKeepAlive();
         } else {
-            std::cerr << "3 " <<this->localPort << e.message();
+            std::cerr << "SENDKA: " <<this->localPort << " " << e.message() << std::endl;
 
             if (e == boost::asio::error::eof ||
                     e == boost::asio::error::connection_reset) {
 
-                //closeSocket(); // TODO: OKAY?
-                //notifyObservers();
+//                if (isActive()) {
+//                    std::cout << this->localPort << " close from handler" << std::endl;
+//                    setActive(false);
+//                    closeSocket();
+//                    strand_checkKeepAlive.dispatch([this]() {
+//                        sendKeepAliveTimer.cancel();
+//                    });
+//                    sendKeepAliveTimer.cancel();
+//                }
+//                notifyObservers();
             }
         }
-
-        if (isActive())
-            sendKeepAlive();
     }
 
 // =========================================================================
@@ -242,7 +303,7 @@ namespace controller
 
 // =========================================================================
 
-    // Returns true if it processed the message.
+// Returns true if it processed the message.
     bool TCPConnection::parseMessageInternal(TCPMessage& msg)
     {
         if (msg.getType() == MSG_TYPE::KEEP_ALIVE) {

@@ -22,7 +22,12 @@ namespace controller
             boost::asio::io_service io_service;
             boost::asio::io_service::work work;
 
-            std::unique_ptr<TCPConnection> con;
+            /*
+             * Shared, because the io_service needs a pointer too,
+             * for outstanding handler invocations at destruction.
+             * (given to the handlers through boost::bind)
+             */
+            std::shared_ptr<TCPConnection> con;
 
             tcp::resolver::iterator endpoint_iterator;
             std::string port;

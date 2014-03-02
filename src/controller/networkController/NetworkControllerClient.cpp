@@ -18,7 +18,7 @@ namespace controller
     NetworkControllerClient::~NetworkControllerClient()
     {
         stopThreads();
-        con.reset();
+        disconnect();
     }
 
     void NetworkControllerClient::startThreads(int count)
@@ -42,6 +42,7 @@ namespace controller
     void NetworkControllerClient::disconnect()
     {
         // TODO: Cancel all io service events ?
+        con->stop();
         con.reset();
     }
 
@@ -83,7 +84,7 @@ namespace controller
         std::unique_ptr<tcp::socket> clientCon)
     {
         // Move ownership to TCPConnection
-        con = std::unique_ptr<TCPConnection>(
+        con = std::shared_ptr<TCPConnection>(
                   new TCPConnection(std::move(clientCon)));
 
         for (auto i : obs)

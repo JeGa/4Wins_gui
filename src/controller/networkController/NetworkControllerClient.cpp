@@ -41,23 +41,18 @@ namespace controller
 
     void NetworkControllerClient::disconnect()
     {
-        // TODO: Cancel all io service events ?
-        con->stop();
         con.reset();
     }
 
-    // TODO
     bool NetworkControllerClient::ping()
     {
-        return false;
-
         if (isConnected())
             return true;
 
         connect();
 
         // If error connecting to server
-        if (!con)
+        if (!isConnected())
             return false;
         else
             disconnect();
@@ -96,7 +91,7 @@ namespace controller
 
     void NetworkControllerClient::send(TCPMessage& msg)
     {
-//        con->sendMessage(msg);
+        con->sendMessage(msg);
     }
 
     void NetworkControllerClient::setExternalTCPConnectionObserver(util::Observer *o)
@@ -106,7 +101,9 @@ namespace controller
 
     bool NetworkControllerClient::isConnected()
     {
-        return (con ? true : false);
+        if (!con)
+            return false;
+        return (con->isActive() ? true : false);
     }
 
 }

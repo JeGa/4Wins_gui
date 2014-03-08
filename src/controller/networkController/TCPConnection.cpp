@@ -118,6 +118,7 @@ namespace controller
                                               )));
         } catch (std::exception& e) {
             std::cout << e.what() << std::endl;
+            stop();
         }
     }
 
@@ -155,7 +156,7 @@ namespace controller
         }
     }
 
-// =========================================================================
+    // =========================================================================
 
     void TCPConnection::send(std::string str)
     {
@@ -170,6 +171,7 @@ namespace controller
                                      ));
         } catch (std::exception& e) {
             std::cout << e.what() << std::endl;
+            stop();
         }
     }
 

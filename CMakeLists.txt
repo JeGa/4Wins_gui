@@ -4,17 +4,17 @@ project(4Wins_gui)
 
 # Variables - to build add here the library locations
 set(BOOST_TEST_SEARCH_INCLUDE_DIR
-"C:/Data/Projects/C_C++/ext/boost")
+"E:/Data/Projects/C_C++/ext/boost")
 set(BOOST_TEST_SEARCH_LIB_DIR
-"C:/Data/Projects/C_C++/ext/boost_build/boost/bin.v2/libs")
+"E:/Data/Projects/C_C++/ext/boost_build/boost/bin.v2/libs")
 set(FLTK_SEARCH_INCLUDE_DIR
-"C:/Data/Projects/C_C++/ext/FLTK/include")
+"E:/Data/Projects/C_C++/ext/FLTK/include")
 set(FLTK_SEARCH_LIB_DIR
-"C:/Data/Projects/C_C++/ext/FLTK/lib")
+"E:/Data/Projects/C_C++/ext/FLTK/lib")
 
 # Because fluid not found
 set(FLTK_FLUID_EXECUTABLE
-"C:/Data/Projects/C_C++/ext/FLTK/bin/fluid.exe")
+"E:/Data/Projects/C_C++/ext/FLTK/bin/fluid.exe")
 
 # Because the libraries are not at standard locations:
 # Set the path were the FLTK and boost test binaries are
@@ -45,7 +45,7 @@ include_directories(${FLTK_INCLUDE_DIR})
 
 if (CMAKE_BUILD_TYPE STREQUAL "Test") # Build boost unit tests
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
 	# Remove main
 	list(REMOVE_ITEM 4Wins_gui_SOURCES "${CMAKE_SOURCE_DIR}/src/application/main.cpp")

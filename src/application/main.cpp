@@ -15,7 +15,6 @@ enum class GameMode {GUI, TUI, NOT_SELECTED};
 
 int main(int argc, char **argv)
 {
-    // 0 = gui, 1 = tui (, 2 = both -> not implmented - Observer pattern)
     GameMode status = GameMode::GUI;
     view::IUserInterface *ui = nullptr;
 

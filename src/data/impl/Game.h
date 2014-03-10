@@ -15,7 +15,7 @@ namespace data
 
     class Game : public IGame
     {
-    private:
+		private:
             bool running;
     
             // For key generation

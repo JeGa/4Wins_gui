@@ -1,28 +1,25 @@
-/*
-* The GameManager is resonsible for the memory management.
-* One GameController is used for all games.
-*/
-
 #ifndef IGAMEMANAGERLOCAL_H
 #define IGAMEMANAGERLOCAL_H
 
-#include "IGameController.h"
-#include "IGame.h"
 #include "AGameManager.h"
 
 namespace controller
 {
-    
+
     class IGameManagerLocal : public AGameManager
     {
     public:
-        virtual ~IGameManagerLocal() {};
-        
-        virtual void newGame(data::IGame *game) = 0;
-        virtual bool deleteGame(data::IGame *game) = 0;
+        IGameManagerLocal(GameFactory *f) : AGameManager(f) {}
+        virtual ~IGameManagerLocal() {}
+
+        // adds the game to the manager and sets it to the active game
         virtual bool input(int x, int y) = 0;
-        virtual bool setActiveGame(data::IGame *game) = 0;
-        virtual data::IGame *getActiveGame() = 0; // From GameController
+        // Sets/gets game as active game for GameController
+        virtual bool setActiveGame(int key) = 0;
+        virtual int getActiveGame() = 0;
+        // When a external pointer is required.
+        // Do only use
+        virtual std::shared_ptr<data::IGame> getActiveGameRef() = 0;
     };
     
 }

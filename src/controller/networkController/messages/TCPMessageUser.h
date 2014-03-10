@@ -1,14 +1,23 @@
 /*
 * This class extends the standard TCPMessage for sending user commands
-* like "Login", "Logout" and "Register". It extends the query and ack
-* data with an additional small message protocoll:
+* related to a player. It extends the query and ack data with an
+* additional small message protocoll:
 *
 * ... [QUERY_USER_DATA] [ACK_USER_DATA] ...
-* 
+*
 * [QUERY_USER_DATA] : "<queryType>: <information>"
 * [ACK_USER_DATA] : "<ackType>: <information>"
-* 
-* This class is not responsible for the memory management of players map!
+*
+* ====================================================================
+*
+* TCPMessageUser are:
+*
+* - LOGIN
+* - LOGOUT
+* - REGISTER
+* - GET_PLAYERS
+*
+* ====================================================================
 */
 
 #ifndef TCPMESSAGEUSER_H
@@ -19,53 +28,79 @@
 #include "GameFactory.h"
 #include <vector>
 #include <map>
+#include <memory>
 
 namespace controller
 {
-	
+
+    enum class QUERY_MSG_TYPE_USER
+    {
+        NOT_SET = 0,
+        LOGIN_QUERY,
+        LOGOUT_QUERY,
+        REGISTER_QUERY,
+        GET_PLAYERS_QUERY
+    };
+
+    enum class ACK_MSG_TYPE_USER
+    {
+        NOT_SET = 0,
+        LOGIN_ACK,
+        LOGOUT_ACK,
+        REGISTER_ACK,
+        GET_PLAYERS_ACK
+    };
+
     class TCPMessageUser : public controller::TCPMessage
     {
-	private:
-        GameFactory factory; // For player creation
-    
-		QUERY_MSG_TYPE queryType = QUERY_MSG_TYPE::NOT_SET;
-		ACK_MSG_TYPE ackType = ACK_MSG_TYPE::NOT_SET;
-		
-		std::string userName = "";
-		std::string userPw = "";
-		std::string userKey = "";
-        
-        std::map<int, data::IPlayer *> players;
-		
-		bool ackStatus = false;
+        private:
+            GameFactory factory;
 
-        bool tokenizeUserMessage(std::string msg, std::vector<std::string>& tokens);
-        bool parseQueryUserData();
-        bool parseAckUserData();
-        void clearPlayers();
-        void parsePlayersData();
-	public:
-        TCPMessageUser();
-        virtual ~TCPMessageUser();
-        
-        // Creates the message and encapsulates it with a frame
-        bool createQuery(QUERY_MSG_TYPE type, data::IPlayer& p);
-        
-        bool createAck(std::string frame);
-		// Was the query successful?
-		bool setAck(bool status);
-        bool setAck(std::map<int, data::IPlayer *> &players);
+            QUERY_MSG_TYPE_USER queryType = QUERY_MSG_TYPE_USER::NOT_SET;
+            ACK_MSG_TYPE_USER ackType = ACK_MSG_TYPE_USER::NOT_SET;
+            bool ackStatus = false;
 
-		
-		// Only creates a messag based on a frame data string
-		bool createUserMessage(std::string frameData);
-		
-		QUERY_MSG_TYPE getQueryType();
-		std::string getName();
-		std::string getPw();
-		std::string getKey();
-		bool getAckStatus();
-        std::map<int, data::IPlayer *> getPlayers();
+            bool tokenizeUserMessage(std::string msg, std::vector<std::string>& tokens);
+            bool parseQueryUserData();
+            bool parseAckUserData();
+            void parsePlayersData();
+            std::string playerToMessageString(data::IPlayer& p);
+            std::string queryMsgTypeUserToString(QUERY_MSG_TYPE_USER type);
+            std::string ackMsgTypeUserToString(ACK_MSG_TYPE_USER type);
+            QUERY_MSG_TYPE_USER stringToQueryMsgType(std::string type);
+            ACK_MSG_TYPE_USER stringToAckMsgType(std::string type);
+            ACK_MSG_TYPE_USER queryToAckMsgType(QUERY_MSG_TYPE_USER type);
+            QUERY_MSG_TYPE_USER ackToQueryMsgType(ACK_MSG_TYPE_USER type);
+
+            // Query data (set from sender, get from receiver):
+            std::shared_ptr<data::IPlayer> queryUser;
+
+            // Ack data (set from receiver, get from sender):
+            std::map<int, std::shared_ptr<data::IPlayer>> players;
+
+            // TODO: Make inherited functions private
+            //bool createQueryMessage(std::string data);
+            //bool setAckMessage(std::string data);
+
+        public:
+            TCPMessageUser() {} // TODO: Get factory as parameter?
+            virtual ~TCPMessageUser() {}
+
+            bool createQueryMessage(
+                QUERY_MSG_TYPE_USER type,
+                std::shared_ptr<data::IPlayer> p);
+            bool setAckMessage(
+                std::map<int, std::shared_ptr<data::IPlayer>>& players
+            );
+            bool setAckMessage(bool status);
+
+            virtual bool createMessage(std::string frameData) override;
+            virtual void reset() override;
+
+            QUERY_MSG_TYPE_USER getQueryType();
+            bool getAckStatus();
+            std::shared_ptr<data::IPlayer> getUser();
+            std::map<int, std::shared_ptr<data::IPlayer>> getPlayers();
     };
 
 }

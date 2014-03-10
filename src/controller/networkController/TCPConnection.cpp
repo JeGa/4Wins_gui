@@ -1,21 +1,18 @@
 #include "TCPConnection.h"
 #include <iostream>
-#include <boost/chrono.hpp>
 
 namespace controller
 {
-	
-	const int TCPConnection::KEEP_ALIVE = 10;
 
-    TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s)
-        : socket(std::move(s))
+    TCPConnection::TCPConnection(std::unique_ptr<tcp::socket> s) :
+        socket(std::move(s)),
+        io_service(socket->get_io_service()),
+        strand_receive(io_service)
     {
-        socket->non_blocking(true);
-        
         tcp::endpoint localEndp = socket->local_endpoint();
         localAddress = localEndp.address().to_string();
         localPort = localEndp.port();
-        
+
         tcp::endpoint remoteEndp = socket->remote_endpoint();
         remoteAddress = remoteEndp.address().to_string();
         remotePort = remoteEndp.port();
@@ -23,84 +20,66 @@ namespace controller
 
     TCPConnection::~TCPConnection()
     {
-        this->disconnect();
-    }
-    
-    void TCPConnection::disconnect()
-    {
-        // Stop the connection threads
-        //sendThreadHandle.interrupt(); // Maybe already from receiveThread closed
-        //sendThreadHandle.join();
-        if (active) {
-            receiveThreadHandle.interrupt(); // Closes socket and both threads
-            receiveThreadHandle.join();
-        }
+        stop();
     }
 
-    void TCPConnection::startConnectionThreads()
+    void TCPConnection::start()
     {
-        sendThreadHandle =
-            boost::thread(&TCPConnection::sendThread, this);
-            
-        receiveThreadHandle = 
-            boost::thread(&TCPConnection::receiveThread, this);
-            
-        active = true;
+        receive();
+        setActive(true);
     }
-    
-    void TCPConnection::send(std::string str)
+
+    void TCPConnection::stop()
     {
-        str += "\n";
+        if (!isActive())
+            return;
+        setActive(false);
+        closeSocket();
+        std::cout << "CLOSE TCPCON" << std::endl;
+    }
+
+    /*
+     * Synchronized with the strand.
+     */
+    void TCPConnection::closeSocket()
+    {
+        strand_receive.dispatch(boost::bind(&TCPConnection::closeSocketUnsynchronized, this));
+    }
+
+    void TCPConnection::stopUnsynchronized()
+    {
+        if (!isActive())
+            return;
+        setActive(false);
+        closeSocketUnsynchronized();
+        std::cout << "CLOSE TCPCON" << std::endl;
+    }
+
+    /*
+     * Not synchronized with the strand, because this is called
+     * from inside the handler. Strand could cause a deadlock.
+     */
+    void TCPConnection::closeSocketUnsynchronized()
+    {
         try {
-            socketMutex.lock();
-            boost::asio::write(*socket, boost::asio::buffer(str));
-            socketMutex.unlock();
+            if (socket->is_open()) {
+                std::cout << this->localPort << " close socket" << std::endl;
+                socket->cancel();
+                socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+                socket->close();
+            }
         } catch (std::exception& e) {
-            socketMutex.unlock();
             std::cerr << e.what() << std::endl;
         }
     }
-    
-    void TCPConnection::sendMessage(TCPMessage& msg)
+
+    bool TCPConnection::setActive(bool status)
     {
-        send(msg.getFrameData());
+        activeMutex.lock();
+        active = status;
+        activeMutex.unlock();
     }
-    
-    // Returns string "" if no message received
-    std::string TCPConnection::receive()
-    {
-        std::string line = "";
-        boost::asio::streambuf rcv;
-        
-        try {
-            socketMutex.lock();
-            
-            // Throws exception if theres no client connection
-            boost::asio::read_until(*socket, rcv, '\n');
-        
-            std::istream is(&rcv);
-            std::getline(is, line);
-        
-            socketMutex.unlock();
-        } catch (std::exception& e) {
-            socketMutex.unlock();
-            
-            if (!boost::asio::error::would_block)
-                std::cerr << e.what() << std::endl;
-        }
-        
-        return line;
-    }
-	
-    std::unique_ptr<TCPMessage>	TCPConnection::receiveMessage()
-	{
-		std::unique_ptr<TCPMessage> msg(new TCPMessage);
-        std::string str = receive();
-        if (str != "")
-            msg->createMessage(str);
-		return msg;
-	}
-    
+
     bool TCPConnection::isActive()
     {
         activeMutex.lock();
@@ -108,161 +87,104 @@ namespace controller
         activeMutex.unlock();
         return tmp;
     }
-    
-    // Resets the last message (
+
     std::unique_ptr<TCPMessage> TCPConnection::getLastMessage()
     {
         return std::move(lastMessage);
     }
-    
+
     int TCPConnection::getRemotePort()
     {
         return remotePort;
     }
-    
+
     std::string TCPConnection::getRemoteAddress()
     {
         return remoteAddress;
     }
-    
-    // =========================================================================
-    
-    void TCPConnection::receiveThread()
-    {
-        std::cout<< "#> Receive thread started" << std::endl;
-        
-        // Print remote endpoint infos
-        std::cout << "#> " << remoteAddress << " "
-            << remotePort << std::endl;
-        
-        // Initialize the keep alive value
-        lastKeepAlive = boost::chrono::steady_clock::now();
-        
-        while (true) {
-            // Check if thread interrupted -> Closed from other thread
-            // Check if keep alive is expired -> Closed from client (or error)
-            if (checkInterrupt() | !checkKeepAlive()) {
-                
-                // Close send thread
-                sendThreadHandle.interrupt();
-                sendThreadHandle.join();
-                
-                // Close socket
-                closeSocket();
-                
-                // Close thread
-                break;
-            }
 
-            // Read message            
-			std::unique_ptr<TCPMessage> msg = receiveMessage();
-            
-            if (msg->isValid()) {
-                // CONTINUE HERE: Message received
-                
-//                std::cout << msg.getFrameData() << std::endl;
-                
-                if (msg->getType() == MSG_TYPE::KEEP_ALIVE)
-                    parseMessageInternal(*msg);
-                else {
-                    lastMessage = std::move(msg);
-                    notifyObservers();
-                    // Reset the last message (no observer wanted it)
-                    lastMessage.release();
-                }
-            }
-        }
-        
-        activeMutex.lock();
-        active = false;
-        activeMutex.unlock();
-        
-        // Socket is closed from client or from server
-        // Notify observers:
-        // - On server side, this connection is removed from the vector
-        notifyObservers();
-        
-        std::cout<< "#> Receive thread closing" << std::endl;
-    }
-    
-    // Sends keep alive message
-    void TCPConnection::sendThread()
-    {
-        std::cout<< "#> Send thread started" << std::endl;
-
-        while (true) {
-            
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
-            
-            // Check if thread interrupted -> Closed from other thread
-            if (checkInterrupt()) {
-                // Close socket
-                //closeSocket();
-                // Close thread
-                break;
-            }
-            
-			TCPMessage msg;
-			msg.createKeepAliveMessage();
-            send(msg.getFrameData());
-        }
-        
-        std::cout<< "#> Send thread closing" << std::endl;
-    }
-    
     // =========================================================================
-    
-    bool TCPConnection::checkKeepAlive()
-    {
-        boost::chrono::steady_clock::time_point now = 
-            boost::chrono::steady_clock::now();
-            
-        auto d = now - lastKeepAlive;
-        
-        if (d >= boost::chrono::seconds(KEEP_ALIVE)) {
-            // No keep alive after x seconds: Client closed the socket     
-            return false;
-        }
-        
-        return true;
-    }
-    
-    void TCPConnection::parseMessageInternal(TCPMessage& msg)
-    {
-        tcp::endpoint remoteEndpoint = socket->remote_endpoint();
-        
-        // Check keep alive
-        if (msg.getQueryUserData() ==
-			TCPMessage::KEEP_ALIVE_MESSAGE) {
-            lastKeepAlive = boost::chrono::steady_clock::now();
-        }
-    }
-    
-    void TCPConnection::closeSocket()
+
+    void TCPConnection::receive()
     {
         try {
-            if (socket->is_open()) {
-                socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-                socket->close();
-                
-                std::cout << "#> Socket closed: " <<
-                    boost::this_thread::get_id() << std::endl;
-            }
+            boost::asio::async_read_until(*socket, receive_buf, '\n',
+                                          strand_receive.wrap(
+                                              boost::bind(
+                                                  &TCPConnection::receiveHandler,
+                                                  this,
+                                                  boost::asio::placeholders::error,
+                                                  shared_from_this()
+                                              )));
         } catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
+            std::cout << e.what() << std::endl;
+            stop();
         }
     }
-    
-    bool TCPConnection::checkInterrupt()
-    {
-        try {
-            boost::this_thread::interruption_point();
-        } catch (boost::thread_interrupted& e) {
-            // Interrupted:
-            return true;
-        }
-        return false;
-    }
-    
-}
 
+    void TCPConnection::receiveHandler(
+        const boost::system::error_code& e,
+        std::shared_ptr<TCPConnection> c)
+    {
+        if (!e) {
+            std::cout << this->localPort << " Receive Message" << std::endl;
+
+            std::istream is(&receive_buf);
+            std::string line;
+            std::getline(is, line);
+
+            std::unique_ptr<TCPMessage> msg(new TCPMessage);
+            msg->createMessage(line);
+
+            if (msg->isValid()) {
+                lastMessage = std::move(msg);
+                notifyObservers();
+                // Reset the last message (no observer wanted it)
+                lastMessage.reset();
+            }
+
+            receive();
+        } else {
+            std::cerr << "RECEIVE HANDLER " << this->localPort << " " << e.message() << std::endl;
+
+            if (e == boost::asio::error::eof ||
+                    e == boost::asio::error::connection_reset) {
+
+                stopUnsynchronized();
+                notifyObservers();
+            }
+        }
+    }
+
+    // =========================================================================
+
+    void TCPConnection::send(std::string str)
+    {
+        str += "\n";
+        try {
+            boost::asio::async_write(*socket, boost::asio::buffer(str),
+                                     boost::bind(
+                                         &TCPConnection::sendHandler,
+                                         this,
+                                         boost::asio::placeholders::error,
+                                         shared_from_this()
+                                     ));
+        } catch (std::exception& e) {
+            std::cout << e.what() << std::endl;
+            stop();
+        }
+    }
+
+    void TCPConnection::sendHandler(
+        const boost::system::error_code& e,
+        std::shared_ptr<TCPConnection> c)
+    {
+        // Nothing to do
+    }
+
+    void TCPConnection::sendMessage(TCPMessage& msg)
+    {
+        send(msg.getFrameData());
+    }
+
+}

@@ -8,13 +8,12 @@
 namespace data
 {
 
-    struct CellTest
-    {
-            data::Cell cell;
-            data::Cell cell_default;
+    struct CellTest {
+        data::Cell cell;
+        data::Cell cell_default;
 
-            CellTest() : cell(PLAYER1) {}
-			~CellTest() {}
+        CellTest() : cell(PLAYER1) {}
+        ~CellTest() {}
     };
 
 }

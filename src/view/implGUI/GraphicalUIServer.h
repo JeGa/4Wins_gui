@@ -8,9 +8,9 @@
 #include <Fl/fl_input.h>
 #include <Fl/fl_tabs.h>
 #include "GraphicalUITable.h"
-#include <memory>
 #include "IGameManagerServer.h"
 #include "GameFactory.h"
+#include <memory>
 
 namespace view { namespace gui
 {

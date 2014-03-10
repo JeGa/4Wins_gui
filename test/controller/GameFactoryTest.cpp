@@ -5,8 +5,8 @@
 namespace controller
 {
 
-	BOOST_AUTO_TEST_SUITE(GameFactoryTestSuite)
-	
+    BOOST_AUTO_TEST_SUITE(GameFactoryTestSuite)
+
     BOOST_FIXTURE_TEST_CASE(testInit, GameFactoryTest)
     {
         std::string strraw("");
@@ -14,7 +14,7 @@ namespace controller
 
         for (int j = 0; j < field->getHeight(); j++) {
             for (int i = 0; i < field->getWidth(); i++) {
-                strraw.append(field->getCell(i, j)->toString());
+                strraw.append(data::colorsChar[field->getCellStatus(i, j)]);
             }
             strraw.append("\n");
         }
@@ -24,7 +24,7 @@ namespace controller
         std::cout << std::endl << strraw << std::endl << strfunc;
         BOOST_CHECK(!strraw.compare(strfunc));
     }
-	
-	BOOST_AUTO_TEST_SUITE_END()
+
+    BOOST_AUTO_TEST_SUITE_END()
 
 }

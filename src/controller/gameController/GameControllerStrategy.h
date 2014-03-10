@@ -22,6 +22,7 @@
 #include "IGame.h"
 #include "IPlayer.h"
 #include "IGameController.h"
+#include <memory>
 
 namespace controller
 {
@@ -29,19 +30,21 @@ namespace controller
     class GameControllerStrategy : public IGameController
     {
         private:
-            data::IGame *game;
+            std::shared_ptr<data::IGame> game;
 
             void convertCoords(int *y);
             // Strategy method to override
             virtual bool checkRow(int x, int y, data::IPlayer *p) = 0;
         public:
-            GameControllerStrategy();
-            virtual ~GameControllerStrategy();
+            GameControllerStrategy() {}
+            virtual ~GameControllerStrategy() {}
 
-            virtual void playGame(data::IGame *game);
-            virtual data::IPlayer *onTurn(); // From field
-            virtual bool toggleTurn(int x, int y); // Switches between the 2 players
-            virtual data::IGame *getGame();
+            virtual void playGame(std::shared_ptr<data::IGame> game);
+            // From field
+            virtual std::shared_ptr<data::IPlayer> onTurn();
+            // Switches between the 2 players
+            virtual bool toggleTurn(int x, int y);
+            virtual std::shared_ptr<data::IGame> getGame();
     };
 
 }

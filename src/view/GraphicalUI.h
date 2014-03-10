@@ -13,6 +13,7 @@
 #include "GraphicalUIWindow.h"
 #include "GraphicalUIServer.h"
 #include "IGameManagerClient.h"
+#include "IGameManagerLocal.h"
 #include <memory>
 
 namespace view { namespace gui {

@@ -1,14 +1,14 @@
 #include "GraphicalUIServer.h"
-
+#include "GameManagerNetworkServer.h"
 #include <Fl/fl.h>
 #include <boost/lexical_cast.hpp>
 
 namespace view { namespace gui
 {
 
-    GraphicalUIServer::GraphicalUIServer()
-        : Fl_Window(700, 500, "4Wins Server"),
-        server(factory.getGameManagerServer(factory.getGameController()))
+    GraphicalUIServer::GraphicalUIServer() :
+        Fl_Window(700, 500, "4Wins Server"),
+        server(new controller::GameManagerNetworkServer())
     {
         startServer = new Fl_Button(20, 10,
             100, 25, "Start Server");
@@ -124,14 +124,14 @@ namespace view { namespace gui
     {
         addColHeaders();
         
-        std::vector<std::unique_ptr<controller::TCPConnection>>& cons =
+        std::vector<std::shared_ptr<controller::TCPConnection>>& cons =
             server->getConnections();
         
         int s = cons.size();
         std::string tmp = boost::lexical_cast<std::string>(s);
         conCount->value(tmp.c_str());
        
-        for (std::unique_ptr<controller::TCPConnection>& i : cons) {
+        for (std::shared_ptr<controller::TCPConnection>& i : cons) {
             std::vector<std::string> row;
             
             std::string t2 = i->getRemoteAddress();
@@ -143,7 +143,7 @@ namespace view { namespace gui
             table->addRow(row);
         }
         
-        std::map<int, data::IPlayer *> players = server->getPlayers();
+        std::map<int, std::shared_ptr<data::IPlayer>>& players = server->getPlayers();
         
         for (auto &i : players) {
             std::vector<std::string> row;

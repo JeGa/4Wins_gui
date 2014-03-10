@@ -37,7 +37,7 @@ namespace view
         networkGameMainTui.addChild(&networkGamePlayTui);
         networkGameMainTui.addChild(&networkGameProfileTui);
         
-        manager = factory.getGameManagerLocal(factory.getGameController());
+       // manager = factory.getGameManagerLocal(factory.getGameController());
     }
 
     TextUI::~TextUI()
@@ -60,13 +60,13 @@ namespace view
         cout << "Player2 name: ";
         cin >> p2_name;
         
-        IPlayer *p1 = factory.getPlayer(p1_name, "local");
-        IPlayer *p2 = factory.getPlayer(p2_name, "local");
-        IGame *game = factory.getGame(w, h, p1, p2, p1);
+        //IPlayer *p1 = factory.getPlayer(p1_name, "local");
+        //IPlayer *p2 = factory.getPlayer(p2_name, "local");
+        //IGame *game = factory.getGame(w, h, p1, p2, p1);
 
-        manager->newGame(game);
+        //manager->newGame(game);
         
-        gameLoop();
+        //gameLoop();
 
         // GameManager is responsible for freeing the memory!
     }
@@ -89,7 +89,7 @@ namespace view
     
     // Game input
     void TextUI::gameLoop()
-    {
+    {/*
         while (manager->getActiveGame()->isRunning()) {
             cout << endl << manager->getActiveGame()->toString() << endl;
             cout << manager->getActiveGame()->onTurn()->getName() << " -> X and Y coordinates: ";
@@ -101,7 +101,7 @@ namespace view
             manager->input(x, y);
         }
         cout << endl << "== WINNER IS: " <<
-            manager->getActiveGame()->getWinner()->getName() << "! ==" << endl;
+            manager->getActiveGame()->getWinner()->getName() << "! ==" << endl;*/
     }
 
 }

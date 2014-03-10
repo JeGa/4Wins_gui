@@ -13,7 +13,6 @@ namespace data
         private:
             std::string name;
             std::string password;
-            //std::vector<Game> games;
 
             // For key generation
             static int playerCounter;
@@ -33,7 +32,6 @@ namespace data
             virtual std::string getName();
             virtual std::string getPassword();
             virtual void writeToDisk();
-            //virtual bool verifypassword(std::string pw);
             virtual std::string toString();
             
             virtual unsigned int getKey();
@@ -48,6 +46,9 @@ namespace data
             virtual void setLoggedIn(bool l);
             
             virtual void setAllData(int k, int w, int l, int p, int r, bool logged);
+
+            Player& operator=(Player& other) = delete;
+            Player(Player& other) = delete;
     };
 
 }

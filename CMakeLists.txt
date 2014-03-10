@@ -15,6 +15,7 @@ set(FLTK_SEARCH_LIB_DIR
 # Because fluid not found
 set(FLTK_FLUID_EXECUTABLE
 "E:/Data/Projects/C_C++/ext/FLTK/bin/fluid.exe")
+# ==============================================================================
 
 # Because the libraries are not at standard locations:
 # Set the path were the FLTK and boost test binaries are
@@ -65,7 +66,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Test") # Build boost unit tests
 	
 	# Compile and link with 4Wins_gui
 	set(SOURCES_TEST ${4Wins_gui_SOURCES} ${4Wins_gui_SOURCES_TEST})
-	add_executable(4Wins_gui_tests ${SOURCES_TEST})
+	add_executable(4Wins_gui ${SOURCES_TEST})
     
     # Link with boost
 	if (WIN32 AND __COMPILER_GNU)
@@ -76,14 +77,14 @@ if (CMAKE_BUILD_TYPE STREQUAL "Test") # Build boost unit tests
     set(Boost_USE_STATIC_LIBS ON) # Static library
     find_package(Boost COMPONENTS thread regex system unit_test_framework chrono REQUIRED)
     include_directories(${Boost_INCLUDE_DIR})
-    target_link_libraries(4Wins_gui_tests ${Boost_LIBRARIES})
+    target_link_libraries(4Wins_gui ${Boost_LIBRARIES})
     
     # Link with FLTK
-    target_link_libraries(4Wins_gui_tests ${FLTK_LIBRARIES})
+    target_link_libraries(4Wins_gui ${FLTK_LIBRARIES})
     
     # Link with winsock
     if (WIN32)
-        target_link_libraries(4Wins_gui_tests ws2_32)
+        target_link_libraries(4Wins_gui ws2_32)
     endif (WIN32)
 	
 else (CMAKE_BUILD_TYPE STREQUAL "Test")

@@ -31,7 +31,6 @@ namespace controller
         public std::enable_shared_from_this<TCPConnection>
     {
         private:
-            boost::mutex socketMutex;
             std::unique_ptr<tcp::socket> socket;
             boost::asio::io_service& io_service;
             boost::asio::streambuf receive_buf;

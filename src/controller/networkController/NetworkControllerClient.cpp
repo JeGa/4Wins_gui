@@ -3,107 +3,107 @@
 namespace controller
 {
 
-    NetworkControllerClient::NetworkControllerClient(std::string addr, std::string port)
-        : address(addr), port(port), work(io_service)
-    {
-        tcp::resolver resolver(io_service);
-        tcp::resolver::query query(address, port);
+	NetworkControllerClient::NetworkControllerClient(std::string addr, std::string port)
+		: address(addr), port(port), work(io_service)
+	{
+		tcp::resolver resolver(io_service);
+		tcp::resolver::query query(address, port);
 
-        // DNS resolve
-        endpoint_iterator = resolver.resolve(query);
+		// DNS resolve
+		endpoint_iterator = resolver.resolve(query);
 
-        startThreads();
-    }
+		startThreads();
+	}
 
-    NetworkControllerClient::~NetworkControllerClient()
-    {
-        stopThreads();
-        disconnect();
-    }
+	NetworkControllerClient::~NetworkControllerClient()
+	{
+		disconnect();
+		stopThreads();
+	}
 
-    void NetworkControllerClient::startThreads(int count)
-    {
-        for (int i = 0; i < count; ++i) {
-            threadHandles.push_back(
-                boost::thread(
-                    boost::bind(&boost::asio::io_service::run, &io_service)));
-        }
-    }
+	void NetworkControllerClient::startThreads(int count)
+	{
+		for (int i = 0; i < count; ++i) {
+			threadHandles.push_back(
+			    boost::thread(
+			        boost::bind(&boost::asio::io_service::run, &io_service)));
+		}
+	}
 
-    void NetworkControllerClient::stopThreads()
-    {
-        io_service.stop();
-        for (auto& i : threadHandles)
-            i.join();
-        threadHandles.clear();
-        io_service.reset();
-    }
+	void NetworkControllerClient::stopThreads()
+	{
+		io_service.stop();
+		for (auto& i : threadHandles)
+			i.join();
+		threadHandles.clear();
+		io_service.reset();
+	}
 
-    void NetworkControllerClient::disconnect()
-    {
-        con.reset();
-    }
+	void NetworkControllerClient::disconnect()
+	{
+		con.reset();
+	}
 
-    bool NetworkControllerClient::ping()
-    {
-        if (isConnected())
-            return true;
+	void NetworkControllerClient::connect()
+	{
+		try {
+			std::unique_ptr<tcp::socket> clientCon(
+			    new tcp::socket(io_service));
 
-        connect();
+			boost::asio::connect(*clientCon, endpoint_iterator);
 
-        // If error connecting to server
-        if (!isConnected())
-            return false;
-        else
-            disconnect();
+			startTCPConnection(std::move(clientCon));
 
-        return true;
-    }
+		} catch (std::exception& e) {
+			std::cerr << e.what() << std::endl;
+		}
+	}
 
-    void NetworkControllerClient::connect()
-    {
-        try {
-            std::unique_ptr<tcp::socket> clientCon(
-                new tcp::socket(io_service));
+	void NetworkControllerClient::startTCPConnection(
+	    std::unique_ptr<tcp::socket> clientCon)
+	{
+		// Move ownership to TCPConnection
+		con = std::shared_ptr<TCPConnection>(
+		          new TCPConnection(std::move(clientCon)));
 
-            boost::asio::connect(*clientCon, endpoint_iterator);
+		for (auto i : obs)
+			con->addObserver(i);
 
-            startTCPConnection(std::move(clientCon));
+		con->start();
+		std::cout << "Client: Connected" << std::endl;
+	}
 
-        } catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
-        }
-    }
+	bool NetworkControllerClient::ping()
+	{
+		if (isConnected())
+			return true;
 
-    void NetworkControllerClient::startTCPConnection(
-        std::unique_ptr<tcp::socket> clientCon)
-    {
-        // Move ownership to TCPConnection
-        con = std::shared_ptr<TCPConnection>(
-                  new TCPConnection(std::move(clientCon)));
+		connect();
 
-        for (auto i : obs)
-            con->addObserver(i);
+		// If error connecting to server
+		if (!isConnected())
+			return false;
+		else
+			disconnect();
 
-        con->start();
-        std::cout << "Client: Connected" << std::endl;
-    }
+		return true;
+	}
 
-    void NetworkControllerClient::send(TCPMessage& msg)
-    {
-        con->sendMessage(msg);
-    }
+	void NetworkControllerClient::send(TCPMessage& msg)
+	{
+		con->sendMessage(msg);
+	}
 
-    void NetworkControllerClient::setExternalTCPConnectionObserver(util::Observer *o)
-    {
-        obs.push_back(o);
-    }
+	void NetworkControllerClient::setExternalTCPConnectionObserver(util::Observer *o)
+	{
+		obs.push_back(o);
+	}
 
-    bool NetworkControllerClient::isConnected()
-    {
-        if (!con)
-            return false;
-        return (con->isActive() ? true : false);
-    }
+	bool NetworkControllerClient::isConnected()
+	{
+		if (!con)
+			return false;
+		return (con->isActive() ? true : false);
+	}
 
 }

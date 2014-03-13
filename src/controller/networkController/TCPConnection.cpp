@@ -33,9 +33,11 @@ namespace controller
     {
         if (!isActive())
             return;
+
         setActive(false);
         closeSocket();
-        std::cout << "CLOSE TCPCON" << std::endl;
+
+        std::cout << "TCPConnection stopped." << std::endl;
     }
 
     /*
@@ -117,7 +119,7 @@ namespace controller
                                                   shared_from_this()
                                               )));
         } catch (std::exception& e) {
-            std::cout << e.what() << std::endl;
+            std::cout << "RECEIVE " << e.what() << std::endl;
             stop();
         }
     }
@@ -170,7 +172,7 @@ namespace controller
                                          shared_from_this()
                                      ));
         } catch (std::exception& e) {
-            std::cout << e.what() << std::endl;
+            std::cout << "SEND " << e.what() << std::endl;
             stop();
         }
     }

@@ -60,10 +60,19 @@ namespace controller
             ACK_MSG_TYPE_USER ackType = ACK_MSG_TYPE_USER::NOT_SET;
             bool ackStatus = false;
 
-            bool tokenizeUserMessage(std::string msg, std::vector<std::string>& tokens);
             bool parseQueryUserData();
+
             bool parseAckUserData();
-            void parsePlayersData();
+            bool parsePlayersData(std::string& playersList);
+
+            /*
+             * Functions for converting.
+             */
+            std::string intToString(int v);
+            int stringToInt(std::string v);
+            double stringToDouble(std::string v);
+            std::string doubleToString(double v);
+
             std::string playerToMessageString(data::IPlayer& p);
             std::string queryMsgTypeUserToString(QUERY_MSG_TYPE_USER type);
             std::string ackMsgTypeUserToString(ACK_MSG_TYPE_USER type);
@@ -72,10 +81,19 @@ namespace controller
             ACK_MSG_TYPE_USER queryToAckMsgType(QUERY_MSG_TYPE_USER type);
             QUERY_MSG_TYPE_USER ackToQueryMsgType(ACK_MSG_TYPE_USER type);
 
-            // Query data (set from sender, get from receiver):
+            std::vector<std::string>& split(
+                const std::string& s,
+                char delim,
+                std::vector<std::string>& elems);
+
+            /*
+             * Query data (set from sender, get from receiver)
+             */
             std::shared_ptr<data::IPlayer> queryUser;
 
-            // Ack data (set from receiver, get from sender):
+            /*
+             * Ack data (set from receiver, get from sender)
+             */
             std::map<int, std::shared_ptr<data::IPlayer>> players;
 
             // TODO: Make inherited functions private

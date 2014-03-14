@@ -38,10 +38,12 @@ namespace controller
 
     void NetworkControllerServer::startServer()
     {
+        if (acceptor.is_open())
+            return;
+
         acceptor.open(endpoint.protocol());
         acceptor.bind(endpoint);
         acceptor.listen();
-
         accept();
     }
 

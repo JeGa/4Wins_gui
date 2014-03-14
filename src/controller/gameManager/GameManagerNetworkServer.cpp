@@ -19,13 +19,11 @@ namespace controller
 
 	void GameManagerNetworkServer::logoutPlayer(std::string name, std::string pw)
 	{
-		// Set logged-in to false
 		playerStatus(name, pw, false);
 	}
 
 	void GameManagerNetworkServer::loginPlayer(std::string name, std::string pw)
 	{
-		// Set logged-in to true
 		playerStatus(name, pw, true);
 	}
 

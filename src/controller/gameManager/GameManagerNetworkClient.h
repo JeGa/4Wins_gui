@@ -37,6 +37,7 @@ namespace controller
 
         void handleUserMessage(TCPMessageUser& umsg);
         bool isWaitingFor(int key);
+        bool tryConnect();
     public:
         GameManagerNetworkClient();
         virtual ~GameManagerNetworkClient();

@@ -19,9 +19,6 @@ namespace controller
 
     bool GameManagerNetworkClient::login(std::string name, std::string pw)
     {
-        networkController.connect();
-        return true;
-
         if (!networkController.isConnected())
             networkController.connect();
 
@@ -49,14 +46,7 @@ namespace controller
 
     bool GameManagerNetworkClient::logout()
     {
-        networkController.disconnect();
-        return true;
-
-        // Should normally be connected
-        if (!networkController.isConnected())
-            networkController.connect();
-
-        if (!networkController.isConnected())
+        if (!tryConnect())
             return false;
 
         boost::unique_lock<boost::mutex> l(handshake);
@@ -77,10 +67,7 @@ namespace controller
 
     bool GameManagerNetworkClient::registerUser(std::string name, std::string pw)
     {
-        if (!networkController.isConnected())
-            networkController.connect();
-
-        if (!networkController.isConnected())
+        if (!tryConnect())
             return false;
 
         // Create player (only local variable)
@@ -95,6 +82,16 @@ namespace controller
         networkController.send(*umsg);
 
         messageQueue[umsg->getMsgKey()] = std::move(umsg);
+        return true;
+    }
+
+    bool GameManagerNetworkClient::tryConnect()
+    {
+        if (!networkController.isConnected())
+            networkController.connect();
+
+        if (!networkController.isConnected())
+            return false;
         return true;
     }
 
@@ -115,9 +112,8 @@ namespace controller
 
     bool GameManagerNetworkClient::getData()
     {
-        // Should normally be connected
-        if (!networkController.isConnected())
-            networkController.connect();
+        if (!tryConnect())
+            return false;
 
         boost::unique_lock<boost::mutex> l(handshake);
 
@@ -129,7 +125,6 @@ namespace controller
         if (!umsg->createQueryMessage(QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY, localPlayer))
             return false;
 
-        // Logout player: Send message
         networkController.send(*umsg);
 
         messageQueue[umsg->getMsgKey()] = std::move(umsg);
@@ -175,27 +170,35 @@ namespace controller
     void GameManagerNetworkClient::handleUserMessage(TCPMessageUser& umsg)
     {
         if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::REGISTER_QUERY) {
+
             if (umsg.getAckStatus()) {
                 // TODO: How to notify?
             }
+
         } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::LOGIN_QUERY) {
+
             if (umsg.getAckStatus()) {
                 if (localPlayer)
                     localPlayer->setLoggedIn(true);
             } else
                 localPlayer.reset();
+
         } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::LOGOUT_QUERY) {
+
             if (umsg.getAckStatus()) {
                 if (localPlayer)
                     localPlayer.reset();
             }
+
         } else if (umsg.getQueryType() == QUERY_MSG_TYPE_USER::GET_PLAYERS_QUERY) {
+
             if (umsg.getAckStatus()) {
                 clearPlayers();
+                players = umsg.getPlayers();
                 //clearGames();
-                //players = umsg.getPlayers();
                 //games = umsg.getGames();
             }
+
         }
     }
 
